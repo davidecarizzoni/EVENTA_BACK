@@ -4,9 +4,17 @@ const bodyParser = require('body-parser');
 const morgan = require('morgan');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const passport = require('passport');
 
+
+require('./src/api/auth')
 mongoose.Promise = global.Promise;
 mongoose.set('strictQuery', false)
+
+
+//  ROUTERS
+const userRouter = require('./src/api/users');
+const authRoutes = require('./src/api/auth/controller');
 
 //  START EXPRESS APP
 const app = express();
@@ -19,6 +27,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cors());
 app.options('*', cors()); 
 
+//  SET ROUTES WITH AUTHENTICATION
+app.use('/users', passport.authenticate('jwt', { session: false }), userRouter)
+app.use(`/auth`, authRoutes);
 
 
 //  ENVIROMENT VARIABLES
