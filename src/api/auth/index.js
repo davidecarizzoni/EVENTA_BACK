@@ -1,75 +1,12 @@
-const passport = require('passport');
-const localStrategy = require('passport-local').Strategy;
-const UserModel = require('../users/model');
-const JWTstrategy = require('passport-jwt').Strategy;
-const ExtractJWT = require('passport-jwt').ExtractJwt;
+import { Router } from 'express';
 
+import { token, password } from '../../services/passport';
+import { actions } from '../users/controller';
+import { login } from './controller';
 
-passport.use('signup', new localStrategy({
-      usernameField: 'email',
-      passwordField: 'password',
-      passReqToCallback: true,
-    },
-    async (req, email, password, done) => {
-      try {
-        const user = await UserModel.create({
-          email, 
-          password,
-          role: req.body.role,
-          name: req.body.name,
-          username: req.body.username,
-          bio: req.body.bio,
-          profilePic: req.body.profilePic,
-          position: req.body.position,
-          address: req.body.address
-        });
+const router = new Router();
 
-        return done(null, user);
-      } 
-      catch (error) {
-        done(error);
-      }
-    }
-  )
-);
+router.post('/register', token({ required: false }), actions.create);
+router.post('/login', password(), login);
 
-passport.use('login', new localStrategy({
-    usernameField: 'email',
-    passwordField: 'password'
-  },
-  async (email, password, done) => {
-    try {
-      const user = await UserModel.findOne({ email });
-
-      if (!user) {
-
-        return done(null, false, { message: 'Wrong Password' });
-      }
-
-      const validate = await user.isValidPassword(password);
-
-      if (!validate) {
-
-        return done(null, false, { message: 'Wrong Password' });
-      }
-
-      return done(null, user, { message: 'Logged in Successfully' });
-    } catch (error) {
-      return done(error);
-    }
-  }
-)
-);
-
-passport.use( new JWTstrategy({
-    secretOrKey: 'TOP_SECRET',
-    jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken()
-  },
-  async (token, done) => {
-    try {
-      return done(null, token.user);
-    } catch (error) {
-      done(error);
-    }
-  }
-));
+export default router;

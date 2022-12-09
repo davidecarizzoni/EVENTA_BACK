@@ -1,9 +1,6 @@
-const mongoose = require ('mongoose');
-const bcrypt = require('bcrypt');
+import { Schema, model } from 'mongoose';
 
-const Schema = mongoose.Schema;
-
-const EventsSchema = Schema({
+const EventsSchema = new Schema({
   name: {
     type: String,
     required: true
@@ -28,4 +25,6 @@ const EventsSchema = Schema({
 
 
 
-module.exports = mongoose.model('Event', EventsSchema);
+const Event = model('Event', EventsSchema);
+
+export { Event }

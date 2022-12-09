@@ -1,24 +1,27 @@
-const mongoose = require ('mongoose');
-const bcrypt = require('bcrypt');
+import { Schema, model } from 'mongoose';
+import bcrypt from 'bcryptjs';
 
-const Schema = mongoose.Schema;
+export const ADMIN = 'admin'
+export const USER = 'user'
+export const ORGANIZER = 'organizer'
+export const ROLES = [ADMIN, USER, ORGANIZER]
 
-const UsersSchema = Schema({
+const UsersSchema = new Schema({
   email: {
     type: String,
     unique: true,
     lowercase: true,
-    unique: true,
     required: true,
   },
   password: {
     type: String,
-    minlenght: 8,
+    minLength: 8,
     required: true
   },
   role: {
     type: String,
-    default: "user"
+    enum: ROLES,
+    default: USER
   },
   name: {
     type: String,
@@ -27,8 +30,8 @@ const UsersSchema = Schema({
   username: {
     type: String,
     trim: true,
-    minLenght: 4,
-    maxLenght: 16,
+    minLength: 4,
+    maxLength: 16,
     required: true
   },
   bio: {
@@ -46,25 +49,44 @@ const UsersSchema = Schema({
   },
   address: {
     type: String
-}
-
+  }
 })
 
-UsersSchema.pre('save', async function(next) {
-  const user = this;
-  const hash = await bcrypt.hash(this.password, 10); //await has no effect
+UsersSchema.pre('save', function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
 
-  this.password = hash;
-  next();
-
+  bcrypt
+    .hash(this.password, 10)
+    .then((hash) => {
+      this.password = hash;
+      next();
+    })
+    .catch(next);
 });
+
 
 UsersSchema.methods.isValidPassword = async function(password) {
   const user = this;
   const compare = await bcrypt.compare(password, user.password);
-  
+
   return compare;
 }
 
+UsersSchema.methods.authenticate = async function (password) {
+  const user = await User.findById(this._id).select('password');
 
-module.exports = mongoose.model('User', UsersSchema);
+  if (!user) {
+    return false;
+  }
+
+  const result = await bcrypt.compare(password, user.password);
+
+  return result ? this : false;
+};
+
+
+const User = model('User', UsersSchema);
+
+export { User }

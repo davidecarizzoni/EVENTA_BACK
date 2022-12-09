@@ -1,27 +1,22 @@
-const User  = require('./model')
-const express  = require('express')
-const bcrypt  = require('bcrypt')
-const mongoose = require('mongoose');
-const router = express.Router();
+import { Router } from 'express';
+import { admin, password as passwordAuth, token } from '../../services/passport';
+import { actions } from './controller';
+import { middleware as query } from 'querymen';
 
-//  GET USERS WITHOUT PASSWORD
-router.get('/', async (req, res) => {
-  const userList = await User.find()
+const router = new Router();
 
-  if(!userList) {
-    res.status(500).json({success: false})
-  }
-  res.send(userList);
-})
+router.get('/', token({ required: false }), query(), actions.index);
 
-//  GET USERS BY ID 
-router.get('/:id', async (req, res) => {
-  const user = await User.findById(req.params.id);
+router.get('/me', token({ required: true }), actions.showMe);
 
-  if(!user) {
-    res.status(500).json({message: 'the user with the given ID was not found'});
-  }
-  res.status(200).send(user);
-})
+router.get('/:id', admin, actions.show);
 
-module.exports = router;
+router.post('/', admin, actions.create);
+
+router.put('/:id', token({ required: true }), actions.update);
+
+router.put('/:id/password', passwordAuth(), actions.updatePassword);
+
+router.delete('/:id', admin, actions.destroy);
+
+export default router;
