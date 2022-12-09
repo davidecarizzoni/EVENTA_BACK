@@ -5,7 +5,7 @@ import { middleware } from 'querymen';
 
 const router = new Router();
 
-router.get('/', token({ required: false }), middleware(), actions.index);
+router.get('/', token({ required: true }), middleware(), actions.index);
 
 router.get('/me', token({ required: true }), actions.showMe);
 

@@ -70,11 +70,12 @@ passport.use(
 			secretOrKey: JWT_SECRET,
 			jwtFromRequest: ExtractJwt.fromExtractors([
 				ExtractJwt.fromUrlQueryParameter('access_token'),
+				ExtractJwt.fromBodyField('access_token'),
 				ExtractJwt.fromAuthHeaderWithScheme('Bearer')
 			])
 		},
 		({ id }, done) => {
-			User.findOne({ _id: id, isEnabled: true })
+			User.findOne({ _id: id })
 				.then(user => {
 
 					if (!user) {
