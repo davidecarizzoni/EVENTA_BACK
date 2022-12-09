@@ -1,11 +1,11 @@
 import { Router } from 'express';
-import { admin, password as passwordAuth, token } from '../../services/passport';
+import { admin, password, token } from '../auth/passport';
 import { actions } from './controller';
-import { middleware as query } from 'querymen';
+import { middleware } from 'querymen';
 
 const router = new Router();
 
-router.get('/', token({ required: false }), query(), actions.index);
+router.get('/', token({ required: false }), middleware(), actions.index);
 
 router.get('/me', token({ required: true }), actions.showMe);
 
@@ -15,7 +15,7 @@ router.post('/', admin, actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
 
-router.put('/:id/password', passwordAuth(), actions.updatePassword);
+router.put('/:id/password', password(), actions.updatePassword);
 
 router.delete('/:id', admin, actions.destroy);
 

@@ -2,7 +2,7 @@ import http from 'http';
 import api from './api';
 import express from './services/express';
 import mongoose from './services/mongoose';
-import {PORT, IP, ENV, MONGODB_URI} from "./config";
+import {PORT, IP, MONGODB_URI} from "./config";
 
 const app = express(api);
 const server = http.createServer(app);
@@ -16,9 +16,7 @@ mongoose.connect(
 );
 
 server.listen(PORT, IP, () => {
-        console.log(
-          `Express server listening on http://${IP}:${PORT}, in ${ENV} mode`
-        );
-    })
+	console.log(`Server listening on IP: ${IP}, PORT: ${PORT}`);
+})
 
 export default app;

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 
-import { token, password } from '../../services/passport';
+import { token, password } from './passport';
 import { actions } from '../users/controller';
 import { login } from './controller';
 

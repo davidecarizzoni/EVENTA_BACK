@@ -1,6 +1,5 @@
 /* eslint-disable no-console */
 import mongoose from 'mongoose';
-
 const Promise = require('bluebird');
 
 mongoose.Promise = Promise;

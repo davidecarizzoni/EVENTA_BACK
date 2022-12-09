@@ -1,10 +1,9 @@
 import { BasicStrategy } from 'passport-http';
-import { Strategy as BearerStrategy } from 'passport-http-bearer';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import {ADMIN, User} from '../api/users/model';
+import {ADMIN, User} from '../users/model';
 
 import passport from 'passport';
-import { JWT_SECRET } from "../config";
+import { JWT_SECRET } from "../../config";
 
 export const password = () => (req, res, next) => passport.authenticate('password', { session: false }, (err, user) => {
 	if (err && err.param) {
@@ -22,22 +21,12 @@ export const password = () => (req, res, next) => passport.authenticate('passwor
 })(req, res, next);
 
 export const token = (params) => (req, res, next) => {
-	const { required, master, roles } = params;
+	const { required, master } = params;
 	return passport.authenticate('token', { session: false }, (err, user) => {
-
-		if (master && (err || (required && !user))) {
-			return passport.authenticate('master', { session: false }, (err, result) => {
-				if (result !== false) {
-					return next();
-				}
-				return res.status(401).end();
-			})(req, res, next);
-		}
 
 		if (err || (required && !user)) {
 			return res.status(401).end();
 		}
-
 
 		req.logIn(user, { session: false }, (err) => {
 			if (err) {
@@ -57,9 +46,7 @@ export const admin = token({
 passport.use(
 	'password',
 	new BasicStrategy((email, password, done) => {
-
 		User.findOne({ email: email.toLowerCase() }).then(user => {
-			console.log(user)
 			if (!user) {
 				done(true);
 				return null;
@@ -67,9 +54,6 @@ passport.use(
 			return user
 				.authenticate(password, user.password)
 				.then((user) => {
-					user.pre_last_login = user.last_login;
-					user.last_login = new Date();
-
 					user.save();
 					done(null, user);
 					return null;
@@ -86,7 +70,6 @@ passport.use(
 			secretOrKey: JWT_SECRET,
 			jwtFromRequest: ExtractJwt.fromExtractors([
 				ExtractJwt.fromUrlQueryParameter('access_token'),
-				ExtractJwt.fromBodyField('access_token'),
 				ExtractJwt.fromAuthHeaderWithScheme('Bearer')
 			])
 		},
