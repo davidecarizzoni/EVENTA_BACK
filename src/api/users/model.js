@@ -14,7 +14,6 @@ const UsersSchema = Schema({
   password: {
     type: String,
     minlenght: 8,
-    select: false,
     required: true
   },
   role: {
@@ -28,8 +27,8 @@ const UsersSchema = Schema({
   username: {
     type: String,
     trim: true,
-    minlenght: 4,
-    maxlenght: 16,
+    minLenght: 4,
+    maxLenght: 16,
     required: true
   },
   bio: {

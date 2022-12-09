@@ -9,11 +9,13 @@ const passport = require('passport');
 
 require('./src/api/auth')
 mongoose.Promise = global.Promise;
+
 mongoose.set('strictQuery', false)
 
 
 //  ROUTERS
 const userRouter = require('./src/api/users');
+const eventRouter = require('./src/api/events');
 const authRoutes = require('./src/api/auth/controller');
 
 //  START EXPRESS APP
@@ -29,6 +31,7 @@ app.options('*', cors());
 
 //  SET ROUTES WITH AUTHENTICATION
 app.use('/users', passport.authenticate('jwt', { session: false }), userRouter)
+app.use('/events', passport.authenticate('jwt', { session: false }), eventRouter)
 app.use(`/auth`, authRoutes);
 
 
