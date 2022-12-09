@@ -4,12 +4,10 @@ import _ from 'lodash';
 const actions = {};
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
+  const data = await User.find().skip(cursor.skip).limit(cursor.limit).sort(cursor.sort);
+  const totalData = await User.countDocuments(query);
 
-  const results = await User.find().skip(cursor.skip).limit(cursor.limit).sort(cursor.sort);
-  const count = await User.countDocuments(query);
-
-  res.set('entity-count', count);
-  res.send(results);
+  res.send({ data, totalData });
 };
 
 actions.show = async function ({ params: { id } }, res) {

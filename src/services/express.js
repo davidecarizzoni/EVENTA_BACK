@@ -12,10 +12,6 @@ export default (routes) => {
 	app.use(compression());
 	app.use(bodyParser.urlencoded({ extended: false }));
 	app.use(bodyParser.json());
-	app.use((req, res, next) => {
-		res.setHeader('Access-Control-Expose-Headers', 'entity-count');
-		next();
-	});
 	app.use(routes);
 	app.use(errorHandler());
 	app.use(bodyErrorHandler());
