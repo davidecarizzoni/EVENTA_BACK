@@ -12,7 +12,7 @@ const EventsSchema = new Schema({
   profilePic: {
     type: String,
     required: false,
-    default:''
+    default: ''
   },
   position: {
     type: { type: String, default: 'Point' },
@@ -20,11 +20,10 @@ const EventsSchema = new Schema({
   },
   address: {
     type: String
-}
-})
-
+  }
+});
 
 
 const Event = model('Event', EventsSchema);
 
-export { Event }
+export { Event };

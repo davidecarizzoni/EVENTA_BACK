@@ -1,9 +1,9 @@
 import { BasicStrategy } from 'passport-http';
 import { Strategy as JwtStrategy, ExtractJwt } from 'passport-jwt';
-import {ADMIN, User} from '../users/model';
+import { ADMIN, User } from '../users/model';
 
 import passport from 'passport';
-import { JWT_SECRET } from "../../config";
+import { JWT_SECRET } from '../../config';
 
 export const password = () => (req, res, next) => passport.authenticate('password', { session: false }, (err, user) => {
 	if (err && err.param) {
@@ -21,7 +21,7 @@ export const password = () => (req, res, next) => passport.authenticate('passwor
 })(req, res, next);
 
 export const token = (params) => (req, res, next) => {
-	const { required, master } = params;
+	const { required } = params;
 	return passport.authenticate('token', { session: false }, (err, user) => {
 
 		if (err || (required && !user)) {
@@ -46,6 +46,7 @@ export const admin = token({
 passport.use(
 	'password',
 	new BasicStrategy((email, password, done) => {
+		console.log('password strategy');
 		User.findOne({ email: email.toLowerCase() }).then(user => {
 			if (!user) {
 				done(true);
@@ -79,7 +80,7 @@ passport.use(
 				.then(user => {
 
 					if (!user) {
-						return done(null, undefined)
+						return done(null, undefined);
 					}
 
 					return done(null, user);

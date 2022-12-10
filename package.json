@@ -17,6 +17,12 @@
     "lint-staged": "^7.0.0",
     "nodemon": "^1.19.4"
   },
+  "lint-staged": {
+	"src/**/*.js": [
+	  "eslint --fix",
+	  "git add"
+	]
+  },
   "dependencies": {
     "babel-core": "^6.17.0",
     "babel-eslint": "^7.0.0",

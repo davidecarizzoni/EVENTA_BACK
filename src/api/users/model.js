@@ -1,10 +1,10 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcryptjs';
 
-export const ADMIN = 'admin'
-export const USER = 'user'
-export const ORGANIZER = 'organizer'
-export const ROLES = [ADMIN, USER, ORGANIZER]
+export const ADMIN = 'admin';
+export const USER = 'user';
+export const ORGANIZER = 'organizer';
+export const ROLES = [ADMIN, USER, ORGANIZER];
 
 const UsersSchema = new Schema({
   email: {
@@ -16,7 +16,8 @@ const UsersSchema = new Schema({
   password: {
     type: String,
     minLength: 8,
-    required: true
+    required: true,
+		select: false
   },
   role: {
     type: String,
@@ -36,12 +37,10 @@ const UsersSchema = new Schema({
   },
   bio: {
     type: String,
-    required: false
   },
   profilePic: {
     type: String,
-    required: false,
-    default:''
+    default: ''
   },
   position: {
     type: { type: String, default: 'Point' },
@@ -50,7 +49,7 @@ const UsersSchema = new Schema({
   address: {
     type: String
   }
-})
+});
 
 UsersSchema.pre('save', function (next) {
   if (!this.isModified('password')) {
@@ -65,14 +64,6 @@ UsersSchema.pre('save', function (next) {
     })
     .catch(next);
 });
-
-
-UsersSchema.methods.isValidPassword = async function(password) {
-  const user = this;
-  const compare = await bcrypt.compare(password, user.password);
-
-  return compare;
-}
 
 UsersSchema.methods.authenticate = async function (password) {
   const user = await User.findById(this._id).select('password');
@@ -89,4 +80,4 @@ UsersSchema.methods.authenticate = async function (password) {
 
 const User = model('User', UsersSchema);
 
-export { User }
+export { User };
