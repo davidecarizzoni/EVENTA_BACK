@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { admin, password, token } from '../auth/passport';
+import { admin, token } from '../auth/passport';
 import { actions } from './controller';
 import { middleware } from 'querymen';
 

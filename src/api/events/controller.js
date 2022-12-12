@@ -12,15 +12,15 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
 actions.show = async function ({ params: { id } }, res) {
 
-  const user = await Event.findById(id);
+  const event = await Event.findById(id);
 
-  if (!user) {
+  if (!event) {
     return res.status(404).send();
   }
 
-  res.send(user);
+  res.send(event);
 };
 
-actions.showMe = ({ user }, res) => res.send(user);
+actions.showMe = ({ event }, res) => res.send(event);
 
 export { actions };
