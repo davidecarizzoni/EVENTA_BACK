@@ -2,8 +2,8 @@ import { Schema, model } from 'mongoose';
 
 const EventsSchema = new Schema({
   organizerId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+    type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   name: {
