@@ -31,6 +31,7 @@ const UsersSchema = new Schema({
   username: {
     type: String,
     trim: true,
+    unique: true,
     minLength: 4,
     maxLength: 16,
     required: true

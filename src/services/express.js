@@ -4,10 +4,11 @@ import cors from 'cors';
 import express from 'express';
 const { errorHandler } = require('querymen');
 const bodyErrorHandler = require('bodymen').errorHandler;
+var passport = require('passport');
+
 
 export default (routes) => {
 	const app = express();
-
 	app.use(cors());
 	app.use(compression());
 	app.use(bodyParser.urlencoded({ extended: false }));
@@ -18,3 +19,4 @@ export default (routes) => {
 
 	return app;
 };
+

@@ -1,17 +1,21 @@
 import { Schema, model } from 'mongoose';
 
 const EventsSchema = new Schema({
+  organizerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true
+  },
   name: {
     type: String,
     required: true
   },
   description: {
     type: String,
-    required: false
+    required: true
   },
-  profilePic: {
+  eventImage: {
     type: String,
-    required: false,
     default: ''
   },
   position: {
@@ -19,10 +23,14 @@ const EventsSchema = new Schema({
     coordinates: { type: [Number], default: [0, 0] },
   },
   address: {
-    type: String
+    type: String,
+    required: true,
+  },
+  date: {
+    type: Date,
+    required: true,
   }
 });
-
 
 const Event = model('Event', EventsSchema);
 

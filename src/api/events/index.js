@@ -1,35 +1,15 @@
-const Event = require('./model');
-const express = require('express');
-const router = express.Router();
+import { Router } from 'express';
+import { admin, password, token } from '../auth/passport';
+import { actions } from './controller';
+import { middleware } from 'querymen';
 
-//  GET USERS WITHOUT PASSWORD
-router.get('/', async (req, res) => {
-  const eventList = await Event.find();
+const router = new Router();
 
-  if (!eventList) {
-    res.status(500).json({ success: false });
-  }
-  res.send(eventList);
-});
+router.get('/', token({ required: true }), middleware(), actions.index);
 
-//  GET USERS BY ID
-router.get('/:id', async (req, res) => {
-  const event = await Event.findById(req.params.id);
+router.get('/me', token({ required: true }), actions.showMe);
 
-  if (!event) {
-    res.status(500).json({ message: 'the event with the given ID was not found' });
-  }
-  res.status(200).send(event);
-});
+router.get('/:id', admin, actions.show);
 
-router.post('/', async (req, res) => {
-    let event = new Event(req.body);
-    event = await event.save();
+export default router;
 
-    if (!event) {
-        return res.status(404).send('The event cannot be created');
-    }
-    res.send(event);
-});
-
-module.exports = router;

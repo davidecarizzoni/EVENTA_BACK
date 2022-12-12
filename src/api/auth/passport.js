@@ -36,7 +36,6 @@ export const token = (params) => (req, res, next) => {
 		});
 	})(req, res, next);
 };
-
 export const admin = token({
 	required: true,
 	master: false,
