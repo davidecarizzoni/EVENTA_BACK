@@ -4,7 +4,7 @@ import _ from 'lodash';
 const actions = {};
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Event.find().skip(cursor.skip).limit(cursor.limit).sort(cursor.sort).populate("organizer");
+  const data = await Event.find().skip(cursor.skip).limit(cursor.limit).sort(cursor.sort).populate('organizer');
   const totalData = await Event.countDocuments(query);
 
   res.send({ data, totalData });
@@ -12,7 +12,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
 actions.show = async function ({ params: { id } }, res) {
 
-  const event = await Event.findById(id).populate("organizer");
+  const event = await Event.findById(id).populate('organizer');
 
   if (!event) {
     return res.status(404).send();
@@ -26,19 +26,17 @@ actions.showMe = ({ event }, res) => res.send(event);
 actions.create = async ({ body }, res) => {
   let event;
   try {
-    event = await Event.create(body)
+    event = await Event.create(body);
   } catch (err) {
-    return null // to be changed
+    return null; // to be changed
   }
 
   res.send(event);
 };
 
 
-actions.update = ({ body, params, event }, res, next) => {
-
+actions.update = ({ body, params }, res) => {
 	return Event.findById(params.id)
-  
 		.then(async (event) => {
 			if (!event) {
 				return null;
@@ -55,9 +53,9 @@ actions.update = ({ body, params, event }, res, next) => {
 			}
 			await event.save();
 
-			res.send(event)
+			res.send(event);
 		});
-}
+};
 
 
 actions.destroy = async function ({ params: { id } }, res) {
