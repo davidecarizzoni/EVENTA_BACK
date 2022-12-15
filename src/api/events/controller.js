@@ -1,4 +1,4 @@
-import { ADMIN, Event } from './model';
+import { Event } from './model';
 import _ from 'lodash';
 
 const actions = {};
@@ -43,11 +43,6 @@ actions.update = ({ body, params, event }, res, next) => {
 			if (!event) {
 				return null;
 			}
-      console.log(body)
-      console.log(params)
-      console.log(event)
-    
-
 			for (const key in body) {
 				if (
 					!_.isUndefined(body[key]) &&
