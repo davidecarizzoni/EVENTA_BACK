@@ -1,4 +1,4 @@
-import {ADMIN, Event} from './model';
+import { ADMIN, Event } from './model';
 import _ from 'lodash';
 
 const actions = {};

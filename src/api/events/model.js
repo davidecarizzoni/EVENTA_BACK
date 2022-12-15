@@ -1,11 +1,10 @@
 import { Schema, model } from 'mongoose';
-import mongoose from 'mongoose';
 
 
 const EventsSchema = new Schema({
-  organizer: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User",
+  organizerId: {
+    type: Schema.Types.ObjectId,
+    ref: 'User',
     required: true
   },
   name: {
