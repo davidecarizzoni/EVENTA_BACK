@@ -1,7 +1,9 @@
 import { Schema, model } from 'mongoose';
+import mongoose from 'mongoose';
+
 
 const EventsSchema = new Schema({
-  organizerId: {
+  organizer: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
@@ -28,7 +30,7 @@ const EventsSchema = new Schema({
   },
   date: {
     type: Date,
-    required: true,
+    //required: true,
   }
 });
 

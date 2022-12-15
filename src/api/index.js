@@ -6,7 +6,7 @@ import auth from "./auth";
 const router = new Router();
 
 router.use('/users', users)
-router.use('/events', event)
+router.use('/events', events)
 router.use('/auth', auth)
 
 export default router;

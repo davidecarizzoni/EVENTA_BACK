@@ -11,5 +11,14 @@ router.get('/me', token({ required: true }), actions.showMe);
 
 router.get('/:id', admin, actions.show);
 
+router.post('/', token({ required: true }), actions.create);
+
+router.put('/:id', token({ required: true }), actions.update);
+
+router.delete('/:id', token({ required: true }), actions.destroy);
+
+
+
+
 export default router;
 

@@ -32,8 +32,8 @@ const UsersSchema = new Schema({
     type: String,
     trim: true,
     unique: true,
-    minLength: 4,
-    maxLength: 16,
+    minlength: 4,
+    maxlength: 16,
     required: true
   },
   bio: {
