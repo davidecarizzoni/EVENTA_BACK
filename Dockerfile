@@ -11,4 +11,4 @@ RUN npm install --only=production
 
 COPY . .
 
-CMD ["node", "build"]
+CMD ["node", "./src/index.js"]
