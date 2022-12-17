@@ -1,8 +1,7 @@
 import { Schema, model } from 'mongoose';
 
-
 const EventsSchema = new Schema({
-  organizerId: {
+  organizer: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
