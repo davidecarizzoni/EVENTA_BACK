@@ -4,7 +4,7 @@ import _ from 'lodash';
 const actions = {};
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Event.find().skip(cursor.skip).limit(cursor.limit).sort(cursor.sort).populate('organizer');
+  const data = await Event.find().skip(cursor.skip).limit(cursor.limit).sort(cursor.sort);
   const totalData = await Event.countDocuments(query);
 
   res.send({ data, totalData });
@@ -12,7 +12,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
 actions.show = async function ({ params: { id } }, res) {
 
-  const event = await Event.findById(id).populate('organizer');
+  const event = await Event.findById(id);
 
   if (!event) {
     return res.status(404).send();

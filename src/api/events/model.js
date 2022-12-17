@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 
 const EventsSchema = new Schema({
-  organizer: {
+  organizerId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -31,6 +31,12 @@ const EventsSchema = new Schema({
   }
 });
 
+EventsSchema.virtual('organizer', {
+  ref: 'User',
+  localField: 'organizerId',
+  foreignField: '_id',
+  justOne: true
+});
 const Event = model('Event', EventsSchema);
 
 export { Event };
