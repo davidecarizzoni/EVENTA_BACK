@@ -3,8 +3,6 @@ import { Schema, model } from 'mongoose';
 const EventsSchema = new Schema({
   organizerId: {
     type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true
   },
   name: {
     type: String,
@@ -29,7 +27,7 @@ const EventsSchema = new Schema({
   date: {
     type: Date,
   }
-});
+}, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 EventsSchema.virtual('organizer', {
   ref: 'User',
@@ -37,6 +35,7 @@ EventsSchema.virtual('organizer', {
   foreignField: '_id',
   justOne: true
 });
+
 const Event = model('Event', EventsSchema);
 
 export { Event };
