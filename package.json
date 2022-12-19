@@ -4,7 +4,7 @@
   "description": "eventa backend",
   "main": "app.js",
   "scripts": {
-	"start": "node ./src/index.js",
+	"start": "nodemon ./src/index.js",
 	"dev": "npx nodemon ./src/index.js",
 	"build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
