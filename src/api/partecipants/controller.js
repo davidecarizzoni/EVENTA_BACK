@@ -2,7 +2,7 @@ import { Partecipant } from './model';
 import _ from 'lodash';
 
 const actions = {};
-const populationOptions1 = ['user'];
+const populationOptions1 = ['userId'];
 const populationOptions2 = ['event'];
 
 
@@ -11,8 +11,8 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
-	.populate(populationOptions1, populationOptions2)
-
+	.populate('event')
+	.populate('user')
 	.exec();
 
   const totalData = await Partecipant.countDocuments(query);
@@ -24,7 +24,6 @@ actions.show = async function ({ params: { id } }, res) {
 
   const partecipant = await Partecipant
 	.findById(id)
-	.populate(populationOptions1, populationOptions2)
 	.exec();
 
   if (!partecipant) {
@@ -34,7 +33,6 @@ actions.show = async function ({ params: { id } }, res) {
   res.send(partecipant);
 };
 
-actions.showMe = ({ partecipant }, res) => res.send(partecipant);
 
 actions.create = async ({ body }, res) => {
   let partecipant;

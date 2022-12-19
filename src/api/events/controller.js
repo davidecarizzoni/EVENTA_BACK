@@ -31,7 +31,6 @@ actions.show = async function ({ params: { id } }, res) {
   res.send(event);
 };
 
-actions.showMe = ({ event }, res) => res.send(event);
 
 actions.create = async ({ body }, res) => {
   let event;

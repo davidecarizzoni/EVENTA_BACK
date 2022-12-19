@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose';
 const PartecipantsSchema = new Schema({
   eventId: {
     type: Schema.Types.ObjectId,
+    required: true
   },
   userId: {
     type: Schema.Types.ObjectId,
@@ -23,6 +24,8 @@ PartecipantsSchema.virtual('user', {
   foreignField: '_id',
   justOne: true
 });
+
+
 
 const Partecipant = model('Partecipant', PartecipantsSchema);
 
