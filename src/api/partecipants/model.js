@@ -26,7 +26,6 @@ PartecipantsSchema.virtual('user', {
 });
 
 
-
 const Partecipant = model('Partecipant', PartecipantsSchema);
 
 export { Partecipant };

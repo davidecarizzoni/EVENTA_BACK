@@ -1,4 +1,4 @@
-import { Partecipant } from './model';
+import { Follow } from './model';
 import _ from 'lodash';
 
 const actions = {};
@@ -7,7 +7,7 @@ const populationOptions2 = ['user'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Partecipant.find()
+  const data = await Follow.find()
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
@@ -15,70 +15,70 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.populate(populationOptions2)
 	.exec();
 
-  const totalData = await Partecipant.countDocuments(query);
+  const totalData = await Follow.countDocuments(query);
 
   res.send({ data, totalData });
 };
 
 actions.show = async function ({ params: { id } }, res) {
 
-  const partecipant = await Partecipant
+  const follow = await Follow
 	.findById(id)
 	.populate(populationOptions1)
 	.populate(populationOptions2)
 	.exec();
 
-  if (!partecipant) {
+  if (!follow) {
     return res.status(404).send();
   }
 
-  res.send(partecipant);
+  res.send(follow);
 };
 
 
 actions.create = async ({ body }, res) => {
-  let partecipant;
+  let follow;
   try {
-    partecipant = await Partecipant.create(body);
+    follow = await Follow.create(body);
   } catch (err) {
     return null; // to be changed
   }
 
-  res.send(partecipant);
+  res.send(follow);
 };
 
 
 actions.update = ({ body, params }, res) => {
-	return Partecipant.findById(params.id)
-		.then(async (partecipant) => {
-			if (!partecipant) {
+	return Follow.findById(params.id)
+		.then(async (follow) => {
+			if (!follow) {
 				return null;
 			}
 			for (const key in body) {
 				if (
 					!_.isUndefined(body[key]) &&
-					partecipant[key] !== body[key]
+					follow[key] !== body[key]
 				) {
-					partecipant[key] = null;
-					partecipant[key] = body[key];
-					partecipant.markModified(key);
+					follow[key] = null;
+					follow[key] = body[key];
+					follow.markModified(key);
 				}
 			}
-			await partecipant.save();
+			await follow.save();
 
-			res.send(partecipant);
+			res.send(follow);
 		});
 };
 
 
 actions.destroy = async function ({ params: { id } }, res) {
-  const partecipant = await Partecipant.findById(id);
+  const follow = await Follow.findById(id);
 
-  if (_.isNil(partecipant)) {
+  if (_.isNil(follow)) {
     return res.status(404).send();
   }
 
-  await partecipant.delete();
+  await follow.delete();
 
   res.status(204).send();
 };
