@@ -2,8 +2,8 @@ import { Partecipant } from './model';
 import _ from 'lodash';
 
 const actions = {};
-const populationOptions1 = ['userId'];
-const populationOptions2 = ['event'];
+//se mettiamo array non ha senso definirne due, altrimenti non c'è nessun vanaggio
+const populationOptions = ['user', 'event'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
@@ -11,8 +11,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
-	.populate('event')
-	.populate('user')
+	.populate(populationOptions)
 	.exec();
 
   const totalData = await Partecipant.countDocuments(query);
