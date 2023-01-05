@@ -13,8 +13,8 @@ const EventsSchema = new Schema({
     required: true
   },
   eventImage: {
-    type: String,
-    default: ''
+    data: Buffer,
+    contentType: String
   },
   position: {
     type: { type: String, default: 'Point' },
