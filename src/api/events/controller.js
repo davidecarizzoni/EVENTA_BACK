@@ -2,6 +2,7 @@ import { Event } from './model';
 import _ from 'lodash';
 const upload = require('../../services/uploadController');
 const fs = require('fs')
+const path = require('path')
 
 const actions = {};
 const populationOptions = ['organizer'];
@@ -34,50 +35,46 @@ actions.show = async function ({ params: { id } }, res) {
 };
 
 
-actions.create = async ({ body }, res) => {
+actions.create = async (req, res) => {
   let event;
   try {
-    event = await Event.create(body);
-  } catch (err) {
-    return null; // to be changed
+    if(!req.file){
+      res.json({
+        success:false,
+        message: "You must provide at least 1 file"
+      });
+    } else {
+      event = await Event.create({
+        eventImage: {
+          data: fs.readFileSync(path.join(__dirname + '/Users/federico/Desktop/EVENTA_BACK/src/uploads' + req.file.filename)),
+          contentType: "image/png"
+        },
+        ...req.body
+        });
+    }
+    
+    
+  } 
+    catch (err) {
+      console.error(err);
+      res.status(500).send("Server Error");
   }
-
   res.send(event);
 };
 
 
-// actions.postImage = (req, res) => {
-// 	return Event.findById(req.params.id)
-// 		.then(async (event) => {
-// 			if (!event) {
-// 				return null;
-// 			}
-//       for (const key in body) {
-// 				if (
-// 					!_.isUndefined(body[key]) &&
-// 					event[key] !== body[key]
-// 				) {
-// 					event[key] = fs.readFileSync("/Users/federico/Desktop/EVENTA_BACK/src/uploads" + body[key].file.filename);
-// 					event.markModified(key);
-// 				}
-// 			}
-
-// 			res.send(event);
-// 		});
-// };
-
-actions.postImage = async (req, res) => {
+// actions.postImage = async (req, res) => {
 	
-  const event = await Event.findByIdAndUpdate(
-    req.params.id,
-    {
-      eventImage : fs.readFileSync("/Users/federico/Desktop/EVENTA_BACK/src/uploads/" + req.file.filename),
-    },
-    {new: true})
+//   const event = await Event.findByIdAndUpdate(
+//     req.params.id,
+//     {
+//       eventImage : fs.readFileSync("/Users/federico/Desktop/EVENTA_BACK/src/uploads/" + req.file.filename),
+//     },
+//     {new: true})
 
-    res.send(event);
+//     res.send(event);
 
-};
+// };
 
 actions.update = ({ body, params }, res) => {
 	return Event.findById(params.id)

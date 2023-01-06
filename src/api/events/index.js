@@ -11,9 +11,7 @@ router.get('/', token({ required: true }), middleware(), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
 
-router.post('/', token({ required: true }), actions.create);
-
-router.put('/image/:id', token({ required: true }), upload.single('TestImage'), actions.postImage);
+router.post('/', token({ required: true }), upload.single('eventImage'), actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
 
