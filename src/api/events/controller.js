@@ -46,13 +46,13 @@ actions.create = async (req, res) => {
     } else {
       event = await Event.create({
         eventImage: {
-          data: fs.readFileSync(path.join(__dirname + '/Users/federico/Desktop/EVENTA_BACK/src/uploads' + req.file.filename)),
+          data: fs.readFileSync('./src/uploads/' + req.file.filename),
           contentType: "image/png"
         },
         ...req.body
         });
+
     }
-    
     
   } 
     catch (err) {
@@ -62,19 +62,6 @@ actions.create = async (req, res) => {
   res.send(event);
 };
 
-
-// actions.postImage = async (req, res) => {
-	
-//   const event = await Event.findByIdAndUpdate(
-//     req.params.id,
-//     {
-//       eventImage : fs.readFileSync("/Users/federico/Desktop/EVENTA_BACK/src/uploads/" + req.file.filename),
-//     },
-//     {new: true})
-
-//     res.send(event);
-
-// };
 
 actions.update = ({ body, params }, res) => {
 	return Event.findById(params.id)
