@@ -1,9 +1,5 @@
 import { Event } from './model';
 import _ from 'lodash';
-const upload = require('../../services/uploadController');
-const fs = require('fs')
-const path = require('path')
-
 const actions = {};
 const populationOptions = ['organizer'];
 
@@ -35,33 +31,20 @@ actions.show = async function ({ params: { id } }, res) {
 };
 
 
-actions.create = async (req, res) => {
-  let event;
-  try {
-    if(!req.file){
-      res.json({
-        success:false,
-        message: "You must provide at least 1 file"
-      });
-    } else {
-      event = await Event.create({
-        eventImage: {
-          data: fs.readFileSync('./src/uploads/' + req.file.filename),
-          contentType: "image/png"
-        },
-        ...req.body
-        });
+actions.create = async ({ body }, res) => {
+	let event;
+	try {
+		event = await Event.create(body);
+	} catch (err) {
+		return res.status(409).send({
+			valid: false,
+			param: 'name',
+			message: 'name already registered'
+		})
+ 	}
 
-    }
-    
-  } 
-    catch (err) {
-      console.error(err);
-      res.status(500).send("Server Error");
-  }
-  res.send(event);
+	res.send(event);
 };
-
 
 actions.update = ({ body, params }, res) => {
 	return Event.findById(params.id)
@@ -85,7 +68,13 @@ actions.update = ({ body, params }, res) => {
 		});
 };
 
+actions.coverImage = ({ body, params, file }, res) => {
+	//params.id -> id evento
+	//file -> image
 
+	//carico su backet
+	//aggiorno l'evento e come risposta mando evento aggioenato con immagine
+};
 
 
 actions.destroy = async function ({ params: { id } }, res) {

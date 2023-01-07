@@ -4,4 +4,6 @@ export const JWT_SECRET = process.env.JWT_SECRET;
 export const PORT = process.env.PORT || 9000;
 export const IP = process.env.IP || '0.0.0.0';
 export const MONGODB_URI = process.env.MONGODB_URI;
+export const BACKET_NAME_S3 = process.env.BACKET_NAME_S3;
+export const BACKET_REGION_S3 = process.env.BACKET_REGION_S3;
 
