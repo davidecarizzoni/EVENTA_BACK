@@ -27,7 +27,7 @@ const EventsSchema = new Schema({
     type: Date,
   },
   startTime: {
-    type: String,
+    type: Date,
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 

@@ -1,5 +1,9 @@
 import { Event } from './model';
+import { PutObjectCommand } from "@aws-sdk/client-s3";
 import _ from 'lodash';
+
+const { bucketName, s3, randomImageName } = require('../../services/uploadController');
+
 const actions = {};
 const populationOptions = ['organizer'];
 
@@ -10,6 +14,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.sort(cursor.sort)
 	.populate(populationOptions)
 	.exec();
+
 
   const totalData = await Event.countDocuments(query);
 
@@ -68,11 +73,18 @@ actions.update = ({ body, params }, res) => {
 		});
 };
 
-actions.coverImage = ({ body, params, file }, res) => {
+actions.coverImage = async ( req, res) => {
 	//params.id -> id evento
-	//file -> image
+	
+	const fileInfo = {
+		Bucket : bucketName,
+		Key: randomImageName(),
+		Body: req.file.buffer,
+		ContentType: req.file.mimetype
+	}
+	const command = new PutObjectCommand(fileInfo)
+	await s3.send(command)
 
-	//carico su backet
 	//aggiorno l'evento e come risposta mando evento aggioenato con immagine
 };
 

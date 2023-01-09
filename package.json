@@ -4,7 +4,7 @@
   "description": "eventa backend",
   "main": "app.js",
   "scripts": {
-    "start": "node ./src/index.js",
+    "start": "nodemon ./src/index.js",
     "dev": "npx nodemon ./src/index.js",
     "build": "npx tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -25,6 +25,7 @@
     ]
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.245.0",
     "aws-sdk": "^2.1290.0",
     "babel-core": "^6.17.0",
     "babel-eslint": "^7.0.0",
@@ -40,6 +41,7 @@
     "bodymen": "^1.1.1",
     "compression": "^1.7.4",
     "cors": "^2.8.5",
+    "crypto": "^1.0.1",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
     "express": "^4.18.2",
