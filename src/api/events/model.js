@@ -3,6 +3,7 @@ import { Schema, model } from 'mongoose';
 const EventsSchema = new Schema({
   organizerId: {
     type: Schema.Types.ObjectId,
+    required: true
   },
   name: {
     type: String,
@@ -11,9 +12,6 @@ const EventsSchema = new Schema({
   description: {
     type: String,
     required: true
-  },
-  coverImage: {
-		type: String,
   },
   position: {
     type: { type: String, default: 'Point' },
@@ -25,10 +23,19 @@ const EventsSchema = new Schema({
   },
   date: {
     type: Date,
+    required: true,
   },
   startTime: {
     type: Date,
-  }
+    required: true,
+  },
+  coverImage: {
+		type: String,
+  },
+  imageUrl: {
+		type: String,
+  },
+
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 EventsSchema.virtual('organizer', {

@@ -2,7 +2,6 @@ import { Partecipant } from './model';
 import _ from 'lodash';
 
 const actions = {};
-//se mettiamo array non ha senso definirne due, altrimenti non c'è nessun vanaggio
 const populationOptions = ['user', 'event'];
 
 

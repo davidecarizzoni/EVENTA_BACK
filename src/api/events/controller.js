@@ -1,11 +1,16 @@
 import { Event } from './model';
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl, S3RequestPresigner } from "@aws-sdk/s3-request-presigner";
+
+import sharp from 'sharp'
 import _ from 'lodash';
 
 const { bucketName, s3, randomImageName } = require('../../services/uploadController');
 
 const actions = {};
 const populationOptions = ['organizer'];
+
+
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await Event.find()
@@ -15,6 +20,20 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.populate(populationOptions)
 	.exec();
 
+  for (const event of data){
+    
+    console.log(event.coverImage)
+
+    const getObjectParams = {
+      Bucket: bucketName,
+      Key: event.coverImage
+    }
+    const command = new GetObjectCommand(getObjectParams);
+    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    event.imageUrl = url
+  }
+  
+  console.log(data)
 
   const totalData = await Event.countDocuments(query);
 
@@ -32,6 +51,15 @@ actions.show = async function ({ params: { id } }, res) {
     return res.status(404).send();
   }
 
+  const getObjectParams = {
+    Bucket: bucketName,
+    Key: event.coverImage
+  }
+  const command = new GetObjectCommand(getObjectParams);
+  const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+  event.imageUrl = url
+
+ 
   res.send(event);
 };
 
@@ -74,18 +102,42 @@ actions.update = ({ body, params }, res) => {
 };
 
 actions.coverImage = async ( req, res) => {
-	//params.id -> id evento
-	
-	const fileInfo = {
-		Bucket : bucketName,
-		Key: randomImageName(),
-		Body: req.file.buffer,
-		ContentType: req.file.mimetype
-	}
-	const command = new PutObjectCommand(fileInfo)
-	await s3.send(command)
 
-	//aggiorno l'evento e come risposta mando evento aggioenato con immagine
+	let event;
+	try {
+		if(!req.file){
+		res.json({
+			success:false,
+			message: "You must provide at least 1 file"
+		});
+		}
+		else{
+			const buffer = await sharp(req.file.buffer).resize({
+				height: 500,
+				width: 500, 
+				fit: "contain"
+			}).toBuffer()
+			const imageName = randomImageName()
+			const fileInfo = {
+				Bucket : bucketName,
+				Key: imageName,
+				Body: buffer, //req.file.buffer
+				ContentType: req.file.mimetype
+			}
+			const command = new PutObjectCommand(fileInfo)
+			await s3.send(command)
+
+			event = await Event.findById(req.params.id)
+			event.coverImage = imageName
+
+		}
+	}
+	catch (err) {
+		console.error(err);
+		res.status(500).send("Server Error");
+	}
+	await event.save();
+	res.send(event)
 };
 
 
