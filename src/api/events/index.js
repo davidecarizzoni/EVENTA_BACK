@@ -15,7 +15,7 @@ router.post('/', token({ required: true }), actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
 
-router.put('/:id/coverImage', token({ required: true }), upload.single("coverImage"), actions.coverImage);
+router.put('/:id/coverImage', token({ required: true }), upload.single("file"), actions.coverImage);
 
 router.delete('/:id', token({ required: true }), actions.destroy);
 

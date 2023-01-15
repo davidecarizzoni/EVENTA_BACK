@@ -21,7 +21,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.exec();
 
   for (const event of data){
-    
     console.log(event.coverImage)
 
     const getObjectParams = {
@@ -134,7 +133,7 @@ actions.coverImage = async ( req, res) => {
 	}
 	catch (err) {
 		console.error(err);
-		res.status(500).send("Server Error");
+		res.status(500).send(error);
 	}
 	await event.save();
 	res.send(event)

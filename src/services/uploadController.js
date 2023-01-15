@@ -7,16 +7,16 @@ var path = require('path');
 
 const s3 = new S3Client ({
     credentials : {
-        accessKeyId: "AKIAQ3KAZBEOXQ4542CX",
-        secretAccessKey: "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",
+        accessKeyId: AWS_ACCESS_KEY,
+        secretAccessKey: AWS_ACCESS_SECRET_KEY,
     },
-    region: "us-east-1"
+    region: BUCKET_REGION_S3
 
 })
 
 
 
-const bucketName = "eventafiles"
+const bucketName = BUCKET_NAME_S3
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 const storage = multer.memoryStorage()
 
