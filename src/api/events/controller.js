@@ -20,20 +20,16 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.populate(populationOptions)
 	.exec();
 
-  for (const event of data){
     
-    console.log(event.coverImage)
 
-    const getObjectParams = {
-      Bucket: bucketName,
-      Key: event.coverImage
-    }
-    const command = new GetObjectCommand(getObjectParams);
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    event.imageUrl = url
-  }
+    // const getObjectParams = {
+    //   Bucket: bucketName,
+    //   Key: event.coverImage
+    // }
+    // const command = new GetObjectCommand(getObjectParams);
+    // const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+    // event.imageUrl = url
   
-  console.log(data)
 
   const totalData = await Event.countDocuments(query);
 
