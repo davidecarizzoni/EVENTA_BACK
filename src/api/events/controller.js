@@ -20,21 +20,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.populate(populationOptions)
 	.exec();
 
-  for (const event of data){
-    
-    console.log(event.coverImage)
-
-    const getObjectParams = {
-      Bucket: bucketName,
-      Key: event.coverImage
-    }
-    const command = new GetObjectCommand(getObjectParams);
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    event.imageUrl = url
-  }
-  
-  console.log(data)
-
   const totalData = await Event.countDocuments(query);
 
   res.send({ data, totalData });
@@ -59,7 +44,7 @@ actions.show = async function ({ params: { id } }, res) {
   const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
   event.imageUrl = url
 
- 
+
   res.send(event);
 };
 
@@ -102,8 +87,12 @@ actions.update = ({ body, params }, res) => {
 };
 
 actions.coverImage = async ( req, res) => {
+	let event = await Event.findById(req.params.id)
 
-	let event;
+	if (_.isNil(event)) {
+		return res.status(404).send();
+	}
+
 	try {
 		if(!req.file){
 		res.json({
@@ -114,7 +103,7 @@ actions.coverImage = async ( req, res) => {
 		else{
 			const buffer = await sharp(req.file.buffer).resize({
 				height: 500,
-				width: 500, 
+				width: 500,
 				fit: "contain"
 			}).toBuffer()
 			const imageName = randomImageName()
@@ -126,8 +115,8 @@ actions.coverImage = async ( req, res) => {
 			}
 			const command = new PutObjectCommand(fileInfo)
 			await s3.send(command)
-
-			event = await Event.findById(req.params.id)
+			console.log('imageName', imageName)
+			console.log(event, 'event')
 			event.coverImage = imageName
 
 		}
