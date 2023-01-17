@@ -132,34 +132,28 @@ actions.profilePic = async ( req, res) => {
 	if (_.isNil(user)) {
 		return res.status(404).send();
 	}
-
-	try {
-		if(!req.file){
-		res.json({
-			success:false,
-			message: "You must provide at least 1 file"
-		});
-		}
-		else{
-			const buffer = await sharp(req.file.buffer).resize({
-				height: 500,
-				width: 500,
-				fit: "contain"
-			}).toBuffer()
-			const imageName = randomImageName()
-			const fileInfo = {
-				Bucket : bucketName,
-				Key: imageName,
-				Body: buffer, //req.file.buffer
-				ContentType: req.file.mimetype
-			}
-			const command = new PutObjectCommand(fileInfo)
-			await s3.send(command)
-			user.profilePic = imageName
-
-		}
+	
+	if(!req.file){
+		res.status(400).send();
 	}
-	catch (err) {
+	
+	try {
+		const buffer = await sharp(req.file.buffer).resize({
+			height: 500,
+			width: 500,
+			fit: "contain"
+		}).toBuffer()
+		const imageName = randomImageName()
+		const fileInfo = {
+			Bucket : bucketName,
+			Key: imageName,
+			Body: buffer, //req.file.buffer
+			ContentType: req.file.mimetype
+		}
+		const command = new PutObjectCommand(fileInfo)
+		await s3.send(command)
+		user.profilePic = imageName
+	} catch (err) {
 		console.error(err);
 		res.status(500).send(err);
 	}
