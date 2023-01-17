@@ -31,6 +31,12 @@ const EventsSchema = new Schema({
   imageUrl: {
 		type: String,
   },
+  createdAt: {
+    type: Date,
+  },
+  updatedAt: {
+    type: Date,
+  }
 
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 

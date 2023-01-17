@@ -9,6 +9,12 @@ const LikeSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: true
   },
+  createdAt: {
+    type: Date,
+  },
+  updatedAt: {
+    type: Date,
+  }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 LikeSchema.virtual('event', {

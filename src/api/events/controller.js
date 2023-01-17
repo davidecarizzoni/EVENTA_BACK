@@ -1,6 +1,6 @@
 import { Event } from './model';
-import { PutObjectCommand, S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl, S3RequestPresigner } from "@aws-sdk/s3-request-presigner";
+import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 import sharp from 'sharp'
 import _ from 'lodash';
@@ -19,21 +19,21 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.sort(cursor.sort)
 	.populate(populationOptions)
 	.exec();
-
-    
-
-    // const getObjectParams = {
-    //   Bucket: bucketName,
-    //   Key: event.coverImage
-    // }
-    // const command = new GetObjectCommand(getObjectParams);
-    // const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    // event.imageUrl = url
   
+	const updatedData = await Promise.all(data.map(async (event) => {
+		const getObjectParams = {
+			Bucket: bucketName,
+			Key: event.coverImage
+		}
+		const command = new GetObjectCommand(getObjectParams);
+		const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
+		event.imageUrl = url;
+		return event;
+		}));
 
   const totalData = await Event.countDocuments(query);
 
-  res.send({ data, totalData });
+  res.send({ updatedData, totalData });
 };
 
 actions.show = async function ({ params: { id } }, res) {
@@ -126,15 +126,13 @@ actions.coverImage = async ( req, res) => {
 			}
 			const command = new PutObjectCommand(fileInfo)
 			await s3.send(command)
-			console.log('imageName', imageName)
-			console.log(event, 'event')
 			event.coverImage = imageName
 
 		}
 	}
 	catch (err) {
 		console.error(err);
-		res.status(500).send(error);
+		res.status(500).send(err);
 	}
 	await event.save();
 	res.send(event)

@@ -2,6 +2,8 @@ import { Router } from 'express';
 import { admin, password, token } from '../auth/passport';
 import { actions } from './controller';
 import { middleware } from 'querymen';
+const { upload } = require('../../services/uploadController');
+
 
 const router = new Router();
 
@@ -14,6 +16,8 @@ router.get('/:id', admin, actions.show);
 router.post('/', admin, actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
+
+router.put('/:id/profilePic', token({ required: true }), upload.single("file"), actions.profilePic);
 
 router.put('/:id/password', password(), actions.updatePassword);
 
