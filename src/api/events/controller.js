@@ -1,12 +1,6 @@
-import { Event } from './model';
-import { PutObjectCommand,GetObjectCommand } from "@aws-sdk/client-s3";
-import UploadStream from 's3-stream-upload';
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import sharp from 'sharp'
+import {Event} from './model';
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
-
-const { bucketName, s3, randomImageName, createImageUpload } = require('../../services/uploadController');
 
 const actions = {};
 const populationOptions = ['organizer'];
@@ -92,15 +86,7 @@ actions.coverImage = async ( req, res) => {
 	}
 
 	try {
-		const image = await uploadToS3(req.file)
-		const getObjectParams = {
-			Bucket: bucketName,
-			Key: image.key
-		}
-		const command = new GetObjectCommand(getObjectParams);
-		const url = await getSignedUrl(s3, command);
-		console.log('image', url)
-		event.coverImage = url
+		event.coverImage = await uploadToS3(req.file)
 		await event.save();
 		res.send(event)
 	} catch (err) {
