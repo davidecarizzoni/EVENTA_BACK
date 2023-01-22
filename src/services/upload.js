@@ -44,7 +44,7 @@ export async function uploadToS3(file) {
 	const getObjectParams = {
 		Bucket: BUCKET_NAME_S3,
 		Key: image.key,
-		Expires:  2419200 * 12
+		Expires:  2419200
 	}
 	const command = new GetObjectCommand(getObjectParams);
 	const url = await getSignedUrl(s3GetFile, command);
