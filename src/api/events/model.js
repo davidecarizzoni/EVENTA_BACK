@@ -1,7 +1,7 @@
 import { Schema, model } from 'mongoose';
 
 const EventsSchema = new Schema({
-  organizerId: {
+  organiserId: {
     type: Schema.Types.ObjectId,
     required: true
   },
@@ -40,9 +40,9 @@ const EventsSchema = new Schema({
 
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-EventsSchema.virtual('organizer', {
+EventsSchema.virtual('organiser', {
   ref: 'User',
-  localField: 'organizerId',
+  localField: 'organiserId',
   foreignField: '_id',
   justOne: true
 });

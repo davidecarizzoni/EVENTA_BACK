@@ -3,8 +3,8 @@ import bcrypt from 'bcryptjs';
 
 export const ADMIN = 'admin';
 export const USER = 'user';
-export const ORGANIZER = 'organizer';
-export const ROLES = [ADMIN, USER, ORGANIZER];
+export const ORGANISER = 'organiser';
+export const ROLES = [ADMIN, USER, ORGANISER];
 
 const UsersSchema = new Schema({
   email: {

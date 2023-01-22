@@ -1,21 +1,14 @@
 import {ADMIN, User} from './model';
-import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import {uploadToS3} from "../../services/upload";
 
 
-import sharp from 'sharp'
 import _ from 'lodash';
-
-const { bucketName, s3, randomImageName } = require('../../services/uploadController');
-
 
 const actions = {};
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await User.find().skip(cursor.skip).limit(cursor.limit).sort(cursor.sort);
   const totalData = await User.countDocuments(query);
-
 
   res.send({ data, totalData });
 };
