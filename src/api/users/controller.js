@@ -1,6 +1,8 @@
 import {ADMIN, User} from './model';
 import { PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import {uploadToS3} from "../../services/upload";
+
 
 import sharp from 'sharp'
 import _ from 'lodash';
@@ -15,53 +17,19 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   const totalData = await User.countDocuments(query);
 
 
-  const updatedData = await Promise.all(data.map(async (user) => {
-    if(user.profilePic == ''){
-      return user
-    }
-    else {
-      const getObjectParams = {
-        Bucket: bucketName,
-        Key: user.profilePic
-      }
-      const command = new GetObjectCommand(getObjectParams);
-      const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-      user.imageUrl = url;
-      return user;
-
-    }}));
-
-  res.send({ updatedData, totalData });
+  res.send({ data, totalData });
 };
 
 actions.show = async function ({ params: { id } }, res) {
 
   const user = await User.findById(id);
 
-  console.log("got here")
-
   if (!user) {
     return res.status(404).send();
   }
-  console.log("got here too")
 
-  
-  console.log(user)
-
-  if(user.profilePic == ''){
-	  res.send(user)
-  }
-  else{
-    const getObjectParams = {
-      Bucket: bucketName,
-      Key: user.profilePic
-    }
-    const command = new GetObjectCommand(getObjectParams);
-    const url = await getSignedUrl(s3, command, { expiresIn: 3600 });
-    user.imageUrl = url
-
-    res.send(user);
-	}
+  res.send(user);
+	
 };
 
 actions.showMe = ({ user }, res) => res.send(user);
@@ -138,27 +106,12 @@ actions.profilePic = async ( req, res) => {
 	}
 	
 	try {
-		const buffer = await sharp(req.file.buffer).resize({
-			height: 500,
-			width: 500,
-			fit: "contain"
-		}).toBuffer()
-		const imageName = randomImageName()
-		const fileInfo = {
-			Bucket : bucketName,
-			Key: imageName,
-			Body: buffer, //req.file.buffer
-			ContentType: req.file.mimetype
-		}
-		const command = new PutObjectCommand(fileInfo)
-		await s3.send(command)
-		user.profilePic = imageName
+		user.profilePic = await uploadToS3(req.file)
+		await user.save()
 	} catch (err) {
 		console.error(err);
 		res.status(500).send(err);
 	}
-	await user.save();
-	res.send(user)
 };
 
 
