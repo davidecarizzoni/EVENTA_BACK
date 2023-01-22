@@ -108,6 +108,7 @@ actions.profilePic = async ( req, res) => {
 	try {
 		user.profilePic = await uploadToS3(req.file)
 		await user.save()
+		res.send(user)
 	} catch (err) {
 		console.error(err);
 		res.status(500).send(err);
