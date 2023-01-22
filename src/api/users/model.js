@@ -42,10 +42,6 @@ const UsersSchema = new Schema({
   },
   profilePic: {
     type: String,
-    default: ""
-  },
-  imageUrl: {
-		type: String,
   },
   position: {
     type: { type: String, default: 'Point' },

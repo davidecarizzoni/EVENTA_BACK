@@ -28,9 +28,6 @@ const EventsSchema = new Schema({
   coverImage: {
 		type: String,
   },
-  imageUrl: {
-		type: String,
-  },
   createdAt: {
     type: Date,
   },
