@@ -1,22 +1,30 @@
 import {Event} from './model';
 import _ from 'lodash';
-import {uploadToS3} from "../../services/upload";
+import {getS3SignedUrl, uploadToS3} from "../../services/upload";
+const Promise = require('bluebird');
 
 const actions = {};
 const populationOptions = ['organiser'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Event.find()
+  let data = await Event.find()
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
 	.populate(populationOptions)
 	.exec();
 
-  const totalData = await Event.countDocuments(query);
+	const totalData = await Event.countDocuments(query);
 
-  res.send({ data, totalData });
+	// console.log(data)
+	data = await Promise.map(data, async event => ({
+		...event._doc,
+		coverImage: await getS3SignedUrl(event.coverImage)
+	}))
+
+
+	res.send({ data, totalData });
 };
 
 actions.show = async function ({ params: { id } }, res) {
@@ -39,11 +47,8 @@ actions.create = async ({ body }, res) => {
 	try {
 		event = await Event.create(body);
 	} catch (err) {
-		return res.status(409).send({
-			valid: false,
-			param: 'name',
-			message: 'name already registered'
-		})
+		console.log(err)
+		return res.status(409).send(err)
  	}
 
 	res.send(event);

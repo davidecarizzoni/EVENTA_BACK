@@ -15,11 +15,23 @@ const s3GetFile = new S3Client ({
 
 const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 
+export async function getS3SignedUrl (key) {
+	const getObjectParams = {
+		Bucket: BUCKET_NAME_S3,
+		Key: key,
+		// Expires: 60 * 60 * 24
+	}
+	const command = new GetObjectCommand(getObjectParams);
+	const url = await getSignedUrl(s3GetFile, command);
+
+	console.log('image', url)
+	return String(url)
+}
+
 export async function uploadToS3(file) {
 	console.log('file',file)
 	const s3 = new AWS.S3({
-		sslEnabled: true,
-		accessKeyId:AWS_ACCESS_KEY,
+		accessKeyId: AWS_ACCESS_KEY,
 		secretAccessKey: AWS_ACCESS_SECRET_KEY
 	});
 	// const imagePath = file.buffer
@@ -34,21 +46,17 @@ export async function uploadToS3(file) {
 
 	const image = await s3.upload({
 		Bucket: BUCKET_NAME_S3,
-		ACL: 'private',
+		// ACL: 'public-read',
 		contentType: file.mimetype,
 		Key: fileName,
 		Body: buffer,
 	}).promise()
 
+	// const imageUrl = `https://${BUCKET_REGION_S3}.amazonaws.com/` + BUCKET_NAME_S3 + '/' + image.Key;
+	// console.log('uploadedImage', image)
+	//
+	// return imageUrl
 
-	const getObjectParams = {
-		Bucket: BUCKET_NAME_S3,
-		Key: image.key,
-		Expires:  2419200
-	}
-	const command = new GetObjectCommand(getObjectParams);
-	const url = await getSignedUrl(s3GetFile, command);
-
-	console.log('image', url)
-	return String(url)
+	return image.Key
 }
+

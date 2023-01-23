@@ -11,11 +11,11 @@ router.get('/', token({ required: true }), middleware(), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
 
-router.post('/', token({ required: true }), actions.create);
+router.post('/', token({ required: false }), actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
 
-router.put('/:id/coverImage', token({ required: true }), upload.single("file"), actions.coverImage);
+router.put('/:id/coverImage', token({ required: false }), upload.single("file"), actions.coverImage);
 
 router.delete('/:id', token({ required: true }), actions.destroy);
 

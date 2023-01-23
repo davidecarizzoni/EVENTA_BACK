@@ -3,11 +3,9 @@ import { Schema, model } from 'mongoose';
 const EventsSchema = new Schema({
   organiserId: {
     type: Schema.Types.ObjectId,
-    required: true
   },
   name: {
     type: String,
-    required: true
   },
   description: {
     type: String,
