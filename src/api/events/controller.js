@@ -1,4 +1,6 @@
 import {Event} from './model';
+import {Partecipant} from '../partecipants/model';
+
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
@@ -6,13 +8,19 @@ const actions = {};
 const populationOptions = ['organiser'];
 
 
+
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Event.find()
-	.skip(cursor.skip)
-	.limit(cursor.limit)
-	.sort(cursor.sort)
-	.populate(populationOptions)
-	.exec();
+  const events = await Event.find()
+  .skip(cursor.skip)
+  .limit(cursor.limit)
+  .sort(cursor.sort)
+  .populate('organiser')
+  .exec();
+
+  const data = await Promise.all(events.map(async event => {
+    event.partecipants = await Partecipant.find({ eventId: event._id }).exec();
+    return event;
+  }));
 
   const totalData = await Event.countDocuments(query);
 
