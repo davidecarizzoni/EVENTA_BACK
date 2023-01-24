@@ -11,6 +11,8 @@ router.get('/', token({ required: true }), middleware(), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
 
+router.get('/:id/participants', token({ required: true }), middleware(), actions.participants);
+
 router.post('/', token({ required: false }), actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);

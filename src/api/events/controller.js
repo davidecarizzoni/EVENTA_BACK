@@ -21,6 +21,19 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
+actions.participants = async function ({ params, querymen: { query, cursor } }, res) {
+	const data = await Partecipant.find({ ...query, eventId: params.id})
+		.skip(cursor.skip)
+		.limit(cursor.limit)
+		.sort(cursor.sort)
+		.populate(['user'])
+		.exec();
+
+	const totalData = await Partecipant.countDocuments(query);
+
+	res.send({ data, totalData });
+};
+
 actions.show = async function ({ params: { id } }, res) {
 
   const event = await Event
