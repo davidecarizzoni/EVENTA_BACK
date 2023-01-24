@@ -5,22 +5,16 @@ import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
 const actions = {};
-const populationOptions = ['organiser'];
-
+const populationOptions = ['organiser', 'partecipants'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const events = await Event.find()
+  const data = await Event.find()
   .skip(cursor.skip)
   .limit(cursor.limit)
   .sort(cursor.sort)
-  .populate('organiser')
+  .populate(populationOptions)
   .exec();
-
-  const data = await Promise.all(events.map(async event => {
-    event.partecipants = await Partecipant.find({ eventId: event._id }).exec();
-    return event;
-  }));
 
   const totalData = await Event.countDocuments(query);
 

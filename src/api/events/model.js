@@ -32,9 +32,6 @@ const EventsSchema = new Schema({
   updatedAt: {
     type: Date,
   },
-  partecipants:[{
-    type: Schema.Types.ObjectId,
-  }]
 
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
@@ -45,11 +42,11 @@ EventsSchema.virtual('organiser', {
   justOne: true
 });
 
-EventsSchema.virtual('partecipant', {
+EventsSchema.virtual('partecipants', {
   ref: 'Partecipant',
-  localField: 'partecipants',
-  foreignField: '_id',
-  justOne: true
+  localField: '_id',
+  foreignField: 'eventId',
+  justOne: false
 });
 
 const Event = model('Event', EventsSchema);
