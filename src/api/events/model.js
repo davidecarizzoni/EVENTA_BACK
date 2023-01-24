@@ -46,7 +46,8 @@ EventsSchema.virtual('partecipants', {
   ref: 'Partecipant',
   localField: '_id',
   foreignField: 'eventId',
-  justOne: false
+  justOne: false,
+	// count: true
 });
 
 const Event = model('Event', EventsSchema);

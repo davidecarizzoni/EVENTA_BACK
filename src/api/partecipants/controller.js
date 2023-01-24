@@ -6,7 +6,7 @@ const populationOptions = ['user', 'event'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Partecipant.find()
+  const data = await Partecipant.find(query)
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
