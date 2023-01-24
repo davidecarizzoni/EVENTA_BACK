@@ -1,30 +1,30 @@
 import {Event} from './model';
+import {Partecipant} from '../partecipants/model';
+
 import _ from 'lodash';
-import {getS3SignedUrl, uploadToS3} from "../../services/upload";
-const Promise = require('bluebird');
+import {uploadToS3} from "../../services/upload";
 
 const actions = {};
 const populationOptions = ['organiser'];
 
 
+
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  let data = await Event.find()
-	.skip(cursor.skip)
-	.limit(cursor.limit)
-	.sort(cursor.sort)
-	.populate(populationOptions)
-	.exec();
+  const events = await Event.find()
+  .skip(cursor.skip)
+  .limit(cursor.limit)
+  .sort(cursor.sort)
+  .populate('organiser')
+  .exec();
 
-	const totalData = await Event.countDocuments(query);
+  const data = await Promise.all(events.map(async event => {
+    event.partecipants = await Partecipant.find({ eventId: event._id }).exec();
+    return event;
+  }));
 
-	// console.log(data)
-	data = await Promise.map(data, async event => ({
-		...event._doc,
-		coverImage: await getS3SignedUrl(event.coverImage)
-	}))
+  const totalData = await Event.countDocuments(query);
 
-
-	res.send({ data, totalData });
+  res.send({ data, totalData });
 };
 
 actions.show = async function ({ params: { id } }, res) {
@@ -47,8 +47,11 @@ actions.create = async ({ body }, res) => {
 	try {
 		event = await Event.create(body);
 	} catch (err) {
-		console.log(err)
-		return res.status(409).send(err)
+		return res.status(409).send({
+			valid: false,
+			param: 'name',
+			message: 'name already registered'
+		})
  	}
 
 	res.send(event);
