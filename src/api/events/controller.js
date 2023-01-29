@@ -40,18 +40,18 @@ actions.near = async function({ params: { id }, query: { coordinates, maxDistanc
 	if (!maxDistance || isNaN(maxDistance) || maxDistance < 0) {
     return res.status(400).send({ error: 'maxDistance is required and should be a positive number' });
 	}
-		
+
   const events = await Event.aggregate([
     {
       $geoNear: {
-        near: { type: 'Point', coordinates }, 
-        distanceField: 'distance', 
-        spherical: true, 
+        near: { type: 'Point', coordinates },
+        distanceField: 'distance',
+        spherical: true,
         maxDistance: maxDistance
       }
     },
-    { $match: { _id: id } },  
-    { $limit: 1 }, 
+    { $match: { _id: id } },
+    { $limit: 1 },
   ])
 
   if (!events) {
@@ -114,7 +114,7 @@ actions.update = ({ body, params }, res) => {
 		});
 };
 
-actions.coverImage = async ( req, res) => {
+actions.coverImage = async (req, res) => {
 	let event = await Event.findById(req.params.id)
 
 	if (_.isNil(event)) {
@@ -127,6 +127,8 @@ actions.coverImage = async ( req, res) => {
 			message: "You must provide at least 1 file"
 		});
 	}
+
+	console.log('req.file', req.file);
 
 	try {
 		event.coverImage = await uploadToS3(req.file)

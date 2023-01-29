@@ -1,6 +1,5 @@
 import * as AWS from "aws-sdk";
 import {BUCKET_NAME_S3, AWS_ACCESS_SECRET_KEY, AWS_ACCESS_KEY, BUCKET_REGION_S3} from "../config";
-import crypto from "crypto";
 import {GetObjectCommand, S3Client} from "@aws-sdk/client-s3";
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
 const fs = require("fs");
@@ -27,6 +26,7 @@ export async function getS3SignedUrl (key) {
 }
 
 export async function uploadToS3(file) {
+	console.log('file', file)
 	const s3 = new AWS.S3({
 		accessKeyId: AWS_ACCESS_KEY,
 		secretAccessKey: AWS_ACCESS_SECRET_KEY
