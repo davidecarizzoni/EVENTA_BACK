@@ -34,22 +34,24 @@ actions.participants = async function ({ params, querymen: { query, cursor } }, 
 	res.send({ data, totalData });
 };
 
-actions.locationfilter = async function({ params: { id }, query: { coordinates } }, res) {
-  // coordinates is an array in the format [longitude, latitude]
 
-  // Use the $geoNear operator to sort events by proximity to the user's coordinates
+actions.near = async function({ params: { id }, query: { coordinates, maxDistance } }, res) {
+
+	if (!maxDistance || isNaN(maxDistance) || maxDistance < 0) {
+    return res.status(400).send({ error: 'maxDistance is required and should be a positive number' });
+	}
+		
   const events = await Event.aggregate([
     {
       $geoNear: {
-        near: { type: 'Point', coordinates }, // user's coordinates
-        distanceField: 'distance', // add a distance field to the result documents
-        spherical: true, // use a spherical model for distance calculations
-        maxDistance: 40000
+        near: { type: 'Point', coordinates }, 
+        distanceField: 'distance', 
+        spherical: true, 
+        maxDistance: maxDistance
       }
     },
-    { $match: { _id: id } },  // filter the events based on the id provided in the request
-    { $limit: 1 }, // limit the number of events returned
-    { $project: { distance: 0 } } // remove the distance field from the result documents
+    { $match: { _id: id } },  
+    { $limit: 1 }, 
   ])
 
   if (!events) {

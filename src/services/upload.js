@@ -54,7 +54,7 @@ export async function uploadToS3(file) {
 
 	// const imageUrl = `https://${BUCKET_REGION_S3}.amazonaws.com/` + BUCKET_NAME_S3 + '/' + image.Key;
 	// console.log('uploadedImage', image)
-	//
+	
 	// return imageUrl
 
 	return image.Key
