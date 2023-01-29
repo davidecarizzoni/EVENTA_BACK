@@ -1,24 +1,32 @@
 import {Event} from './model';
 import {Partecipant} from '../partecipants/model';
-
+const Promise = require('bluebird');
 import _ from 'lodash';
-import {uploadToS3} from "../../services/upload";
+import {getS3SignedUrl, uploadToS3} from "../../services/upload";
 
 const actions = {};
 const populationOptions = ['organiser', 'partecipants'];
 
+const addIMageToEntity = async (entity, imagePath) => {
+	const imageUrl =  entity[imagePath] ? await getS3SignedUrl(entity[imagePath]) : ''
+	return {
+		...entity,
+		[imagePath]: imageUrl
+	}
+}
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Event.find()
-  .skip(cursor.skip)
-  .limit(cursor.limit)
-  .sort(cursor.sort)
-  .populate(populationOptions)
-  .exec();
+  let data = await Event.find()
+  	.skip(cursor.skip)
+  	.limit(cursor.limit)
+  	.sort(cursor.sort)
+  	.populate(populationOptions)
+		.lean()
 
-  const totalData = await Event.countDocuments(query);
+	const totalData = await Event.countDocuments(query);
+	data = await Promise.map(data, async (event) => await addIMageToEntity(event, 'coverImage'));
 
-  res.send({ data, totalData });
+	res.send({ data, totalData });
 };
 
 actions.participants = async function ({ params, querymen: { query, cursor } }, res) {
