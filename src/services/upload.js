@@ -1,9 +1,9 @@
 import * as AWS from "aws-sdk";
 import {BUCKET_NAME_S3, AWS_ACCESS_SECRET_KEY, AWS_ACCESS_KEY, BUCKET_REGION_S3} from "../config";
 import crypto from "crypto";
-import sharp from 'sharp'
 import {GetObjectCommand, S3Client} from "@aws-sdk/client-s3";
 import {getSignedUrl} from "@aws-sdk/s3-request-presigner";
+const fs = require("fs");
 
 const s3GetFile = new S3Client ({
 	credentials : {
@@ -12,8 +12,6 @@ const s3GetFile = new S3Client ({
 	},
 	region: BUCKET_REGION_S3
 })
-
-const randomImageName = (bytes = 32) => crypto.randomBytes(bytes).toString('hex')
 
 export async function getS3SignedUrl (key) {
 	const getObjectParams = {
@@ -29,34 +27,27 @@ export async function getS3SignedUrl (key) {
 }
 
 export async function uploadToS3(file) {
-	console.log('file',file)
 	const s3 = new AWS.S3({
 		accessKeyId: AWS_ACCESS_KEY,
 		secretAccessKey: AWS_ACCESS_SECRET_KEY
 	});
-	// const imagePath = file.buffer
-	const fileName = randomImageName()
-	// const blob = fs.readFileSync(imagePath)
+	const fileStream = fs.createReadStream(file.path);
 
-	const buffer = await sharp(file.buffer).resize({
-		height: 500,
-		width: 500,
-		fit: "contain"
-	}).toBuffer()
-
-	const image = await s3.upload({
+	const uploadParams = {
 		Bucket: BUCKET_NAME_S3,
-		// ACL: 'public-read',
-		contentType: file.mimetype,
-		Key: fileName,
-		Body: buffer,
-	}).promise()
+		Body: fileStream,
+		Key: file.filename,
+		ACL: 'public-read',
+	};
 
-	// const imageUrl = `https://${BUCKET_REGION_S3}.amazonaws.com/` + BUCKET_NAME_S3 + '/' + image.Key;
-	// console.log('uploadedImage', image)
-	//
-	// return imageUrl
-
-	return image.Key
+	const img = await s3.upload(uploadParams).promise();
+	fs.unlink(file.path, function (err) {
+		if (err) {
+			console.error(err);
+		}
+	});
+	console.log('img', img)
+	return img.Location || ''
 }
+
 

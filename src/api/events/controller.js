@@ -16,7 +16,7 @@ const addIMageToEntity = async (entity, imagePath) => {
 }
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  let data = await Event.find()
+  const data = await Event.find()
   	.skip(cursor.skip)
   	.limit(cursor.limit)
   	.sort(cursor.sort)
@@ -24,7 +24,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 		.lean()
 
 	const totalData = await Event.countDocuments(query);
-	data = await Promise.map(data, async (event) => await addIMageToEntity(event, 'coverImage'));
+	// data = await Promise.map(data, async (event) => await addIMageToEntity(event, 'coverImage'));
 
 	res.send({ data, totalData });
 };
