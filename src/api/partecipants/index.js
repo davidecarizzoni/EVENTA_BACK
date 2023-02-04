@@ -2,15 +2,14 @@ import {Router} from 'express';
 import {token} from '../auth/passport';
 import {actions} from './controller';
 import {middleware, Schema as QuerySchema} from 'querymen';
-import {Schema} from 'mongoose';
+
+import {Partecipant} from './model';
+import {createQuerymenSchema } from '../../services/queryController';
+const eventQuerymenSchema = createQuerymenSchema(Partecipant.schema);
 
 const router = new Router();
 
-const schema = new QuerySchema({
-	eventId: Schema.Types.ObjectId
-});
-
-router.get('/', token({ required: true }), middleware(schema), actions.index);
+router.get('/', token({ required: true }), middleware(eventQuerymenSchema), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
 

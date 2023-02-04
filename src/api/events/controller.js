@@ -1,7 +1,6 @@
 import {Event} from './model';
 import {Partecipant} from '../partecipants/model';
 
-
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 

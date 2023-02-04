@@ -2,14 +2,13 @@ import { Router } from 'express';
 import { token } from '../auth/passport';
 import { actions } from './controller';
 import {middleware, Schema as QuerySchema} from 'querymen';
-import {Event} from './model';
 const { upload } = require('../../services/uploadController');
-import {createQuerymenSchema } from '../../services/queryController';
 
+import {Event} from './model';
+import {createQuerymenSchema } from '../../services/queryController';
+const eventQuerymenSchema = createQuerymenSchema(Event.schema);
 
 const router = new Router();
-
-const eventQuerymenSchema = createQuerymenSchema(Event.schema);
 
 router.get('/', token({ required: true }), middleware(eventQuerymenSchema), actions.index);
 
