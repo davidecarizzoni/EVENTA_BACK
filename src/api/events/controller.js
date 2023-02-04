@@ -1,6 +1,7 @@
 import {Event} from './model';
 import {Partecipant} from '../partecipants/model';
 
+
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
@@ -9,7 +10,7 @@ const populationOptions = ['organiser', 'partecipants'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Event.find()
+  const data = await Event.find(query)
   .skip(cursor.skip)
   .limit(cursor.limit)
   .sort(cursor.sort)

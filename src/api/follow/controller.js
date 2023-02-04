@@ -5,7 +5,6 @@ const actions = {};
 const populationOptions = ['user'];
 
 
-
 actions.index = async function ({ querymen: { query, cursor } }, res) {
     const data = await Follow.find()
       .skip(cursor.skip)

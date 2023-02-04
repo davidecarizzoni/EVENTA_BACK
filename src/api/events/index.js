@@ -1,13 +1,17 @@
 import { Router } from 'express';
 import { token } from '../auth/passport';
 import { actions } from './controller';
-import { middleware } from 'querymen';
+import {middleware, Schema as QuerySchema} from 'querymen';
+import {Event} from './model';
 const { upload } = require('../../services/uploadController');
+import {createQuerymenSchema } from '../../services/queryController';
 
 
 const router = new Router();
 
-router.get('/', token({ required: true }), middleware(), actions.index);
+const eventQuerymenSchema = createQuerymenSchema(Event.schema);
+
+router.get('/', token({ required: true }), middleware(eventQuerymenSchema), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
 
