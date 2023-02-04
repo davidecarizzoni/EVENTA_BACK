@@ -3,6 +3,7 @@ import {uploadToS3} from "../../services/upload";
 
 
 import _ from 'lodash';
+import {Follow} from "../follow/model";
 
 const actions = {};
 
@@ -15,17 +16,41 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
 actions.show = async function ({ params: { id } }, res) {
 
-  const user = await User.findById(id);
+  const user = await User.findById(id).lean();
+	//se serve solo nel dettaglio facciamo questo
+	//se inizia a servire anche nella lista  vediamo quanto diventa pesante e al massimo lo materializziamo nell'utente
+	const followers = await Follow.countDocuments({ followedId: id })
+	const followed = await Follow.countDocuments({ followerId: id })
 
   if (!user) {
     return res.status(404).send();
   }
 
-  res.send(user);
-	
+  res.send({
+		...user,
+		followers,
+		followed,
+	});
+
 };
 
-actions.showMe = ({ user }, res) => res.send(user);
+actions.follow = async function ({ user, params: { id } }, res) {
+	const follow = await Follow.create({
+		followerId: user._id, // segue
+		followedId: id, // seguito
+	})
+
+	console.log('follow', follow)
+
+	res.send(follow);
+
+};
+
+actions.showMe = async ({ user }, res) => {
+	const followers = await Follow.countDocuments({ followedId: user.id })
+	const followed = await Follow.countDocuments({ followerId: user.id })
+	res.send({ ...user._doc, followers, followed });
+}
 
 actions.create = async ({ body }, res) => {
   let user;
@@ -93,11 +118,11 @@ actions.profilePic = async ( req, res) => {
 	if (_.isNil(user)) {
 		return res.status(404).send();
 	}
-	
+
 	if(!req.file){
 		res.status(400).send();
 	}
-	
+
 	try {
 		user.profilePic = await uploadToS3(req.file)
 		await user.save()

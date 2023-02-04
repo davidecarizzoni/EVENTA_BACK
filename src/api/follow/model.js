@@ -17,19 +17,19 @@ const FollowSchema = new Schema({
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-FollowSchema.virtual('user', {
-  ref: 'User',
-  localField: 'userId',
-  foreignField: '_id',
-  justOne: true
-});
-
-FollowSchema.virtual('user', {
-  ref: 'User',
-  localField: 'userId',
-  foreignField: '_id',
-  justOne: true
-});
+// FollowSchema.virtual('user', {
+//   ref: 'User',
+//   localField: 'userId',
+//   foreignField: '_id',
+//   justOne: true
+// });
+//
+// FollowSchema.virtual('user', {
+//   ref: 'User',
+//   localField: 'userId',
+//   foreignField: '_id',
+//   justOne: true
+// });
 
 
 const Follow = model('Follow', FollowSchema);
