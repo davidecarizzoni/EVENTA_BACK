@@ -30,11 +30,7 @@ const UsersSchema = new Schema({
   },
   username: {
     type: String,
-    trim: true,
     unique: true,
-    lowercase: true,
-    minlength: 6,
-    maxlength: 16,
     required: true
   },
   bio: {
