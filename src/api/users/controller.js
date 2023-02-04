@@ -35,16 +35,47 @@ actions.show = async function ({ params: { id } }, res) {
 };
 
 actions.follow = async function ({ user, params: { id } }, res) {
-	const follow = await Follow.create({
+	// const follow = await Follow.findOne({
+	// 	followerId: user._id, // segue
+	// 	followedId: id, // seguito
+	// })
+
+	try {
+		const follow = await Follow.create({
+			followerId: user._id, // segue
+			followedId: id, // seguito
+		})
+
+		res.send(follow);
+	} catch (err) {
+		if (err.code === 11000) {
+			return res.status(409).send({
+				valid: false,
+				param: 'followerId - followedId',
+				message: 'You already follow the user'
+			});
+		}
+		res.status(500).send(err);
+	}
+};
+
+actions.unfollow = async function ({ user, params: { id } }, res) {
+	const follow = await Follow.findOne({
 		followerId: user._id, // segue
 		followedId: id, // seguito
 	})
 
 	console.log('follow', follow)
 
-	res.send(follow);
+	if (_.isNil(follow)) {
+		return res.status(404).send();
+	}
 
+	await follow.delete();
+	res.status(204).send();
 };
+
+
 
 actions.showMe = async ({ user }, res) => {
 	const followers = await Follow.countDocuments({ followedId: user.id })

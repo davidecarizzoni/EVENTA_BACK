@@ -30,6 +30,7 @@ const FollowSchema = new Schema({
 //   foreignField: '_id',
 //   justOne: true
 // });
+FollowSchema.index({ followedId: 1, followerId: 1}, { unique: true });
 
 
 const Follow = model('Follow', FollowSchema);

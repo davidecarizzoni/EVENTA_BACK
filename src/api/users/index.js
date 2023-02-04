@@ -19,7 +19,7 @@ router.put('/:id', token({ required: true }), actions.update);
 
 router.post('/:id/follow', token({ required: true }), actions.follow);
 
-// router.delete('/:id/unfollow', token({ required: true }), actions.unfollow);
+router.delete('/:id/unfollow', token({ required: true }), actions.unfollow);
 
 router.put('/:id/profilePic', token({ required: true }), upload.single("file"), actions.profilePic);
 
