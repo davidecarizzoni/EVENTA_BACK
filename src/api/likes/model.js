@@ -24,7 +24,7 @@ LikeSchema.virtual('event', {
   justOne: true
 });
 
-PartecipantsSchema.virtual('user', {
+LikeSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
   foreignField: '_id',
