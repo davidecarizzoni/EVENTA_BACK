@@ -8,7 +8,7 @@ import {Follow} from "../follow/model";
 const actions = {};
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await User.find().skip(cursor.skip).limit(cursor.limit).sort(cursor.sort);
+  const data = await User.find(query).skip(cursor.skip).limit(cursor.limit).sort(cursor.sort);
   const totalData = await User.countDocuments(query);
 
   res.send({ data, totalData });

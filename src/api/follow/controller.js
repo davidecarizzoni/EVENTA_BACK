@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 const actions = {};
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-    const data = await Follow.find()
+    const data = await Follow.find(query)
       .skip(cursor.skip)
       .limit(cursor.limit)
       .sort(cursor.sort)

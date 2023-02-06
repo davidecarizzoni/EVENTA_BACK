@@ -4,7 +4,7 @@ import _ from 'lodash';
 const actions = {};
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Like.find()
+  const data = await Like.find(query)
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)

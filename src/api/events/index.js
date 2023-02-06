@@ -12,6 +12,8 @@ const router = new Router();
 
 router.get('/', token({ required: true }), middleware(eventQuerymenSchema), actions.index);
 
+// router.get('/search', token({ required: true }), middleware(eventQuerymenSchema),actions.search);
+
 router.get('/:id', token({ required: true }), actions.show);
 
 router.get('/:id/participants', token({ required: true }), middleware(), actions.participants);
