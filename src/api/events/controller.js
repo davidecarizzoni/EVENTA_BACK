@@ -8,27 +8,15 @@ const actions = {};
 const populationOptions = ['organiser', 'partecipants'];
 
 actions.index = async function({ querymen: { query, cursor } }, res) {
-  const search = query.search;
-  let searchQuery = {};
-  if (search) {
-    const searchExpressions = [];
-    for (const key in EventsSchema.paths) {
-      if (EventsSchema.paths[key].instance === "String") {
-        searchExpressions.push({ [key]: { $regex: search, $options: "i" } });
-      }
-    }
-
-    searchQuery = { $or: searchExpressions };
-  }
-
-  const data = await Event.find({ ...searchQuery, ...query })
+	console.log('query', query)
+  const data = await Event.find(query)
     .skip(cursor.skip)
     .limit(cursor.limit)
     .sort(cursor.sort)
     .populate(populationOptions)
     .exec();
 
-  const totalData = await Event.countDocuments({ ...searchQuery, ...query });
+  const totalData = await Event.countDocuments(query);
 
   res.send({ data, totalData });
 };

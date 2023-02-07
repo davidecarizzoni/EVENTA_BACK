@@ -1,13 +1,19 @@
 import querymen from 'querymen';
+import _ from 'lodash';
 
-export function createQuerymenSchema(mongooseSchema) {
-  const schema = {};
-  Object.keys(mongooseSchema.paths).map(field => {
-    schema[field] = {
-      type: mongooseSchema.paths[field].instance,
-      paths: [field]
-    };
-  });
-  return new querymen.Schema(schema);
+export function createQuerymenSchema(mongooseSchema, additionalQueryFilter = {}) {
+	const qFilters = _.get(additionalQueryFilter, 'q.paths', [])
+	const schema = _.reduce(mongooseSchema.paths, (acc, field, name) => {
+		if(qFilters.includes(name)) {
+			return acc
+		}
+		acc[field.instance] = {
+			type: field.instance,
+			paths: [field]
+		}
+		return acc
+	}, { ...additionalQueryFilter})
+
+	return new querymen.Schema(schema);
 }
 

@@ -6,7 +6,12 @@ const { upload } = require('../../services/uploadController');
 
 import {Event} from './model';
 import {createQuerymenSchema } from '../../services/queryController';
-const eventQuerymenSchema = createQuerymenSchema(Event.schema);
+const eventQuerymenSchema = createQuerymenSchema(Event.schema, {
+	q: {
+		type: RegExp,
+		paths: ['name'],
+	}
+});
 
 const router = new Router();
 
