@@ -1,11 +1,12 @@
-import { Router } from 'express';
-import { token } from '../auth/passport';
-import { actions } from './controller';
-import {middleware, Schema as QuerySchema} from 'querymen';
+import {Router} from 'express';
+import {token} from '../auth/passport';
+import {actions} from './controller';
+import {middleware} from 'querymen';
+import {Event} from './model';
+import {createQuerymenSchema} from '../../services/queryController';
+
 const { upload } = require('../../services/uploadController');
 
-import {Event} from './model';
-import {createQuerymenSchema } from '../../services/queryController';
 const eventQuerymenSchema = createQuerymenSchema(Event.schema, {
 	q: {
 		type: RegExp,
