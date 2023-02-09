@@ -8,7 +8,13 @@ const router = new Router();
 
 import {User} from './model';
 import {createQuerymenSchema } from '../../services/queryController';
-const eventQuerymenSchema = createQuerymenSchema(User.schema);
+
+const eventQuerymenSchema = createQuerymenSchema(User.schema, {
+	q: {
+		type: RegExp,
+		paths: ['name', 'username'],
+	}
+});
 
 router.get('/', token({ required: true }), middleware(eventQuerymenSchema), actions.index);
 
