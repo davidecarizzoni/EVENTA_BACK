@@ -8,7 +8,6 @@ const actions = {};
 const populationOptions = ['organiser', 'partecipants'];
 
 actions.index = async function({ querymen: { query, cursor } }, res) {
-	console.log('query', query)
   const data = await Event.find(query)
     .skip(cursor.skip)
     .limit(cursor.limit)
@@ -40,8 +39,8 @@ actions.participate = async function ({ user, params: { id } }, res) {
 
 	try {
 		const participant = await Partecipant.create({
-			userId: user._id, 
-			eventId: id, 
+			userId: user._id,
+			eventId: id,
 		})
 
 		res.send(participant);
@@ -55,8 +54,8 @@ actions.participate = async function ({ user, params: { id } }, res) {
 
 actions.unparticipate = async function ({ user, params: { id } }, res) {
 	const participant = await Partecipant.findOne({
-		userId: user._id, 
-		eventId: id, 
+		userId: user._id,
+		eventId: id,
 	})
 
 	if (_.isNil(participant)) {
