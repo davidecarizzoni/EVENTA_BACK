@@ -20,7 +20,11 @@ router.get('/', token({ required: true }), middleware(eventQuerymenSchema), acti
 
 router.get('/:id', token({ required: true }), actions.show);
 
-router.get('/:id/participants', token({ required: true }), middleware(), actions.participants);
+router.get('/:id/show/participants', token({ required: true }), middleware(), actions.showParticipants);
+
+router.post('/:id/participate', token({ required: true }), actions.participate);
+
+router.delete('/:id/unparticipate', token({ required: true }), actions.unparticipate);
 
 router.post('/', token({ required: false }), actions.create);
 

@@ -22,10 +22,7 @@ actions.index = async function({ querymen: { query, cursor } }, res) {
 };
 
 
-
-
-
-actions.participants = async function ({ params, querymen: { query, cursor } }, res) {
+actions.showParticipants = async function ({ params, querymen: { query, cursor } }, res) {
 	const data = await Partecipant.find({ ...query, eventId: params.id})
 		.skip(cursor.skip)
 		.limit(cursor.limit)
@@ -37,6 +34,56 @@ actions.participants = async function ({ params, querymen: { query, cursor } }, 
 
 	res.send({ data, totalData });
 };
+
+
+actions.participate = async function ({ user, params: { id } }, res) {
+
+	try {
+		const participant = await Partecipant.create({
+			userId: user._id, 
+			eventId: id, 
+		})
+
+		res.send(participant);
+	} catch (err) {
+		if (err.code === 11000) {
+			return res.status(409)
+		}
+		res.status(500).send(err);
+	}
+};
+
+actions.unparticipate = async function ({ user, params: { id } }, res) {
+	const participant = await Partecipant.findOne({
+		userId: user._id, 
+		eventId: id, 
+	})
+
+	if (_.isNil(participant)) {
+		return res.status(404).send();
+	}
+
+	await participant.delete();
+	res.status(204).send();
+};
+
+actions.show = async function ({ params: { id } }, res) {
+
+	const participants = await Partecipant.countDocuments({ eventId: id })
+
+  const event = await Event
+	.findById(id)
+	.populate(populationOptions)
+	.exec();
+
+  if (!event) {
+    return res.status(404).send();
+  }
+
+	res.send({
+		...user,
+		participants,
+	});};
 
 
 actions.near = async function({ params: { id }, query: { coordinates, maxDistance } }, res) {
@@ -65,20 +112,6 @@ actions.near = async function({ params: { id }, query: { coordinates, maxDistanc
   res.send(events);
 };
 
-
-actions.show = async function ({ params: { id } }, res) {
-
-  const event = await Event
-	.findById(id)
-	.populate(populationOptions)
-	.exec();
-
-  if (!event) {
-    return res.status(404).send();
-  }
-
-  res.send(event);
-};
 
 
 actions.create = async ({ body }, res) => {

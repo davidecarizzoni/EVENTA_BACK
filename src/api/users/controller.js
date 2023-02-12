@@ -50,6 +50,7 @@ actions.follow = async function ({ user, params: { id } }, res) {
 	} catch (err) {
 		if (err.code === 11000) {
 			return res.status(409).send({
+			
 				valid: false,
 				param: 'followerId - followedId',
 				message: 'You already follow the user'
