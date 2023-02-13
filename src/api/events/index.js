@@ -27,8 +27,6 @@ router.get('/', token({ required: true }), middleware(queryBody), actions.index)
 
 router.get('/:id', token({ required: true }), actions.show);
 
-router.get('/:id/show/participants', token({ required: true }), middleware(), actions.showParticipants);
-
 router.post('/:id/participate', token({ required: true }), actions.participate);
 
 router.delete('/:id/unparticipate', token({ required: true }), actions.unparticipate);

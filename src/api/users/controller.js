@@ -1,7 +1,6 @@
 import {ADMIN, User} from './model';
 import {uploadToS3} from "../../services/upload";
 
-
 import _ from 'lodash';
 import {Follow} from "../follow/model";
 
@@ -17,8 +16,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 actions.show = async function ({ params: { id } }, res) {
 
   const user = await User.findById(id).lean();
-	//se serve solo nel dettaglio facciamo questo
-	//se inizia a servire anche nella lista  vediamo quanto diventa pesante e al massimo lo materializziamo nell'utente
 	const followers = await Follow.countDocuments({ followedId: id })
 	const followed = await Follow.countDocuments({ followerId: id })
 
@@ -35,11 +32,6 @@ actions.show = async function ({ params: { id } }, res) {
 };
 
 actions.follow = async function ({ user, params: { id } }, res) {
-	// const follow = await Follow.findOne({
-	// 	followerId: user._id, // segue
-	// 	followedId: id, // seguito
-	// })
-
 	try {
 		const follow = await Follow.create({
 			followerId: user._id, // segue

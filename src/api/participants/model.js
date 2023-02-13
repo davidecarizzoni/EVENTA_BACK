@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-const PartecipantsSchema = new Schema({
+const ParticipantsSchema = new Schema({
   eventId: {
     type: Schema.Types.ObjectId,
     required: true
@@ -17,14 +17,14 @@ const PartecipantsSchema = new Schema({
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-PartecipantsSchema.virtual('event', {
+ParticipantsSchema.virtual('event', {
   ref: 'Event',
   localField: 'eventId',
   foreignField: '_id',
   justOne: true
 });
 
-PartecipantsSchema.virtual('user', {
+ParticipantsSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
   foreignField: '_id',
@@ -33,6 +33,6 @@ PartecipantsSchema.virtual('user', {
 
 
 
-const Partecipant = model('Partecipant', PartecipantsSchema);
+const Participant = model('Participant', ParticipantsSchema);
 
-export { Partecipant };
+export { Participant };

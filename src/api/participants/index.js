@@ -3,9 +3,9 @@ import {token} from '../auth/passport';
 import {actions} from './controller';
 import {middleware, Schema as QuerySchema} from 'querymen';
 
-import {Partecipant} from './model';
+import {Participant} from './model';
 import {createQuerymenSchema } from '../../services/queryController';
-const eventQuerymenSchema = createQuerymenSchema(Partecipant.schema);
+const eventQuerymenSchema = createQuerymenSchema(Participant.schema);
 
 const router = new Router();
 

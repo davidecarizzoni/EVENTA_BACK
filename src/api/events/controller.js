@@ -1,11 +1,11 @@
 import {Event} from './model';
-import {Partecipant} from '../partecipants/model';
+import {Participant} from '../participants/model';
 
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
 const actions = {};
-const populationOptions = ['organiser', 'partecipants'];
+const populationOptions = ['organiser', 'participants'];
 
 actions.index = async function({ querymen: { query, cursor } }, res) {
   const data = await Event.find(query)
@@ -16,29 +16,32 @@ actions.index = async function({ querymen: { query, cursor } }, res) {
     .exec();
 
   const totalData = await Event.countDocuments(query);
-
   res.send({ data, totalData });
 };
 
+actions.show = async function ({ params: { id } }, res) {
 
-actions.showParticipants = async function ({ params, querymen: { query, cursor } }, res) {
-	const data = await Partecipant.find({ ...query, eventId: params.id})
-		.skip(cursor.skip)
-		.limit(cursor.limit)
-		.sort(cursor.sort)
-		.populate(['user'])
-		.exec();
+	const participants = await Participant.countDocuments({ eventId: id })
 
-	const totalData = await Partecipant.countDocuments(query);
+  const event = await Event
+	.findById(id)
+	.populate(populationOptions)
+	.exec();
 
-	res.send({ data, totalData });
-};
+  if (!event) {
+    return res.status(404).send();
+  }
+
+	res.send({
+		event,
+		participants,
+	});};
 
 
 actions.participate = async function ({ user, params: { id } }, res) {
 
 	try {
-		const participant = await Partecipant.create({
+		const participant = await Participant.create({
 			userId: user._id,
 			eventId: id,
 		})
@@ -53,7 +56,7 @@ actions.participate = async function ({ user, params: { id } }, res) {
 };
 
 actions.unparticipate = async function ({ user, params: { id } }, res) {
-	const participant = await Partecipant.findOne({
+	const participant = await Participant.findOne({
 		userId: user._id,
 		eventId: id,
 	})
@@ -66,23 +69,6 @@ actions.unparticipate = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
-actions.show = async function ({ params: { id } }, res) {
-
-	const participants = await Partecipant.countDocuments({ eventId: id })
-
-  const event = await Event
-	.findById(id)
-	.populate(populationOptions)
-	.exec();
-
-  if (!event) {
-    return res.status(404).send();
-  }
-
-	res.send({
-		...user,
-		participants,
-	});};
 
 
 actions.near = async function({ params: { id }, query: { coordinates, maxDistance } }, res) {
