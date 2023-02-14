@@ -2,21 +2,30 @@ import { Router } from 'express';
 import { admin, password, token } from '../auth/passport';
 import { actions } from './controller';
 import { middleware } from 'querymen';
+import { Schema } from 'mongoose';
+
 const { upload } = require('../../services/uploadController');
 
 const router = new Router();
 
-import {User} from './model';
-import {createQuerymenSchema } from '../../services/queryController';
 
-const eventQuerymenSchema = createQuerymenSchema(User.schema, {
+const queryBody = {
 	q: {
-		type: RegExp,
-		paths: ['name', 'username'],
-	}
-});
+		type: String, parse: (value, field) => {
+			return {
+				$or: [
+					{ name: { $regex: value, $options: 'i' } },
+					{ username: { $regex: value, $options: 'i' } }
+				]
+			};
+		}
+	},
+	role: {
+		type: String
+	},
+}
 
-router.get('/', token({ required: true }), middleware(eventQuerymenSchema), actions.index);
+router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/me', token({ required: true }), actions.showMe);
 

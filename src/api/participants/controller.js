@@ -2,7 +2,7 @@ import { Participant } from './model';
 import _ from 'lodash';
 
 const actions = {};
-const populationOptions = ['user', 'event'];
+const populationOptions = ['user'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {

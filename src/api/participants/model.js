@@ -17,12 +17,12 @@ const ParticipantsSchema = new Schema({
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-ParticipantsSchema.virtual('event', {
-  ref: 'Event',
-  localField: 'eventId',
-  foreignField: '_id',
-  justOne: true
-});
+// ParticipantsSchema.virtual('event', {
+//   ref: 'Event',
+//   localField: 'eventId',
+//   foreignField: '_id',
+//   justOne: true
+// });
 
 ParticipantsSchema.virtual('user', {
   ref: 'User',
