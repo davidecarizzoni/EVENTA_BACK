@@ -21,8 +21,6 @@ actions.index = async function({ querymen: { query, cursor } }, res) {
 
 actions.show = async function ({ params: { id } }, res) {
 
-	const participants = await Participant.countDocuments({ eventId: id })
-
   const event = await Event
 	.findById(id)
 	.populate(populationOptions)
@@ -34,7 +32,6 @@ actions.show = async function ({ params: { id } }, res) {
 
 	res.send({
 		event,
-		participants,
 	});};
 
 
