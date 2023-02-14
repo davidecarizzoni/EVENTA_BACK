@@ -49,7 +49,7 @@ EventsSchema.virtual('organiser', {
 });
 
 EventsSchema.virtual('participants', {
-  ref: 'participant',
+  ref: 'Participant',
   localField: '_id',
   foreignField: 'eventId',
   justOne: false,
