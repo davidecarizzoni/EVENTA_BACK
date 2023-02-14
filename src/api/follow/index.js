@@ -2,14 +2,21 @@ import { Router } from 'express';
 import { token } from '../auth/passport';
 import { actions } from './controller';
 import { middleware } from 'querymen';
-
-import {Follow} from './model';
-import {createQuerymenSchema } from '../../services/queryController';
-const eventQuerymenSchema = createQuerymenSchema(Follow.schema);
+import { Schema } from 'mongoose';
 
 const router = new Router();
 
-router.get('/', token({ required: true }), middleware(eventQuerymenSchema), actions.index);
+const queryBody = {
+	followerId: {
+		type: Schema.Types.ObjectId
+	},
+  followedId: {
+		type: Schema.Types.ObjectId
+	},
+
+}
+
+router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
 

@@ -2,13 +2,15 @@ import { Follow } from './model';
 import _ from 'lodash';
 
 const actions = {};
+const populationOptions = ['followed', 'follower'];
+
 actions.index = async function ({ querymen: { query, cursor } }, res) {
     const data = await Follow.find(query)
       .skip(cursor.skip)
       .limit(cursor.limit)
+      .populate(populationOptions)
       .sort(cursor.sort)
       .exec();
-
     const totalData = await Follow.countDocuments(query);
 
     res.send({ data, totalData });
