@@ -7,13 +7,14 @@ import {uploadToS3} from "../../services/upload";
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
-actions.index = async function({ querymen: { query, cursor } }, res) {
+actions.index = async function({ querymen: { query, select, cursor } }, res) {
   const data = await Event.find(query)
     .skip(cursor.skip)
     .limit(cursor.limit)
     .sort(cursor.sort)
-    .populate(populationOptions)
-    .exec();
+		.select(select)
+		.populate(populationOptions)
+		.exec();
 
   const totalData = await Event.countDocuments(query);
   res.send({ data, totalData });

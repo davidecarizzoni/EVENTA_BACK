@@ -45,7 +45,14 @@ EventsSchema.virtual('organiser', {
   ref: 'User',
   localField: 'organiserId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+	options: {
+		projection: {
+			name: 1,
+			username: 1,
+			profilePic: 1
+		},
+	}
 });
 
 EventsSchema.virtual('participants', {
