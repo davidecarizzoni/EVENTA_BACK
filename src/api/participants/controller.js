@@ -30,8 +30,34 @@ actions.show = async function ({ params: { id } }, res) {
 
   res.send(participant);
 };
+actions.search = async function ({ querymen: { query, cursor } }, res) {
+  const { eventId, name } = query;
+  const participants = await Participant.aggregate([
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $match: {
+        eventId: mongoose.Types.ObjectId(eventId), 
+        "user.name": { $regex: new RegExp(`.*${name}.*`, "i") } 
+      }
+    }
+  ]);
 
+  if (!participants) {
+    return res.status(404).send();
+  }
 
+  res.send(participants);
+};
 actions.create = async ({ body }, res) => {
   let participant;
   try {
@@ -42,6 +68,7 @@ actions.create = async ({ body }, res) => {
 
   res.send(participant);
 };
+
 
 
 actions.update = ({ body, params }, res) => {
