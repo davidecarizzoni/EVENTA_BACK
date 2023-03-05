@@ -20,13 +20,12 @@ const queryBody = {
   userId: {
 		type: Schema.Types.ObjectId
 	},
+
 }
 
 const router = new Router();
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
-
-router.get('/search', token({ required: true }), middleware(queryBody), actions.search);
 
 router.get('/:id', token({ required: true }), actions.show);
 

@@ -4,6 +4,7 @@ import {Participant} from '../participants/model';
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
+
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
@@ -67,6 +68,16 @@ actions.unparticipate = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
+actions.create = async ({ body }, res) => {
+  let participant;
+  try {
+    participant = await Participant.create(body);
+  } catch (err) {
+    return null; // to be changed
+  }
+
+  res.send(participant);
+};
 
 
 actions.near = async function({ params: { id }, query: { coordinates, maxDistance } }, res) {
@@ -94,8 +105,6 @@ actions.near = async function({ params: { id }, query: { coordinates, maxDistanc
 
   res.send(events);
 };
-
-
 
 actions.create = async ({ body }, res) => {
 	let event;
