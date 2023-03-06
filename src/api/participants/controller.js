@@ -35,8 +35,11 @@ actions.show = async function ({ params: { id } }, res) {
   res.send(participant);
 };
 
-actions.search = async function ({ querymen: { query, cursor } }, res) {
+actions.search = async function ({ querymen: { query } }, res) {
+  console.log("got hereeeeeee")
+
   const { eventId, name } = query;
+  console.log(query)
   const participants = await Participant.aggregate([
     {
       $lookup: {

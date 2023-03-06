@@ -19,10 +19,6 @@ const queryBody = {
 	organiserId: {
 		type: Schema.Types.ObjectId
 	},
-	name:{
-		type: String,
-	}
-
 }
 
 const router = new Router();
@@ -30,8 +26,6 @@ const router = new Router();
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
-
-router.get('/search/:id', token({ required: true }), middleware(queryBody), actions.search);
 
 router.post('/:id/participate', token({ required: true }), actions.participate);
 

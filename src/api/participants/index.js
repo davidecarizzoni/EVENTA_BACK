@@ -29,6 +29,8 @@ router.get('/', token({ required: true }), middleware(queryBody), actions.index)
 
 router.get('/:id', token({ required: true }), actions.show);
 
+router.get('/search', token({ required: true }), middleware(queryBody), actions.search);
+
 router.post('/', token({ required: true }), actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
