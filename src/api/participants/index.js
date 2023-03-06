@@ -20,16 +20,18 @@ const queryBody = {
   userId: {
 		type: Schema.Types.ObjectId
 	},
-
+	name:{
+		type: String,
+	}
 }
 
 const router = new Router();
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
-router.get('/:id', token({ required: true }), actions.show);
-
 router.get('/search', token({ required: true }), middleware(queryBody), actions.search);
+
+router.get('/:id', token({ required: true }), actions.show);
 
 router.post('/', token({ required: true }), actions.create);
 
