@@ -13,12 +13,17 @@ const queryBody = {
   followedId: {
 		type: Schema.Types.ObjectId
 	},
+	name: {
+		type: String,
+	}
 
 }
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
+
+// router.get('/search', token({ required: true }), middleware(queryBody), actions.searchFollower);
 
 router.post('/', token({ required: true }), actions.create);
 

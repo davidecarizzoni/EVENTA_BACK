@@ -34,6 +34,7 @@ actions.show = async function ({ params: { id } }, res) {
 
   res.send(participant);
 };
+
 actions.search = async function ({ querymen: { query, cursor } }, res) {
   console.log(query)
 
@@ -45,6 +46,7 @@ actions.search = async function ({ querymen: { query, cursor } }, res) {
       { "user.username": { $regex: new RegExp(`.*${name}.*`, "i") } }
     ];
   }
+
   const participants = await Participant.aggregate([
    {
      $lookup: {
@@ -61,6 +63,9 @@ actions.search = async function ({ querymen: { query, cursor } }, res) {
       $match: filter
     }
   ]);
+
+  console.log(typeof participants); // outputs "object"
+  console.log(Array.isArray(participants)); // outputs "true"
 
   if (!participants) {
     return res.status(404).send();

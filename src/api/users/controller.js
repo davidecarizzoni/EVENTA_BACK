@@ -3,6 +3,7 @@ import {uploadToS3} from "../../services/upload";
 
 import _ from 'lodash';
 import {Follow} from "../follow/model";
+import mongoose from "mongoose";
 
 const actions = {};
 
@@ -67,6 +68,47 @@ actions.unfollow = async function ({ user, params: { id } }, res) {
 	await follow.delete();
 	res.status(204).send();
 };
+
+  actions.searchFollower = async function ({params: { id }, querymen: { query, cursor } }, res) {
+
+    const { name } = query;
+    const user = await User.findById(id);
+    if (!user) {
+        return res.status(404).send();
+    }
+    const followedIds = user.followed.map(follow => follow.toString());
+
+    let filter = { followerId: { $in: followedIds } };
+    if (name) {
+      filter["$or"] = [
+        { "follower.name": { $regex: new RegExp(`.*${name}.*`, "i") } },
+        { "follower.username": { $regex: new RegExp(`.*${name}.*`, "i") } }
+      ];
+    }
+  
+    const followers = await Follow.aggregate([
+     {
+       $lookup: {
+         from: "users",
+         localField: "followerId",
+         foreignField: "_id",
+         as: "follower"
+       }
+     },
+     {
+       $unwind: "$follower"
+     },
+      {
+        $match: filter
+      }
+    ]);
+
+    if (!followers) {
+      return res.status(404).send();
+    }
+  
+    res.send(followers);
+  };
 
 
 

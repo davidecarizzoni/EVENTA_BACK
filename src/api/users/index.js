@@ -31,6 +31,9 @@ router.get('/me', token({ required: true }), actions.showMe);
 
 router.get('/:id', admin, actions.show);
 
+router.get('/search/:id', token({ required: true }), middleware(queryBody), actions.searchFollower);
+
+
 router.post('/', admin, actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
