@@ -34,11 +34,17 @@ actions.show = async function ({ params: { id } }, res) {
 
   res.send(participant);
 };
-
 actions.search = async function ({ querymen: { query, cursor } }, res) {
   console.log(query)
 
   const { eventId, name } = query;
+  let filter = { eventId: mongoose.Types.ObjectId(eventId) };
+  if (name) {
+    filter["$or"] = [
+      { "user.name": { $regex: new RegExp(`.*${name}.*`, "i") } },
+      { "user.username": { $regex: new RegExp(`.*${name}.*`, "i") } }
+    ];
+  }
   const participants = await Participant.aggregate([
    {
      $lookup: {
@@ -52,21 +58,15 @@ actions.search = async function ({ querymen: { query, cursor } }, res) {
      $unwind: "$user"
    },
     {
-      $match: {
-        eventId: mongoose.Types.ObjectId(eventId), 
-        $or: [
-          { "user.name": { $regex: new RegExp(`.*${name}.*`, "i") } },
-          { "user.username": { $regex: new RegExp(`.*${name}.*`, "i") } }
-        ]
-      }
+      $match: filter
     }
   ]);
- if (!participants) {
-   return res.status(404).send();
- }
+
+  if (!participants) {
+    return res.status(404).send();
+  }
 
   res.send(participants);
-
 };
 
 
