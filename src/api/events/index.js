@@ -19,6 +19,9 @@ const queryBody = {
 	organiserId: {
 		type: Schema.Types.ObjectId
 	},
+	date:{
+		type: Date
+	}
 }
 
 const router = new Router();
