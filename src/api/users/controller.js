@@ -14,20 +14,41 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-actions.show = async function ({ params: { id } }, res) {
+actions.show = async function ({user, querymen: { query, cursor } , params: { id }, res}) {
 
-  const user = await User.findById(id).lean();
+  const userCheck = await User.findById(id).lean();
 	const followers = await Follow.countDocuments({ followedId: id })
 	const followed = await Follow.countDocuments({ followerId: id })
 
-  if (!user) {
+	const followedId = req.query;
+
+
+  const result = await Follow.aggregate([
+    {
+      $match: {
+        followerId: mongoose.Types.ObjectId(user._id),
+        followedId: mongoose.Types.ObjectId(followedId)
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        count: { $sum: 1 }
+      }
+    }
+  ]);
+
+  const isFollowing = result.length > 0 && result[0].count > 0;
+
+  if (!userCheck) {
     return res.status(404).send();
   }
 
   res.send({
-		...user,
+		...userCheck,
 		followers,
 		followed,
+		isFollowing,
 	});
 
 };

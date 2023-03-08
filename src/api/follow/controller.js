@@ -43,46 +43,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   };
 
 
-  // actions.searchFollower = async function ({ querymen: { query, cursor } }, res) {
-
-  //   const { userId, name } = query;
-  //   const user = await User.findById(userId);
-  //   if (!user) {
-  //       return res.status(404).send();
-  //   }
-  //   const followedIds = user.followed.map(follow => follow.toString());
-
-  //   let filter = { followerId: { $in: followedIds } };
-  //   if (name) {
-  //     filter["$or"] = [
-  //       { "follower.name": { $regex: new RegExp(`.*${name}.*`, "i") } },
-  //       { "follower.username": { $regex: new RegExp(`.*${name}.*`, "i") } }
-  //     ];
-  //   }
-  
-  //   const followers = await Follow.aggregate([
-  //    {
-  //      $lookup: {
-  //        from: "users",
-  //        localField: "followerId",
-  //        foreignField: "_id",
-  //        as: "follower"
-  //      }
-  //    },
-  //    {
-  //      $unwind: "$follower"
-  //    },
-  //     {
-  //       $match: filter
-  //     }
-  //   ]);
-
-  //   if (!followers) {
-  //     return res.status(404).send();
-  //   }
-  
-  //   res.send(followers);
-  // };
 
   actions.update = ({ body, params }, res) => {
       return Follow.findById(params.id)
