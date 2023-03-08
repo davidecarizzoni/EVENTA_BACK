@@ -47,7 +47,7 @@ actions.search = async function ({ querymen: { query, cursor } }, res) {
     ];
   }
 
-  const participants = await Participant.aggregate([
+  const data = await Participant.aggregate([
    {
      $lookup: {
        from: "users",
@@ -64,14 +64,12 @@ actions.search = async function ({ querymen: { query, cursor } }, res) {
     }
   ]);
 
-  console.log(typeof participants); // outputs "object"
-  console.log(Array.isArray(participants)); // outputs "true"
-
-  if (!participants) {
+  if (!data) {
     return res.status(404).send();
   }
+  const totalData = data.length;
 
-  res.send(participants);
+  res.send({ data, totalData });
 };
 
 
