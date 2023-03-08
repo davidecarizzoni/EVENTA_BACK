@@ -2,7 +2,6 @@ import { Router } from 'express';
 import { admin, password, token } from '../auth/passport';
 import { actions } from './controller';
 import { middleware } from 'querymen';
-import { Schema } from 'mongoose';
 
 const { upload } = require('../../services/uploadController');
 
@@ -25,14 +24,19 @@ const queryBody = {
 	},
 }
 
+const followerBody = {
+	search: {
+		type: String
+	}
+}
+
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/me', token({ required: true }), actions.showMe);
 
 router.get('/:id', admin, actions.show);
 
-router.get('/search/:id', token({ required: true }), middleware(queryBody), actions.searchFollower);
-
+router.get('/:id/followers', token({ required: true }), middleware(followerBody), actions.followers);
 
 router.post('/', admin, actions.create);
 

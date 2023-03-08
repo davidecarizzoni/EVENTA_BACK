@@ -3,7 +3,7 @@ import {uploadToS3} from "../../services/upload";
 
 import _ from 'lodash';
 import {Follow} from "../follow/model";
-import mongoose from "mongoose";
+import {Types} from "mongoose";
 
 const actions = {};
 
@@ -43,7 +43,7 @@ actions.follow = async function ({ user, params: { id } }, res) {
 	} catch (err) {
 		if (err.code === 11000) {
 			return res.status(409).send({
-			
+
 				valid: false,
 				param: 'followerId - followedId',
 				message: 'You already follow the user'
@@ -69,46 +69,38 @@ actions.unfollow = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
-  actions.searchFollower = async function ({params: { id }, querymen: { query, cursor } }, res) {
+actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
+	const { search } = query;
 
-    const { name } = query;
-    const user = await User.findById(id);
-    if (!user) {
-        return res.status(404).send();
-    }
-    const followedIds = user.followed.map(follow => follow.toString());
+	const followers = await Follow.aggregate([
+		{
+			$match: {
+				followerId: Types.ObjectId(id)
+			}
+		},
+	 	{
+	 	  $lookup: {
+	 	    from: "users",
+	 	    localField: "followerId",
+	 	    foreignField: "_id",
+	 	    as: "follower"
+	 	  }
+	 	},
+	 	{
+	 	  $unwind: "$follower"
+	 	},
+		{
+			$match: search ? {
+				$or: [
+					{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+					{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+				]
+			} : { }
+		}
+	]);
 
-    let filter = { followerId: { $in: followedIds } };
-    if (name) {
-      filter["$or"] = [
-        { "follower.name": { $regex: new RegExp(`.*${name}.*`, "i") } },
-        { "follower.username": { $regex: new RegExp(`.*${name}.*`, "i") } }
-      ];
-    }
-  
-    const followers = await Follow.aggregate([
-     {
-       $lookup: {
-         from: "users",
-         localField: "followerId",
-         foreignField: "_id",
-         as: "follower"
-       }
-     },
-     {
-       $unwind: "$follower"
-     },
-      {
-        $match: filter
-      }
-    ]);
-
-    if (!followers) {
-      return res.status(404).send();
-    }
-  
-    res.send(followers);
-  };
+	res.send(followers);
+};
 
 
 
