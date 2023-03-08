@@ -4,8 +4,11 @@ import {uploadToS3} from "../../services/upload";
 import _ from 'lodash';
 import {Follow} from "../follow/model";
 import {Types} from "mongoose";
+import mongoose from "mongoose";
 
 const actions = {};
+
+// GET FUNCTIONS
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await User.find(query).skip(cursor.skip).limit(cursor.limit).sort(cursor.sort);
@@ -14,20 +17,23 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-actions.show = async function ({user, querymen: { query, cursor } , params: { id }, res}) {
+actions.showMe = async ({ user }, res) => {
+	const followers = await Follow.countDocuments({ followedId: user.id })
+	const followed = await Follow.countDocuments({ followerId: user.id })
+	res.send({ ...user._doc, followers, followed });
+}
+
+actions.show = async function ({user, params: { id }, res}) {
 
   const userCheck = await User.findById(id).lean();
 	const followers = await Follow.countDocuments({ followedId: id })
 	const followed = await Follow.countDocuments({ followerId: id })
 
-	const followedId = req.query;
-
-
   const result = await Follow.aggregate([
     {
       $match: {
         followerId: mongoose.Types.ObjectId(user._id),
-        followedId: mongoose.Types.ObjectId(followedId)
+        followedId: mongoose.Types.ObjectId(id)
       }
     },
     {
@@ -52,6 +58,43 @@ actions.show = async function ({user, querymen: { query, cursor } , params: { id
 	});
 
 };
+
+actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
+	const { search } = query;
+
+	const data = await Follow.aggregate([
+		{
+			$match: {
+				followerId: Types.ObjectId(id)
+			}
+		},
+	 	{
+	 	  $lookup: {
+	 	    from: "users",
+	 	    localField: "followerId",
+	 	    foreignField: "_id",
+	 	    as: "follower"
+	 	  }
+	 	},
+	 	{
+	 	  $unwind: "$follower"
+	 	},
+		{
+			$match: search ? {
+				$or: [
+					{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+					{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+				]
+			} : { }
+		}
+	]);
+
+  const totalData = data.length;
+  res.send({ data, totalData })
+
+};
+
+//POST FUNCTIONS
 
 actions.follow = async function ({ user, params: { id } }, res) {
 	try {
@@ -89,47 +132,6 @@ actions.unfollow = async function ({ user, params: { id } }, res) {
 	await follow.delete();
 	res.status(204).send();
 };
-
-actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
-	const { search } = query;
-
-	const followers = await Follow.aggregate([
-		{
-			$match: {
-				followerId: Types.ObjectId(id)
-			}
-		},
-	 	{
-	 	  $lookup: {
-	 	    from: "users",
-	 	    localField: "followerId",
-	 	    foreignField: "_id",
-	 	    as: "follower"
-	 	  }
-	 	},
-	 	{
-	 	  $unwind: "$follower"
-	 	},
-		{
-			$match: search ? {
-				$or: [
-					{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-					{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-				]
-			} : { }
-		}
-	]);
-
-	res.send(followers);
-};
-
-
-
-actions.showMe = async ({ user }, res) => {
-	const followers = await Follow.countDocuments({ followedId: user.id })
-	const followed = await Follow.countDocuments({ followerId: user.id })
-	res.send({ ...user._doc, followers, followed });
-}
 
 actions.create = async ({ body }, res) => {
   let user;
@@ -186,6 +188,7 @@ actions.update = ({ body, params, user }, res, next) => {
 				}
 			}
 			await user.save();
+			
 
 			res.send(user)
 		});

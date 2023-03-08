@@ -38,18 +38,22 @@ router.get('/:id', admin, actions.show);
 
 router.get('/:id/followers', token({ required: true }), middleware(followerBody), actions.followers);
 
-router.post('/', admin, actions.create);
 
-router.put('/:id', token({ required: true }), actions.update);
+
+router.post('/', admin, actions.create);
 
 router.post('/:id/follow', token({ required: true }), actions.follow);
 
 router.delete('/:id/unfollow', token({ required: true }), actions.unfollow);
 
+router.delete('/:id', admin, actions.destroy);
+
+
+
+router.put('/:id', token({ required: true }), actions.update);
+
 router.put('/:id/profilePic', token({ required: true }), upload.single("file"), actions.profilePic);
 
 router.put('/:id/password', password(), actions.updatePassword);
-
-router.delete('/:id', admin, actions.destroy);
 
 export default router;
