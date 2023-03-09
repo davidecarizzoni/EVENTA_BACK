@@ -3,6 +3,7 @@ import {Participant} from '../participants/model';
 
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
+import mongoose from "mongoose";
 
 
 const actions = {};
@@ -21,20 +22,24 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-actions.show = async function ({ params: { id } }, res) {
+actions.show = async function ({ user, params: { id } }, res) {
+  const participant = await Participant.findOne({ eventId: id, userId: user._id }).exec();
 
-  const event = await Event
-	.findById(id)
-	.populate(populationOptions)
-	.exec();
+  const event = await Event.findById(id)
+    .populate(populationOptions)
+    .exec();
 
   if (!event) {
     return res.status(404).send();
   }
 
-	res.send({
-		event,
-	});};
+  const isParticipating = !!participant;
+
+  res.send({
+    event,
+    isParticipating,
+  });
+};
 
 
 actions.participate = async function ({ user, params: { id } }, res) {

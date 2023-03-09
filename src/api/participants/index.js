@@ -39,6 +39,5 @@ router.put('/:id', token({ required: true }), actions.update);
 
 router.delete('/:id', token({ required: true }), actions.destroy);
 
-
 export default router;
 
