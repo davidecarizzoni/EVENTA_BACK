@@ -58,27 +58,47 @@ actions.show = async function ({user, params: { id }, res}) {
 		isFollowing,
 	});
 
-};
-
-actions.showEventsForUser = async function ({ params: { id } }, res) {
+};actions.showEventsForUser = async function ({ params: { id } }, res) {
   const data = await Participant.aggregate([
-    {
-      $match: {
-        userId: mongoose.Types.ObjectId(id)
-      }
-    },
-    {
-      $lookup: {
-        from: 'events',
-        localField: 'eventId',
-        foreignField: '_id',
-        as: 'event'
-      }
-    },
-    {
-      $unwind: '$event'
-    }
-  ]);
+		{
+			$match: {
+				userId: mongoose.Types.ObjectId(id),
+			},
+		},
+		{
+			$lookup: {
+				from: 'events',
+				let: { eventId: '$eventId' },
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$eq: ['$_id', '$$eventId'],
+							},
+						},
+					},
+					{
+						$project: {
+							_id: 0,
+							eventId: 0,
+							userId: 0,
+							__v: 0,
+						},
+					},
+				],
+				as: 'event',
+			},
+		},
+		{
+			$unwind: '$event',
+		},
+		{
+			$project: {
+				_id: 0,
+				event: 1,
+			},
+		},
+	]);
   const totalData = data.length;
   res.send({ data, totalData })
 };
