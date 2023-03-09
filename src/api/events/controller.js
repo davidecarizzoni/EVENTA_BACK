@@ -21,11 +21,10 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
   const totalData = await Event.countDocuments(query);
   res.send({ data, totalData });
 };
-
 actions.show = async function ({ user, params: { id } }, res) {
-  const participant = await Participant.findOne({ eventId: id, userId: user._id }).exec();
 
-  const event = await Event.findById(id)
+  const event = await Event
+    .findById(id)
     .populate(populationOptions)
     .exec();
 
@@ -33,13 +32,45 @@ actions.show = async function ({ user, params: { id } }, res) {
     return res.status(404).send();
   }
 
-  const isParticipating = !!participant;
+  const isParticipating = await Participant
+    .aggregate([
+      {
+        $match: {
+          eventId: mongoose.Types.ObjectId(id),
+          userId: mongoose.Types.ObjectId(user._id)
+        }
+      },
+      {
+        $lookup: {
+          from: 'users',
+          localField: 'userId',
+          foreignField: '_id',
+          as: 'user'
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          isParticipating: { $ne: ['$user', []] }
+        }
+      }
+    ])
+    .then((result) => {
+      return result.length > 0 && result[0].isParticipating;
+    })
+    .catch((error) => {
+      console.error(error);
+      return false;
+    });
 
   res.send({
-    event,
-    isParticipating,
+    event: {
+      ...event.toObject(),
+      isParticipating
+    }
   });
 };
+
 
 
 actions.participate = async function ({ user, params: { id } }, res) {
