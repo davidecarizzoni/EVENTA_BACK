@@ -21,6 +21,8 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
   const totalData = await Event.countDocuments(query);
   res.send({ data, totalData });
 };
+
+
 actions.show = async function ({ user, params: { id } }, res) {
 
   const event = await Event
@@ -70,8 +72,6 @@ actions.show = async function ({ user, params: { id } }, res) {
     }
   });
 };
-
-
 
 actions.participate = async function ({ user, params: { id } }, res) {
 
