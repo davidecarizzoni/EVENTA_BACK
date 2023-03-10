@@ -30,6 +30,7 @@ actions.show = async function ({user, params: { id }, res}) {
 	const followers = await Follow.countDocuments({ followedId: id })
 	const followed = await Follow.countDocuments({ followerId: id })
 
+	//no sense fare la aggregate, basta una query con limit a 1
   const result = await Follow.aggregate([
     {
       $match: {
@@ -59,6 +60,7 @@ actions.show = async function ({user, params: { id }, res}) {
 	});
 
 };actions.showEventsForUser = async function ({ params: { id } }, res) {
+	//TODO: PAGINAZIONE
   const data = await Participant.aggregate([
 		{
 			$match: {
@@ -99,13 +101,13 @@ actions.show = async function ({user, params: { id }, res}) {
 			},
 		},
 	]);
-  const totalData = data.length;
+  const totalData = data.length; //già detto che è sbagliato PD
   res.send({ data, totalData })
 };
 
 actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
-
+	//TODO: paginazione
 	const data = await Follow.aggregate([
 		{
 			$match: {
@@ -133,7 +135,7 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 		}
 	]);
 
-  const totalData = data.length;
+  const totalData = data.length; // E' sbagliato per l'ennesima volta
   res.send({ data, totalData })
 
 };
@@ -232,7 +234,7 @@ actions.update = ({ body, params, user }, res, next) => {
 				}
 			}
 			await user.save();
-			
+
 
 			res.send(user)
 		});
