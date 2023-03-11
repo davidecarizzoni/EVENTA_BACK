@@ -17,8 +17,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
   const totalData = await Participant.countDocuments(query);
 
-  
-
   res.send({ data, totalData });
 };
 
@@ -72,7 +70,6 @@ actions.search = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-
 actions.create = async ({ body }, res) => {
   let participant;
   try {
@@ -83,8 +80,6 @@ actions.create = async ({ body }, res) => {
 
   res.send(participant);
 };
-
-
 
 actions.update = ({ body, params }, res) => {
 	return Participant.findById(params.id)
@@ -107,7 +102,6 @@ actions.update = ({ body, params }, res) => {
 			res.send(participant);
 		});
 };
-
 
 actions.destroy = async function ({ params: { id } }, res) {
   const participant = await Participant.findById(id);

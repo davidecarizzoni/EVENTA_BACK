@@ -22,92 +22,48 @@ actions.showMe = async ({ user }, res) => {
 	const followers = await Follow.countDocuments({ followedId: user.id })
 	const followed = await Follow.countDocuments({ followerId: user.id })
 	res.send({ ...user._doc, followers, followed });
-}
+};
 
-actions.show = async function ({user, params: { id }, res}) {
-
+actions.show = async function ({ user, params: { id }, res }) {
   const userCheck = await User.findById(id).lean();
-	const followers = await Follow.countDocuments({ followedId: id })
-	const followed = await Follow.countDocuments({ followerId: id })
-
-	//no sense fare la aggregate, basta una query con limit a 1
-  const result = await Follow.aggregate([
-    {
-      $match: {
-        followerId: mongoose.Types.ObjectId(user._id),
-        followedId: mongoose.Types.ObjectId(id)
-      }
-    },
-    {
-      $group: {
-        _id: null,
-        count: { $sum: 1 }
-      }
-    }
-  ]);
-
-  const isFollowing = result.length > 0 && result[0].count > 0;
+  const followers = await Follow.countDocuments({ followedId: id });
+  const followed = await Follow.countDocuments({ followerId: id });
+  const isFollowing = !!(await Follow.findOne({
+    followerId: mongoose.Types.ObjectId(user._id),
+    followedId: mongoose.Types.ObjectId(id)
+  }).limit(1));
 
   if (!userCheck) {
     return res.status(404).send();
   }
 
   res.send({
-		...userCheck,
-		followers,
-		followed,
-		isFollowing,
-	});
-
-};actions.showEventsForUser = async function ({ params: { id } }, res) {
-	//TODO: PAGINAZIONE
-  const data = await Participant.aggregate([
-		{
-			$match: {
-				userId: mongoose.Types.ObjectId(id),
-			},
-		},
-		{
-			$lookup: {
-				from: 'events',
-				let: { eventId: '$eventId' },
-				pipeline: [
-					{
-						$match: {
-							$expr: {
-								$eq: ['$_id', '$$eventId'],
-							},
-						},
-					},
-					{
-						$project: {
-							_id: 0,
-							eventId: 0,
-							userId: 0,
-							__v: 0,
-						},
-					},
-				],
-				as: 'event',
-			},
-		},
-		{
-			$unwind: '$event',
-		},
-		{
-			$project: {
-				_id: 0,
-				event: 1,
-			},
-		},
-	]);
-  const totalData = data.length; //già detto che è sbagliato PD
-  res.send({ data, totalData })
+    ...userCheck,
+    followers,
+    followed,
+    isFollowing,
+  });
 };
 
+actions.showEventsForUser = async function ({ params: { id } }, res) {
+  const data = await Participant.aggregate([
+    { $match: { userId: mongoose.Types.ObjectId(id) } },
+    { $lookup: { from: 'events', localField: 'eventId', foreignField: '_id', as: 'event' } },
+    { $unwind: '$event' },
+    { $replaceRoot: { newRoot: '$event' } },
+    { $lookup: { from: 'users', localField: 'organiserId', foreignField: '_id', as: 'organiser' } },
+    { $unwind: '$organiser' },
+    { $addFields: { 'organiser.password': undefined } }
+  ]);
+
+
+  const totalData = data.length; // E' sbagliato per l'ennesima volta
+  res.send({ data, totalData })};
+
+
+//tocheck
 actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
-	//TODO: paginazione
 	const data = await Follow.aggregate([
 		{
 			$match: {
@@ -238,7 +194,7 @@ actions.update = ({ body, params, user }, res, next) => {
 
 			res.send(user)
 		});
-}
+};
 
 actions.profilePic = async ( req, res) => {
 	let user = await User.findById(req.params.id)
@@ -261,7 +217,6 @@ actions.profilePic = async ( req, res) => {
 	}
 };
 
-
 actions.updatePassword = ({ body, params, user }, res, next) => {
 	return User.findById(params.id === 'me' ? user.id : params.id)
 		.then(result => {
@@ -282,8 +237,7 @@ actions.updatePassword = ({ body, params, user }, res, next) => {
 		})
 		.then(user => (user ? user.set({ password: body.password }).save() : null))
 		.then(user => res.send(user))
-}
-
+};
 
 actions.destroy = async function ({ params: { id } }, res) {
   const user = await User.findById(id);

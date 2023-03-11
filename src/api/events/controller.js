@@ -5,7 +5,6 @@ import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 import mongoose from "mongoose";
 
-
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
@@ -21,7 +20,6 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
   const totalData = await Event.countDocuments(query);
   res.send({ data, totalData });
 };
-
 
 actions.show = async function ({ user, params: { id } }, res) {
 
@@ -115,7 +113,6 @@ actions.create = async ({ body }, res) => {
   res.send(participant);
 };
 
-
 actions.near = async function({ params: { id }, query: { coordinates, maxDistance } }, res) {
 
 	if (!maxDistance || isNaN(maxDistance) || maxDistance < 0) {
@@ -204,7 +201,6 @@ actions.coverImage = async (req, res) => {
 		res.status(500).send(err);
 	}
 };
-
 
 actions.destroy = async function ({ params: { id } }, res) {
   const event = await Event.findById(id);

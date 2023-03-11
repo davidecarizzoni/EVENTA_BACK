@@ -28,7 +28,6 @@ actions.show = async function ({ params: { id } }, res) {
   res.send(like);
 };
 
-
 actions.create = async ({ body }, res) => {
   let like;
   try {
@@ -39,7 +38,6 @@ actions.create = async ({ body }, res) => {
 
   res.send(like);
 };
-
 
 actions.update = ({ body, params }, res) => {
 	return Like.findById(params.id)
@@ -62,7 +60,6 @@ actions.update = ({ body, params }, res) => {
 			res.send(like);
 		});
 };
-
 
 actions.destroy = async function ({ params: { id } }, res) {
   const like = await Like.findById(id);
