@@ -33,42 +33,6 @@ actions.show = async function ({ params: { id } }, res) {
   res.send(participant);
 };
 
-actions.search = async function ({ querymen: { query, cursor } }, res) {
-  console.log(query)
-
-  const { eventId, search } = query;
-  let filter = { eventId: mongoose.Types.ObjectId(eventId) };
-  if (search) {
-    filter["$or"] = [
-      { "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-      { "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-    ];
-  }
-
-  const data = await Participant.aggregate([
-   {
-     $lookup: {
-       from: "users",
-       localField: "userId",
-       foreignField: "_id",
-       as: "user"
-     }
-   },
-   {
-     $unwind: "$user"
-   },
-    {
-      $match: filter
-    }
-  ]);
-
-  if (!data) {
-    return res.status(404).send();
-  }
-  const totalData = data.length;
-
-  res.send({ data, totalData });
-};
 
 actions.create = async ({ body }, res) => {
   let participant;

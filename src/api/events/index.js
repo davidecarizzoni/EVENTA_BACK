@@ -21,6 +21,9 @@ const queryBody = {
 	},
 	date:{
 		type: Date
+	},
+	search:{
+		type: String,
 	}
 }
 
@@ -29,6 +32,9 @@ const router = new Router();
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
+
+router.get('/:id/participants', token({ required: true }), middleware(queryBody), actions.participants);
+
 
 router.post('/:id/participate', token({ required: true }), actions.participate);
 

@@ -4,6 +4,8 @@ import {Participant} from '../participants/model';
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 import mongoose from "mongoose";
+import {Types} from "mongoose";
+
 
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
@@ -69,6 +71,54 @@ actions.show = async function ({ user, params: { id } }, res) {
       isParticipating
     }
   });
+};
+
+actions.participants = async function ({ params: { id }, querymen: { query, cursor } }, res) {
+  console.log(query)
+
+	const { search } = query;
+  // let filter = { eventId: id };
+  // if (search) {
+  //   filter["$or"] = [
+  //     { "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+  //     { "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+  //   ];
+  // }
+
+  const data = await Participant.aggregate([
+    {
+      $match: {
+        eventId: Types.ObjectId(id)
+      }
+    },
+    {
+     $lookup: {
+       from: "users",
+       localField: "userId",
+       foreignField: "_id",
+       as: "user"
+     }
+    },
+    {
+     $unwind: "$user"
+    },
+    {
+			$match: search ? {
+				$or: [
+					{ "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+					{ "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+				]
+			} : { }
+		}
+    
+  ]);
+
+  if (!data) {
+    return res.status(404).send();
+  }
+  const totalData = data.length;
+
+  res.send({ data, totalData });
 };
 
 actions.participate = async function ({ user, params: { id } }, res) {

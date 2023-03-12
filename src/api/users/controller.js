@@ -67,7 +67,6 @@ actions.showEventsForUser = async function ({ params: { id } }, res) {
   res.send({ data, totalData });
 };
 
-
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
 	const data = await Follow.aggregate([
@@ -101,7 +100,6 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
   res.send({ data, totalData })
 
 };
-
 
 actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
