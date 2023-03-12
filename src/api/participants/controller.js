@@ -36,12 +36,12 @@ actions.show = async function ({ params: { id } }, res) {
 actions.search = async function ({ querymen: { query, cursor } }, res) {
   console.log(query)
 
-  const { eventId, name } = query;
+  const { eventId, search } = query;
   let filter = { eventId: mongoose.Types.ObjectId(eventId) };
-  if (name) {
+  if (search) {
     filter["$or"] = [
-      { "user.name": { $regex: new RegExp(`.*${name}.*`, "i") } },
-      { "user.username": { $regex: new RegExp(`.*${name}.*`, "i") } }
+      { "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+      { "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
     ];
   }
 
