@@ -18,7 +18,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.sort(cursor.sort);
 	
   const totalData = await User.countDocuments(query);
-
   res.send({ data, totalData });
 };
 
@@ -51,7 +50,7 @@ actions.show = async function ({ user, params: { id }, res }) {
 };
 
 actions.showEventsForUser = async function ({ params: { id } }, res) {
-  const events = await Participant.aggregate([
+  const data = await Participant.aggregate([
     { $match: { userId: mongoose.Types.ObjectId(id) } },
     { $lookup: { from: 'events', localField: 'eventId', foreignField: '_id', as: 'event' } },
     { $unwind: '$event' },
@@ -64,9 +63,9 @@ actions.showEventsForUser = async function ({ params: { id } }, res) {
     { $project: { numParticipants: 0 } },
   ]);
 
-  res.json(events);
+	const totalData = data.length; // E' sbagliato per l'ennesima volta
+  res.send({ data, totalData });
 };
-
 
 
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
