@@ -8,7 +8,6 @@ import mongoose from "mongoose";
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
-
 actions.index = async function({ querymen: { query, select, cursor } }, res) {
   const data = await Event.find(query)
     .skip(cursor.skip)

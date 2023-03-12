@@ -51,20 +51,23 @@ actions.show = async function ({ user, params: { id }, res }) {
 };
 
 actions.showEventsForUser = async function ({ params: { id } }, res) {
-  const data = await Participant.aggregate([
+  const events = await Participant.aggregate([
     { $match: { userId: mongoose.Types.ObjectId(id) } },
     { $lookup: { from: 'events', localField: 'eventId', foreignField: '_id', as: 'event' } },
     { $unwind: '$event' },
     { $replaceRoot: { newRoot: '$event' } },
     { $lookup: { from: 'users', localField: 'organiserId', foreignField: '_id', as: 'organiser' } },
     { $unwind: '$organiser' },
-    { $addFields: { 'organiser.password': undefined } }
+    { $addFields: { 'organiser.password': undefined } },
+    { $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
+    { $addFields: { participants: { $size: '$participants' } } },
+    { $project: { numParticipants: 0 } },
   ]);
 
-
-  const totalData = data.length; // E' sbagliato per l'ennesima volta
-  res.send({ data, totalData })
+  res.json(events);
 };
+
+
 
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
