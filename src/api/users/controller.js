@@ -12,7 +12,11 @@ const actions = {};
 // GET FUNCTIONS
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await User.find(query).skip(cursor.skip).limit(cursor.limit).sort(cursor.sort);
+  const data = await User.find(query)
+	.skip(cursor.skip)
+	.limit(cursor.limit)
+	.sort(cursor.sort);
+	
   const totalData = await User.countDocuments(query);
 
   res.send({ data, totalData });
@@ -28,6 +32,7 @@ actions.show = async function ({ user, params: { id }, res }) {
   const userCheck = await User.findById(id).lean();
   const followers = await Follow.countDocuments({ followedId: id });
   const followed = await Follow.countDocuments({ followerId: id });
+	
   const isFollowing = !!(await Follow.findOne({
     followerId: mongoose.Types.ObjectId(user._id),
     followedId: mongoose.Types.ObjectId(id)
@@ -58,16 +63,50 @@ actions.showEventsForUser = async function ({ params: { id } }, res) {
 
 
   const totalData = data.length; // E' sbagliato per l'ennesima volta
-  res.send({ data, totalData })};
+  res.send({ data, totalData })
+};
 
-
-//tocheck
-actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
+actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
 	const data = await Follow.aggregate([
 		{
 			$match: {
 				followerId: Types.ObjectId(id)
+			}
+		},
+	 	{
+	 	  $lookup: {
+	 	    from: "users",
+	 	    localField: "followedId",
+	 	    foreignField: "_id",
+	 	    as: "follower"
+	 	  }
+	 	},
+	 	{
+	 	  $unwind: "$follower"
+	 	},
+		{
+			$match: search ? {
+				$or: [
+					{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+					{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+				]
+			} : { }
+		}
+	]);
+
+  const totalData = data.length; // E' sbagliato per l'ennesima volta
+  res.send({ data, totalData })
+
+};
+
+
+actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
+	const { search } = query;
+	const data = await Follow.aggregate([
+		{
+			$match: {
+				followedId: Types.ObjectId(id)
 			}
 		},
 	 	{
