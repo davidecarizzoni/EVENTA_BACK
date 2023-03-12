@@ -20,7 +20,7 @@ const queryBody = {
   userId: {
 		type: Schema.Types.ObjectId
 	},
-	name:{
+	search:{
 		type: String,
 	}
 }
