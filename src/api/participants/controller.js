@@ -1,13 +1,11 @@
 import { Participant } from './model';
 import _ from 'lodash';
-import mongoose from 'mongoose';
 
 const actions = {};
 const populationOptions = ['user'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  console.log(query)
   const data = await Participant.find(query)
 	.skip(cursor.skip)
 	.limit(cursor.limit)
@@ -32,7 +30,6 @@ actions.show = async function ({ params: { id } }, res) {
 
   res.send(participant);
 };
-
 
 actions.create = async ({ body }, res) => {
   let participant;

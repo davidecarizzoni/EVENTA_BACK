@@ -1,7 +1,7 @@
 import {Router} from 'express';
 import {token} from '../auth/passport';
 import {actions} from './controller';
-import {middleware, Schema as QuerySchema} from 'querymen';
+import {middleware} from 'querymen';
 import {Schema} from 'mongoose';
 
 const queryBody = {

@@ -1,15 +1,16 @@
 import {Event} from './model';
 import {Participant} from '../participants/model';
 
-import _ from 'lodash';
-import {uploadToS3} from "../../services/upload";
 import mongoose from "mongoose";
 import {Types} from "mongoose";
 
+import _ from 'lodash';
+import {uploadToS3} from "../../services/upload";
 
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
+// GET ALL EVENTS
 actions.index = async function({ querymen: { query, select, cursor } }, res) {
   const data = await Event.find(query)
     .skip(cursor.skip)
@@ -23,6 +24,7 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
   res.send({ data, totalData });
 };
 
+// GET EVENT BY ID + isParticipating
 actions.show = async function ({ user, params: { id } }, res) {
 
   const event = await Event
@@ -73,17 +75,11 @@ actions.show = async function ({ user, params: { id } }, res) {
   });
 };
 
+// GET & SEARCH PARTICIPANTS OF AN EVENT
 actions.participants = async function ({ params: { id }, querymen: { query, cursor } }, res) {
   console.log(query)
 
 	const { search } = query;
-  // let filter = { eventId: id };
-  // if (search) {
-  //   filter["$or"] = [
-  //     { "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-  //     { "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-  //   ];
-  // }
 
   const data = await Participant.aggregate([
     {
@@ -121,6 +117,7 @@ actions.participants = async function ({ params: { id }, querymen: { query, curs
   res.send({ data, totalData });
 };
 
+// USER PARCITIPATION TO EVENT
 actions.participate = async function ({ user, params: { id } }, res) {
 
 	try {
@@ -138,6 +135,7 @@ actions.participate = async function ({ user, params: { id } }, res) {
 	}
 };
 
+// USER UNPARCITIPATION TO EVENT
 actions.unparticipate = async function ({ user, params: { id } }, res) {
 	const participant = await Participant.findOne({
 		userId: user._id,
@@ -151,6 +149,7 @@ actions.unparticipate = async function ({ user, params: { id } }, res) {
 	await participant.delete();
 	res.status(204).send();
 };
+
 
 actions.create = async ({ body }, res) => {
   let participant;

@@ -1,16 +1,16 @@
 import {ADMIN, User} from './model';
-import {uploadToS3} from "../../services/upload";
-
-import _ from 'lodash';
 import {Follow} from "../follow/model";
+import {Participant} from '../participants/model';
+
 import {Types} from "mongoose";
 import mongoose from "mongoose";
-import {Participant} from '../participants/model';
+
+import {uploadToS3} from "../../services/upload";
+import _ from 'lodash';
 
 const actions = {};
 
-// GET FUNCTIONS
-
+// GET ALL USERS
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await User.find(query)
 	.skip(cursor.skip)
@@ -21,12 +21,14 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
+// GET AUTHENTICATED USER + followers, followed
 actions.showMe = async ({ user }, res) => {
 	const followers = await Follow.countDocuments({ followedId: user.id })
 	const followed = await Follow.countDocuments({ followerId: user.id })
 	res.send({ ...user._doc, followers, followed });
 };
 
+// GET  USER BY ID + user id followers, followed, isFollowing (auth. user is following user id)
 actions.show = async function ({ user, params: { id }, res }) {
   const userCheck = await User.findById(id).lean();
   const followers = await Follow.countDocuments({ followedId: id });
@@ -49,6 +51,7 @@ actions.show = async function ({ user, params: { id }, res }) {
   });
 };
 
+// GET EVENTS FOR A USER + num. of participants
 actions.showEventsForUser = async function ({ params: { id } }, res) {
   const data = await Participant.aggregate([
     { $match: { userId: mongoose.Types.ObjectId(id) } },
@@ -63,10 +66,11 @@ actions.showEventsForUser = async function ({ params: { id } }, res) {
     { $project: { numParticipants: 0 } },
   ]);
 
-	const totalData = data.length; // E' sbagliato per l'ennesima volta
+	const totalData = data.length; 
   res.send({ data, totalData });
 };
 
+// GET & SEARCH of USERS of those the given id follows
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
 	const data = await Follow.aggregate([
@@ -101,6 +105,7 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
 
 };
 
+// GET & SEARCH of USERS of those who follow the given id
 actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
 	const data = await Follow.aggregate([
@@ -135,8 +140,7 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 
 };
 
-//POST FUNCTIONS
-
+// AUTH. USER FOLLOW GIVEN ID
 actions.follow = async function ({ user, params: { id } }, res) {
 	try {
 		const follow = await Follow.create({
@@ -158,6 +162,7 @@ actions.follow = async function ({ user, params: { id } }, res) {
 	}
 };
 
+// AUTH. USER UNFOLLOW GIVEN ID
 actions.unfollow = async function ({ user, params: { id } }, res) {
 	const follow = await Follow.findOne({
 		followerId: user._id, // segue

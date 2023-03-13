@@ -42,6 +42,7 @@ router.delete('/:id/unparticipate', token({ required: true }), actions.unpartici
 
 router.post('/', token({ required: false }), actions.create);
 
+
 router.put('/:id', token({ required: true }), actions.update);
 
 router.put('/:id/coverImage', token({ required: false }), upload.single("file"), actions.coverImage);

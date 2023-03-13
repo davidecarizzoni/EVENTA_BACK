@@ -4,7 +4,6 @@ import { actions } from './controller';
 import { middleware } from 'querymen';
 
 const { upload } = require('../../services/uploadController');
-
 const router = new Router();
 
 
@@ -36,12 +35,11 @@ router.get('/me', token({ required: true }), actions.showMe);
 
 router.get('/:id', admin, actions.show);
 
+router.get('/:id/events', token({ required: true }), middleware(followerBody), actions.showEventsForUser);
+
 router.get('/:id/followed', token({ required: true }), middleware(followerBody), actions.followed);
 
 router.get('/:id/followers', token({ required: true }), middleware(followerBody), actions.followers);
-
-router.get('/:id/events', token({ required: true }), middleware(followerBody), actions.showEventsForUser);
-
 
 
 
@@ -51,14 +49,13 @@ router.post('/:id/follow', token({ required: true }), actions.follow);
 
 router.delete('/:id/unfollow', token({ required: true }), actions.unfollow);
 
-router.delete('/:id', admin, actions.destroy);
-
-
 
 router.put('/:id', token({ required: true }), actions.update);
 
 router.put('/:id/profilePic', token({ required: true }), upload.single("file"), actions.profilePic);
 
 router.put('/:id/password', password(), actions.updatePassword);
+
+router.delete('/:id', admin, actions.destroy);
 
 export default router;

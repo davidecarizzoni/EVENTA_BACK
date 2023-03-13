@@ -1,6 +1,5 @@
-import { Follow, User } from './model';
+import { Follow } from './model';
 import _ from 'lodash';
-import mongoose from 'mongoose';
 
 const actions = {};
 const populationOptions = ['followed', 'follower'];
@@ -30,7 +29,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
     res.send(follow);
   };
 
-
   actions.create = async ({ body }, res) => {
     let follow;
     try {
@@ -41,8 +39,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
     res.send(follow);
   };
-
-
 
   actions.update = ({ body, params }, res) => {
       return Follow.findById(params.id)
@@ -65,7 +61,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
               res.send(follow);
           });
   };
-
 
   actions.destroy = async function ({ params: { id } }, res) {
     const follow = await Follow.findById(id);
