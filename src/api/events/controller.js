@@ -20,6 +20,7 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
 		.populate(populationOptions)
 		.exec();
 
+
   const totalData = await Event.countDocuments(query);
   res.send({ data, totalData });
 };

@@ -52,9 +52,12 @@ actions.show = async function ({ user, params: { id }, res }) {
 };
 
 // GET EVENTS FOR A USER + num. of participants
-actions.showEventsForUser = async function ({ params: { id } }, res) {
-  const data = await Participant.aggregate([
-    { $match: { userId: mongoose.Types.ObjectId(id) } },
+actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor } }, res) {
+  console.log(cursor); // add this line to check if cursor is being passed correctly
+
+  const match = { userId: mongoose.Types.ObjectId(id) };
+  const pipeline = [
+    { $match: match },
     { $lookup: { from: 'events', localField: 'eventId', foreignField: '_id', as: 'event' } },
     { $unwind: '$event' },
     { $replaceRoot: { newRoot: '$event' } },
@@ -64,9 +67,18 @@ actions.showEventsForUser = async function ({ params: { id } }, res) {
     { $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
     { $addFields: { participants: { $size: '$participants' } } },
     { $project: { numParticipants: 0 } },
+  ];
+
+  const [data, [count]] = await Promise.all([
+    Participant.aggregate(pipeline)
+      .skip(cursor.skip)
+      .limit(cursor.limit)
+      .sort(cursor.sort)
+      .exec(),
+    Participant.aggregate([{ $match: match }, { $count: 'count' }]).exec(),
   ]);
 
-	const totalData = data.length; 
+  const totalData = count.count;
   res.send({ data, totalData });
 };
 
