@@ -53,7 +53,7 @@ actions.show = async function ({ user, params: { id }, res }) {
 
 // GET EVENTS FOR A USER + num. of participants
 actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor } }, res) {
-  console.log(cursor); // add this line to check if cursor is being passed correctly
+  console.log(cursor); 
 
   const match = { userId: mongoose.Types.ObjectId(id) };
   const pipeline = [

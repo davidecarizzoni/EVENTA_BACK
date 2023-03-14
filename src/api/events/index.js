@@ -6,26 +6,37 @@ import { Schema } from 'mongoose';
 const { upload } = require('../../services/uploadController');
 
 const queryBody = {
-	q: {
-		type: String, parse: (value, field) => {
-			return {
-				$or: [
-					{ name: { $regex: value, $options: 'i' } },
-					{ description: { $regex: value, $options: 'i' } }
-				]
-			};
-		}
-	},
-	organiserId: {
-		type: Schema.Types.ObjectId
-	},
-	date:{
-		type: Date
-	},
-	search:{
-		type: String,
-	}
-}
+  q: {
+    type: String, parse: (value, field) => {
+      return {
+        $or: [
+          { name: { $regex: value, $options: 'i' } },
+          { description: { $regex: value, $options: 'i' } }
+        ]
+      };
+    }
+  },
+  organiserId: {
+    type: Schema.Types.ObjectId
+  },
+  date:{
+    type: Date
+  },
+  search:{
+    type: String,
+  },
+  'date.$gte': {
+    type: Date,
+    paths: ['date'],
+    operator: '$gte'
+  },
+  'date.$lte': {
+    type: Date,
+    paths: ['date'],
+    operator: '$lte'
+  }
+};
+
 
 const router = new Router();
 

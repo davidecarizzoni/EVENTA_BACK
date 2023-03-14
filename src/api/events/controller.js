@@ -12,18 +12,31 @@ const populationOptions = ['organiser', 'participants'];
 
 // GET ALL EVENTS
 actions.index = async function({ querymen: { query, select, cursor } }, res) {
+  console.log("Original query:", query);
+  
+  if (query.date) {
+    console.log("Date query:", query.date);
+    if (query.date.$gte) {
+      query.date.$gte = new Date(query.date.$gte);
+    }
+    if (query.date.$lte) {
+      query.date.$lte = new Date(query.date.$lte);
+    }
+  }
+  console.log("Modified query:", query);
+
   const data = await Event.find(query)
     .skip(cursor.skip)
     .limit(cursor.limit)
     .sort(cursor.sort)
-		.select(select)
-		.populate(populationOptions)
-		.exec();
-
+    .select(select)
+    .populate(populationOptions)
+    .exec();
 
   const totalData = await Event.countDocuments(query);
   res.send({ data, totalData });
 };
+
 
 // GET EVENT BY ID + isParticipating
 actions.show = async function ({ user, params: { id } }, res) {
@@ -150,7 +163,6 @@ actions.unparticipate = async function ({ user, params: { id } }, res) {
 	await participant.delete();
 	res.status(204).send();
 };
-
 
 actions.create = async ({ body }, res) => {
   let participant;
