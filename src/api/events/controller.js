@@ -37,7 +37,6 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-
 // GET EVENT BY ID + isParticipating
 actions.show = async function ({ user, params: { id } }, res) {
 
@@ -91,10 +90,7 @@ actions.show = async function ({ user, params: { id } }, res) {
 
 // GET & SEARCH PARTICIPANTS OF AN EVENT
 actions.participants = async function ({ params: { id }, querymen: { query, cursor } }, res) {
-  console.log(query)
-
 	const { search } = query;
-
   const data = await Participant.aggregate([
     {
       $match: {
@@ -127,7 +123,6 @@ actions.participants = async function ({ params: { id }, querymen: { query, curs
     return res.status(404).send();
   }
   const totalData = data.length;
-
   res.send({ data, totalData });
 };
 
