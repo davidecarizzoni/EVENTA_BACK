@@ -1,22 +1,34 @@
 import { Note } from './model';
+import {Follow} from "../follow/model";
+
 import _ from 'lodash';
 
 const actions = {};
-const populationOptions = ['user'];
+actions.index = async function ({ user, querymen: { query, cursor } }, res) {
+  try {
+    const authenticatedUser = user._id;
+    const followDocs = await Follow.find({ followerId: authenticatedUser });
+    const followedIds = followDocs.map(doc => doc.followedId);
 
+    const noteQuery = {
+      userId: { $in: followedIds },
+    };
+    
+    const notes = await Note.find(noteQuery)
+      .populate('user')
+      .sort('-createdAt')
+      .skip(cursor.skip)
+      .limit(cursor.limit);
 
-actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Note.find(query)
-	.skip(cursor.skip)
-	.limit(cursor.limit)
-	.sort(cursor.sort)
-  .populate(populationOptions)
-	.exec();
-
-  const totalData = await Note.countDocuments(query);
-
-  res.send({ data, totalData });
+    res.json({ data: notes, totalData: notes.length });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
 };
+
+
+
 
 actions.show = async function ({ params: { id } }, res) {
 

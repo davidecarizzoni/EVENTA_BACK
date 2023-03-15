@@ -1,4 +1,5 @@
 import { Participant } from './model';
+
 import _ from 'lodash';
 
 const actions = {};
