@@ -7,8 +7,6 @@ const router = new Router();
 
 router.get('/', token({ required: true }), middleware(), actions.index);
 
-router.get('/all', token({ required: true }), middleware(), actions.showAll);
-
 router.get('/:id', token({ required: true }), actions.show);
 
 router.post('/', token({ required: true }), actions.create);

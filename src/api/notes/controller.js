@@ -1,9 +1,14 @@
 import { Note } from './model';
 import {Follow} from "../follow/model";
+import {Fire} from "../fires/model";
+
 
 import _ from 'lodash';
 
 const actions = {};
+const populationOptions = ['user'];
+
+
 actions.index = async function ({ user, querymen: { query, cursor } }, res) {
   try {
     const authenticatedUser = user._id;
@@ -13,7 +18,7 @@ actions.index = async function ({ user, querymen: { query, cursor } }, res) {
     const noteQuery = {
       userId: { $in: followedIds },
     };
-    
+
     const notes = await Note.find(noteQuery)
       .populate('user')
       .sort('-createdAt')
@@ -27,7 +32,18 @@ actions.index = async function ({ user, querymen: { query, cursor } }, res) {
   }
 };
 
+actions.showAll = async function ({ querymen: { query, cursor } }, res) {
+  const data = await Note.find(query)
+	.skip(cursor.skip)
+	.limit(cursor.limit)
+	.sort(cursor.sort)
+  .populate(populationOptions)
+	.exec();
 
+  const totalData = await Note.countDocuments(query);
+
+  res.send({ data, totalData });
+};
 
 
 actions.show = async function ({ params: { id } }, res) {
@@ -44,7 +60,6 @@ actions.show = async function ({ params: { id } }, res) {
 };
 
 actions.create = async ({ body }, res) => {
-  console.log(body)
   let note;
   try {
     note = await Note.create(body);
