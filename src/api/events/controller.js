@@ -11,9 +11,7 @@ const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
 // GET ALL EVENTS
-actions.index = async function({ querymen: { query, select, cursor } }, res) {
-  console.log("Original query:", query);
-  
+actions.index = async function({ querymen: { query, select, cursor } }, res) {  
   if (query.date) {
     console.log("Date query:", query.date);
     if (query.date.$gte) {
@@ -23,8 +21,7 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
       query.date.$lte = new Date(query.date.$lte);
     }
   }
-  console.log("Modified query:", query);
-
+  
   const data = await Event.find(query)
     .skip(cursor.skip)
     .limit(cursor.limit)

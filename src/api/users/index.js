@@ -26,7 +26,10 @@ const queryBody = {
 const followerBody = {
 	search: {
 		type: String
-	}
+	},
+	role: {
+		type: String
+	},
 }
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);

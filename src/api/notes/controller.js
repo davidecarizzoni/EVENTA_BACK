@@ -2,33 +2,45 @@ import { Note } from './model';
 import {Follow} from "../follow/model";
 import {Fire} from "../fires/model";
 
-
 import _ from 'lodash';
 
 const actions = {};
 const populationOptions = ['user'];
 
-actions.index = async function ({ user, querymen: { query, cursor } }, res) {
+actions.index = async function({ user, querymen: { query, select, cursor } }, res) {  
   try {
     const authenticatedUser = user._id;
     const followDocs = await Follow.find({ followerId: authenticatedUser });
     const followedIds = followDocs.map(doc => doc.followedId);
 
+    const dateQuery = {};
+    if (query.date) {
+      if (query.date.$gte) {
+        dateQuery.$gte = new Date(query.date.$gte);
+      }
+      if (query.date.$lte) {
+        dateQuery.$lte = new Date(query.date.$lte);
+      }
+    }
+
     const noteQuery = {
       userId: { $in: followedIds },
+      createdAt: query.date,
     };
 
-    // Retrieve the notes with the additional constraint of being created by followed users
     const notes = await Note.find(noteQuery)
-      .populate('user')
+      .populate(populationOptions)
       .sort('-createdAt')
       .skip(cursor.skip)
-      .limit(cursor.limit);
+      .limit(cursor.limit)
 
-    // Retrieve the authenticated user's notes and concatenate them with the followed users' notes
-    const authenticatedUserNotes = await Note.find({ userId: authenticatedUser })
-      .populate('user')
-      .sort('-createdAt');
+      const authenticatedUserNotes = await Note.find({
+        userId: authenticatedUser,
+        createdAt: dateQuery
+      })
+        .populate(populationOptions)
+        .sort('-createdAt');
+      
     const allNotes = authenticatedUserNotes.concat(notes);
 
     res.json({ data: allNotes, totalData: allNotes.length });
@@ -71,7 +83,7 @@ actions.create = async ({ body }, res) => {
   try {
     note = await Note.create(body);
   } catch (err) {
-    return null; // to be changed
+    return null; 
   }
 
   res.send(note);
