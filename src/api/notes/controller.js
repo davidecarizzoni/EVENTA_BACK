@@ -5,7 +5,7 @@ import {Fire} from "../fires/model";
 import _ from 'lodash';
 
 const actions = {};
-const populationOptions = ['user'];
+const populationOptions = ['user', "fires"];
 
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {  
   try {
@@ -43,13 +43,18 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
       
     const allNotes = authenticatedUserNotes.concat(notes);
 
-    res.json({ data: allNotes, totalData: allNotes.length });
+    const notesWithFire = await Promise.all(allNotes.map(async (note) => {
+      const fire = await Fire.findOne({ userId: authenticatedUser, noteId: note._id });
+      return { ...note.toObject(), hasFired: !!fire };
+    }));
+
+
+    res.json({ data: notesWithFire, totalData: notesWithFire.length });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 };
-
 
 actions.showAll = async function ({ querymen: { query, cursor } }, res) {
   const data = await Note.find(query)
@@ -64,7 +69,6 @@ actions.showAll = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-
 actions.show = async function ({ params: { id } }, res) {
 
   const note = await Note
@@ -76,6 +80,36 @@ actions.show = async function ({ params: { id } }, res) {
   }
 
   res.send(note);
+};
+
+actions.fire = async function ({ user, params: { id } }, res) {
+	try {
+		const fire = await Fire.create({
+			userId: user._id,
+			noteId: id,
+		})
+
+		res.send(fire);
+	} catch (err) {
+		if (err.code === 11000) {
+			return res.status(409)
+		}
+		res.status(500).send(err);
+	}
+};
+
+actions.unfire = async function ({ user, params: { id } }, res) {
+	const fire = await Fire.findOne({
+		userId: user._id,
+		noteId: id,
+	})
+
+	if (_.isNil(fire)) {
+		return res.status(404).send();
+	}
+
+	await fire.delete();
+	res.status(204).send();
 };
 
 actions.create = async ({ body }, res) => {

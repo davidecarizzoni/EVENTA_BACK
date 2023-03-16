@@ -25,6 +25,14 @@ NoteSchema.virtual('user', {
   justOne: true
 });
 
+NoteSchema.virtual('fires', {
+  ref: 'Fire',
+  localField: '_id',
+  foreignField: 'noteId',
+  justOne: false,
+  count: true
+});
+
 const Note = model('Note', NoteSchema);
 
 export { Note };

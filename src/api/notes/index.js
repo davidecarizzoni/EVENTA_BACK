@@ -29,6 +29,10 @@ router.get('/all', token({ required: true }), middleware(), actions.showAll);
 
 router.get('/:id', token({ required: true }), actions.show);
 
+router.post('/:id/fire', token({ required: true }), actions.fire);
+
+router.delete('/:id/unfire', token({ required: true }), actions.unfire);
+
 router.post('/', token({ required: true }), actions.create);
 
 router.delete('/:id', token({ required: true }), actions.destroy);
