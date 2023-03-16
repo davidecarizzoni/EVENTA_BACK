@@ -84,38 +84,54 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
 
 // GET & SEARCH of USERS of those the given id follows
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
-	const { search } = query;
-	const data = await Follow.aggregate([
+
+  const { search, role } = query;
+	console.log(query)
+
+  const matchStage = {
+    followerId: Types.ObjectId(id)
+  };
+	console.log(matchStage)
+  if (role) {
+    matchStage["follower.role"] = role;
+  }
+  const data = await Follow.aggregate([
 		{
 			$match: {
-				followerId: Types.ObjectId(id)
+				followerId: Types.ObjectId(id),
+				...(search ? {
+					$or: [
+						{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+						{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+					]
+				} : {})
 			}
 		},
-	 	{
-	 	  $lookup: {
-	 	    from: "users",
-	 	    localField: "followedId",
-	 	    foreignField: "_id",
-	 	    as: "follower"
-	 	  }
-	 	},
-	 	{
-	 	  $unwind: "$follower"
-	 	},
 		{
-			$match: search ? {
-				$or: [
-					{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-					{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-				]
-			} : { }
+			$lookup: {
+				from: "users",
+				localField: "followedId",
+				foreignField: "_id",
+				as: "followed"
+			}
+		},
+		{
+			$unwind: "$followed"
+		},
+		{
+			$match: {
+				"followed.role": role || { $exists: true }
+			}
 		}
 	]);
+	
+	
 
-  const totalData = data.length; // E' sbagliato per l'ennesima volta
+  const totalData = data.length;
   res.send({ data, totalData })
 
 };
+
 
 // GET & SEARCH of USERS of those who follow the given id
 actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
