@@ -8,7 +8,6 @@ import _ from 'lodash';
 const actions = {};
 const populationOptions = ['user'];
 
-
 actions.index = async function ({ user, querymen: { query, cursor } }, res) {
   try {
     const authenticatedUser = user._id;
@@ -19,18 +18,26 @@ actions.index = async function ({ user, querymen: { query, cursor } }, res) {
       userId: { $in: followedIds },
     };
 
+    // Retrieve the notes with the additional constraint of being created by followed users
     const notes = await Note.find(noteQuery)
       .populate('user')
       .sort('-createdAt')
       .skip(cursor.skip)
       .limit(cursor.limit);
 
-    res.json({ data: notes, totalData: notes.length });
+    // Retrieve the authenticated user's notes and concatenate them with the followed users' notes
+    const authenticatedUserNotes = await Note.find({ userId: authenticatedUser })
+      .populate('user')
+      .sort('-createdAt');
+    const allNotes = authenticatedUserNotes.concat(notes);
+
+    res.json({ data: allNotes, totalData: allNotes.length });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 actions.showAll = async function ({ querymen: { query, cursor } }, res) {
   const data = await Note.find(query)
