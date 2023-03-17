@@ -78,7 +78,7 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
     Participant.aggregate([{ $match: match }, { $count: 'count' }]).exec(),
   ]);
 
-  const totalData = count.count;
+  const totalData = count ? count.count : 0;
   res.send({ data, totalData });
 };
 

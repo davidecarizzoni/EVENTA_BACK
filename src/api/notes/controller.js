@@ -104,6 +104,8 @@ actions.unfire = async function ({ user, params: { id } }, res) {
 		noteId: id,
 	})
 
+  console.log(fire)
+
 	if (_.isNil(fire)) {
 		return res.status(404).send();
 	}
