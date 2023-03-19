@@ -51,6 +51,12 @@ router.post('/:id/participate', token({ required: true }), actions.participate);
 
 router.delete('/:id/unparticipate', token({ required: true }), actions.unparticipate);
 
+
+router.post('/:id/like', token({ required: true }), actions.like);
+
+router.delete('/:id/unlike', token({ required: true }), actions.unlike);
+
+
 router.post('/', token({ required: false }), actions.create);
 
 

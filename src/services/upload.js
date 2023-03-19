@@ -21,12 +21,10 @@ export async function getS3SignedUrl (key) {
 	const command = new GetObjectCommand(getObjectParams);
 	const url = await getSignedUrl(s3GetFile, command);
 
-	console.log('image', url)
 	return String(url)
 }
 
 export async function uploadToS3(file) {
-	console.log('file', file)
 	const s3 = new AWS.S3({
 		accessKeyId: AWS_ACCESS_KEY,
 		secretAccessKey: AWS_ACCESS_SECRET_KEY
@@ -47,7 +45,6 @@ export async function uploadToS3(file) {
 			console.error(err);
 		}
 	});
-	console.log('img', img)
 	return img.Location || ''
 }
 

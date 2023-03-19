@@ -53,7 +53,6 @@ actions.show = async function ({ user, params: { id }, res }) {
 
 // GET EVENTS FOR A USER + num. of participants
 actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor } }, res) {
-  console.log(cursor); 
 
   const match = { userId: mongoose.Types.ObjectId(id) };
   const pipeline = [
@@ -86,12 +85,11 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 
   const { search, role } = query;
-	console.log(query)
-
+	
   const matchStage = {
     followerId: Types.ObjectId(id)
   };
-	console.log(matchStage)
+
   if (role) {
     matchStage["follower.role"] = role;
   }
@@ -125,8 +123,6 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
 		}
 	]);
 	
-	
-
   const totalData = data.length;
   res.send({ data, totalData })
 

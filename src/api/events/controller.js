@@ -1,5 +1,6 @@
 import {Event} from './model';
 import {Participant} from '../participants/model';
+import {Like} from '../likes/model';
 
 import mongoose from "mongoose";
 import {Types} from "mongoose";
@@ -11,9 +12,8 @@ const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
 // GET ALL EVENTS
-actions.index = async function({ querymen: { query, select, cursor } }, res) {  
+actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
-    console.log("Date query:", query.date);
     if (query.date.$gte) {
       query.date.$gte = new Date(query.date.$gte);
     }
@@ -21,18 +21,36 @@ actions.index = async function({ querymen: { query, select, cursor } }, res) {
       query.date.$lte = new Date(query.date.$lte);
     }
   }
-  
-  const data = await Event.find(query)
-    .skip(cursor.skip)
-    .limit(cursor.limit)
-    .sort(cursor.sort)
-    .select(select)
-    .populate(populationOptions)
-    .exec();
 
-  const totalData = await Event.countDocuments(query);
+  const pipeline = [
+    { $match: query },
+    {
+      $lookup: {
+        from: 'likes',
+        localField: '_id',
+        foreignField: 'eventId',
+        as: 'likes',
+      },
+    },
+    {
+      $addFields: {
+        likes: { $size: '$likes' },
+      },
+    },
+    { $sort: cursor.sort },
+    { $skip: cursor.skip },
+    { $limit: cursor.limit },
+  ];
+
+  const [data, [{ count: totalData }]] = await Promise.all([
+    Event.aggregate(pipeline),
+    Event.aggregate([{ $match: query }, { $count: 'count' }]),
+  ]);
+
   res.send({ data, totalData });
 };
+
+
 
 // GET EVENT BY ID + isParticipating
 actions.show = async function ({ user, params: { id } }, res) {
@@ -156,6 +174,39 @@ actions.unparticipate = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
+// USER LIKES EVENT
+actions.like = async function ({ user, params: { id } }, res) {
+
+	try {
+		const like = await Like.create({
+			userId: user._id,
+			eventId: id,
+		})
+
+		res.send(like);
+	} catch (err) {
+		if (err.code === 11000) {
+			return res.status(409)
+		}
+		res.status(500).send(err);
+	}
+};
+
+// USER UNLIKES EVENT
+actions.unlike = async function ({ user, params: { id } }, res) {
+	const like = await Like.findOne({
+		userId: user._id,
+		eventId: id,
+	})
+
+	if (_.isNil(like)) {
+		return res.status(404).send();
+	}
+
+	await like.delete();
+	res.status(204).send();
+};
+
 actions.create = async ({ body }, res) => {
   let participant;
   try {
@@ -243,8 +294,6 @@ actions.coverImage = async (req, res) => {
 			message: "You must provide at least 1 file"
 		});
 	}
-
-	console.log('req.file', req.file);
 
 	try {
 		event.coverImage = await uploadToS3(req.file)
