@@ -33,34 +33,21 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
       },
     },
     {
-      $lookup: {
-        from: 'users',
-        localField: 'organiserId',
-        foreignField: '_id',
-        as: 'organiser',
-      },
+      $addFields: {
+        hasLiked: {
+          $in: [mongoose.Types.ObjectId(user._id), '$likes.userId']
+        }
+      }
     },
     {
       $addFields: {
-        likes: { $size: '$likes' },
-        organiser: { $arrayElemAt: ['$organiser', 0] },
-      },
-    },
-    {
-      $project: {
-        name: 1,
-        description: 1,
-        position: 1,
-        address: 1,
-        date: 1,
-        coverImage: 1,
-        createdAt: 1,
-        updatedAt: 1,
-        maxDistance: 1,
-        likes: 1,
-        'organiser.name': 1,
-        'organiser.username': 1,
-        'organiser.profilePic': 1,
+        likes: {
+          $cond: {
+            if: { $isArray: "$likes" },
+            then: { $size: "$likes" },
+            else: 0
+          }
+        },
       },
     },
     { $sort: cursor.sort },
@@ -68,6 +55,8 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     { $limit: cursor.limit },
   ];
   
+  
+
   const [data, [{ count: totalData }]] = await Promise.all([
     Event.aggregate(pipeline),
     Event.aggregate([{ $match: query }, { $count: 'count' }]),
@@ -75,6 +64,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
   res.send({ data, totalData });
 };
+
 
 
 
