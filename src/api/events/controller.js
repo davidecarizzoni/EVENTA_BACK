@@ -21,6 +21,10 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
       query.date.$lte = new Date(query.date.$lte);
     }
   }
+  if (query.organiserId) {
+    query.organiserId = mongoose.Types.ObjectId(query.organiserId);
+  }
+
 
   const pipeline = [
     { $match: query },
@@ -69,6 +73,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
+
 
   const [data, [{ count: totalData }]] = await Promise.all([
     Event.aggregate(pipeline),
