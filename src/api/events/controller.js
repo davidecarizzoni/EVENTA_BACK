@@ -25,7 +25,6 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     query.organiserId = mongoose.Types.ObjectId(query.organiserId);
   }
 
-
   const pipeline = [
     { $match: query },
     {
@@ -82,10 +81,6 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
   res.send({ data, totalData });
 };
-
-
-
-
 
 
 // GET EVENT BY ID + isParticipating

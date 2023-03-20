@@ -16,8 +16,13 @@ const EventsSchema = new Schema({
     coordinates: { type: [Number], default: [0, 0] },
   },
   address: {
-    type: String,
-    required: true,
+    city: {
+      type: String,
+    },
+    fullAddress: {
+      type: String,
+      required: true,
+    },
   },
   date: {
     type: Date,
