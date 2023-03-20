@@ -79,6 +79,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
       }
     },
     { $sort: cursor.sort },
+    { $sort: { date: 1 } },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
