@@ -55,15 +55,20 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
         from: 'users',
         localField: 'organiserId',
         foreignField: '_id',
-        as: 'organiser',
-      },
+        as: 'organiser'
+      }
+    },
+    {
+      $addFields: {
+        organiser: {
+          $arrayElemAt: ['$organiser', 0]
+        }
+      }
     },
     { $sort: cursor.sort },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
-  
-  
 
   const [data, [{ count: totalData }]] = await Promise.all([
     Event.aggregate(pipeline),
