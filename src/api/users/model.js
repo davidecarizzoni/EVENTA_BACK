@@ -53,7 +53,7 @@ const UsersSchema = new Schema({
     type: Date,
   }
 });
-
+UsersSchema.index({ position: '2dsphere' });
 UsersSchema.pre('save', function (next) {
   if (!this.isModified('password')) {
     return next();

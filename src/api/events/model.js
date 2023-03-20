@@ -37,15 +37,10 @@ const EventsSchema = new Schema({
   updatedAt: {
     type: Date,
   },
-  maxDistance: {
-    type: Number,
-    default: 0,
-    min: 0
-  },
-
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 EventsSchema.index({ position: '2dsphere' });
+
 EventsSchema.virtual('organiser', {
   ref: 'User',
   localField: 'organiserId',

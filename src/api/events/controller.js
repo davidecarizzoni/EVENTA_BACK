@@ -11,7 +11,6 @@ import {uploadToS3} from "../../services/upload";
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
-// GET ALL EVENTS
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
     if (query.date.$gte) {
@@ -25,8 +24,19 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     query.organiserId = mongoose.Types.ObjectId(query.organiserId);
   }
 
+  const userCoordinates = user.position.coordinates;
+
   const pipeline = [
-    { $match: query },
+    {
+      $geoNear: {
+        near: { type: "Point", coordinates: userCoordinates },
+        distanceField: "distance",
+        maxDistance: 30000, // in meters
+        spherical: true,
+        query: query,
+        key: "position",
+      }
+    },
     {
       $lookup: {
         from: 'likes',
@@ -72,7 +82,6 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
-
 
   const [data, [{ count: totalData }]] = await Promise.all([
     Event.aggregate(pipeline),
