@@ -50,6 +50,14 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
         },
       },
     },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'organiserId',
+        foreignField: '_id',
+        as: 'organiser',
+      },
+    },
     { $sort: cursor.sort },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
@@ -64,6 +72,8 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
   res.send({ data, totalData });
 };
+
+
 
 
 
