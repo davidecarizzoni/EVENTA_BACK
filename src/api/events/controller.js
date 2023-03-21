@@ -12,6 +12,7 @@ const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
 
+
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
     if (query.date.$gte) {
@@ -21,15 +22,17 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
       query.date.$lte = new Date(query.date.$lte);
     }
   }
+
   if (query.organiserId) {
     query.organiserId = mongoose.Types.ObjectId(query.organiserId);
   }
 
-  console.log(query);
-
   const userCoordinates = user.position.coordinates;
 
   const pipeline = [
+    {
+      $match: query,
+    },
     {
       $lookup: {
         from: 'likes',
@@ -90,13 +93,16 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
-
-
-  const [data, [{ count: totalData }]] = await Promise.all([
+  const [data, countResult] = await Promise.all([
     Event.aggregate(pipeline),
     Event.aggregate([{ $match: query }, { $count: 'count' }]),
   ]);
-
+  
+  let totalData = 0;
+  if (countResult.length > 0) {
+    totalData = countResult[0].count;
+  }
+  
   res.send({ data, totalData });
 };
 
@@ -187,12 +193,17 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
-
-  const [data, [{ count: totalData }]] = await Promise.all([
+  
+  const [data, countResult] = await Promise.all([
     Event.aggregate(pipeline),
     Event.aggregate([{ $match: query }, { $count: 'count' }]),
   ]);
-
+  
+  let totalData = 0;
+  if (countResult.length > 0) {
+    totalData = countResult[0].count;
+  }
+  
   res.send({ data, totalData });
 };
 
