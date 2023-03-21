@@ -42,6 +42,8 @@ const router = new Router();
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
+router.get('/home', token({ required: true }), middleware(queryBody), actions.homeEvents);
+
 router.get('/:id', token({ required: true }), actions.show);
 
 router.get('/:id/participants', token({ required: true }), middleware(queryBody), actions.participants);

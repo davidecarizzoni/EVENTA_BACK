@@ -11,6 +11,7 @@ import {uploadToS3} from "../../services/upload";
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
+
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
     if (query.date.$gte) {
@@ -24,6 +25,95 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     query.organiserId = mongoose.Types.ObjectId(query.organiserId);
   }
 
+  console.log(query);
+
+  const userCoordinates = user.position.coordinates;
+
+  const pipeline = [
+    {
+      $lookup: {
+        from: 'likes',
+        localField: '_id',
+        foreignField: 'eventId',
+        as: 'likes',
+      },
+    },
+    {
+      $addFields: {
+        hasLiked: {
+          $in: [mongoose.Types.ObjectId(user._id), '$likes.userId']
+        }
+      }
+    },
+    {
+      $addFields: {
+        likes: {
+          $cond: {
+            if: { $isArray: "$likes" },
+            then: { $size: "$likes" },
+            else: 0
+          }
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'organiserId',
+        foreignField: '_id',
+        as: 'organiser'
+      }
+    },
+    {
+      $addFields: {
+        organiser: {
+          $arrayElemAt: ['$organiser', 0]
+        }
+      }
+    },
+    {
+      $lookup: {
+        from: 'participants',
+        localField: '_id',
+        foreignField: 'eventId',
+        as: 'participants'
+      }
+    },
+    {
+      $addFields: {
+        participants: { $size: "$participants" }
+
+      }
+    },
+    { $sort: cursor.sort },
+    { $sort: { date: 1 } },
+    { $skip: cursor.skip },
+    { $limit: cursor.limit },
+  ];
+
+
+  const [data, [{ count: totalData }]] = await Promise.all([
+    Event.aggregate(pipeline),
+    Event.aggregate([{ $match: query }, { $count: 'count' }]),
+  ]);
+
+  res.send({ data, totalData });
+};
+
+actions.homeEvents = async function({ user, querymen: { query, select, cursor } }, res) {
+  if (query.date) {
+    if (query.date.$gte) {
+      query.date.$gte = new Date(query.date.$gte);
+    }
+    if (query.date.$lte) {
+      query.date.$lte = new Date(query.date.$lte);
+    }
+  }
+
+  if (query.organiserId) {
+    query.organiserId = mongoose.Types.ObjectId(query.organiserId);
+  }
+
   const userCoordinates = user.position.coordinates;
 
   const pipeline = [
@@ -31,7 +121,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
       $geoNear: {
         near: { type: "Point", coordinates: userCoordinates },
         distanceField: "distance",
-        maxDistance: 30000, // in meters
+        maxDistance: 100000000000, // in meters
         spherical: true,
         query: query,
         key: "position",
@@ -78,6 +168,20 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
         }
       }
     },
+    {
+      $lookup: {
+        from: 'participants',
+        localField: '_id',
+        foreignField: 'eventId',
+        as: 'participants'
+      }
+    },
+    {
+      $addFields: {
+        participants: { $size: "$participants" }
+
+      }
+    },
     { $sort: cursor.sort },
     { $sort: { date: 1 } },
     { $skip: cursor.skip },
@@ -91,7 +195,6 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
   res.send({ data, totalData });
 };
-
 
 // GET EVENT BY ID + isParticipating
 actions.show = async function ({ user, params: { id } }, res) {
@@ -257,32 +360,6 @@ actions.create = async ({ body }, res) => {
   }
 
   res.send(participant);
-};
-
-actions.near = async function({ params: { id }, query: { coordinates, maxDistance } }, res) {
-
-	if (!maxDistance || isNaN(maxDistance) || maxDistance < 0) {
-    return res.status(400).send({ error: 'maxDistance is required and should be a positive number' });
-	}
-
-  const events = await Event.aggregate([
-    {
-      $geoNear: {
-        near: { type: 'Point', coordinates },
-        distanceField: 'distance',
-        spherical: true,
-        maxDistance: maxDistance
-      }
-    },
-    { $match: { _id: id } },
-    { $limit: 1 },
-  ])
-
-  if (!events) {
-    return res.status(404).send();
-  }
-
-  res.send(events);
 };
 
 actions.create = async ({ body }, res) => {
