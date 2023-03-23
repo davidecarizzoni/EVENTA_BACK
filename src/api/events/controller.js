@@ -11,8 +11,7 @@ import {uploadToS3} from "../../services/upload";
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
-
-
+// (pagination done + totaldata + sort: check:true)
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
     if (query.date.$gte) {
@@ -26,8 +25,6 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
   if (query.organiserId) {
     query.organiserId = mongoose.Types.ObjectId(query.organiserId);
   }
-
-  const userCoordinates = user.position.coordinates;
 
   const pipeline = [
     {
@@ -93,19 +90,16 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
-  const [data, countResult] = await Promise.all([
+  const [data, count] = await Promise.all([
     Event.aggregate(pipeline),
     Event.aggregate([{ $match: query }, { $count: 'count' }]),
   ]);
   
-  let totalData = 0;
-  if (countResult.length > 0) {
-    totalData = countResult[0].count;
-  }
-  
+  const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
 
+// (pagination done + totaldata + sort: check:true)
 actions.homeEvents = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
     if (query.date.$gte) {
@@ -116,18 +110,13 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
     }
   }
 
-  if (query.organiserId) {
-    query.organiserId = mongoose.Types.ObjectId(query.organiserId);
-  }
-
   const userCoordinates = user.position.coordinates;
-
   const pipeline = [
     {
       $geoNear: {
         near: { type: "Point", coordinates: userCoordinates },
         distanceField: "distance",
-        maxDistance: 100000000000, // in meters
+        maxDistance: 150000, // in meters
         spherical: true,
         query: query,
         key: "position",
@@ -194,20 +183,15 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
     { $limit: cursor.limit },
   ];
   
-  const [data, countResult] = await Promise.all([
+  const [data, count] = await Promise.all([
     Event.aggregate(pipeline),
     Event.aggregate([{ $match: query }, { $count: 'count' }]),
   ]);
   
-  let totalData = 0;
-  if (countResult.length > 0) {
-    totalData = countResult[0].count;
-  }
-  
+  const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
 
-// GET EVENT BY ID + isParticipating
 actions.show = async function ({ user, params: { id } }, res) {
 
   const event = await Event
@@ -258,45 +242,51 @@ actions.show = async function ({ user, params: { id } }, res) {
   });
 };
 
-// GET & SEARCH PARTICIPANTS OF AN EVENT
+// (pagination done + totaldata + sort: check:true)
 actions.participants = async function ({ params: { id }, querymen: { query, cursor } }, res) {
-	const { search } = query;
-  const data = await Participant.aggregate([
+  const { search } = query;
+  const pipeline = [
     {
       $match: {
         eventId: Types.ObjectId(id)
       }
     },
     {
-     $lookup: {
-       from: "users",
-       localField: "userId",
-       foreignField: "_id",
-       as: "user"
-     }
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user"
+      }
     },
     {
-     $unwind: "$user"
+      $unwind: "$user"
     },
     {
-			$match: search ? {
-				$or: [
-					{ "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-					{ "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-				]
-			} : { }
-		}
-    
+      $match: search ? {
+        $or: [
+          { "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+          { "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+        ]
+      } : {}
+    },
+    { $sort: { "user.name": 1 } },
+    { $skip: cursor.skip },
+    { $limit: cursor.limit }
+  ];
+
+  const [data, count] = await Promise.all([
+    Participant.aggregate(pipeline),
+    Participant.aggregate([
+      { $match: { eventId: Types.ObjectId(id) } },
+      { $count: "count" }
+    ])
   ]);
 
-  if (!data) {
-    return res.status(404).send();
-  }
-  const totalData = data.length;
+  const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
 
-// USER PARCITIPATION TO EVENT
 actions.participate = async function ({ user, params: { id } }, res) {
 
 	try {
@@ -314,7 +304,6 @@ actions.participate = async function ({ user, params: { id } }, res) {
 	}
 };
 
-// USER UNPARCITIPATION TO EVENT
 actions.unparticipate = async function ({ user, params: { id } }, res) {
 	const participant = await Participant.findOne({
 		userId: user._id,
@@ -329,7 +318,6 @@ actions.unparticipate = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
-// USER LIKES EVENT
 actions.like = async function ({ user, params: { id } }, res) {
 
 	try {
@@ -347,7 +335,6 @@ actions.like = async function ({ user, params: { id } }, res) {
 	}
 };
 
-// USER UNLIKES EVENT
 actions.unlike = async function ({ user, params: { id } }, res) {
 	const like = await Like.findOne({
 		userId: user._id,

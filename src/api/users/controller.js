@@ -10,10 +10,11 @@ import _ from 'lodash';
 
 const actions = {};
 
-// GET ALL USERS
+// (pagination done + totaldata + sort: check:true)
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await User.find(query)
 	.skip(cursor.skip)
+	.sort({'name':1})
 	.limit(cursor.limit)
 	.sort(cursor.sort);
 	
@@ -21,14 +22,12 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-// GET AUTHENTICATED USER + followers, followed
 actions.showMe = async ({ user }, res) => {
 	const followers = await Follow.countDocuments({ followedId: user.id })
 	const followed = await Follow.countDocuments({ followerId: user.id })
 	res.send({ ...user._doc, followers, followed });
 };
 
-// GET  USER BY ID + user id followers, followed, isFollowing (auth. user is following user id)
 actions.show = async function ({ user, params: { id }, res }) {
   const userCheck = await User.findById(id).lean();
   const followers = await Follow.countDocuments({ followedId: id });
@@ -51,7 +50,7 @@ actions.show = async function ({ user, params: { id }, res }) {
   });
 };
 
-// GET EVENTS FOR A USER + num. of participants
+// (pagination done + totaldata + sort: check:true)
 actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor } }, res) {
 
   const match = { userId: mongoose.Types.ObjectId(id) };
@@ -66,24 +65,22 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
     { $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
     { $addFields: { participants: { $size: '$participants' } } },
     { $project: { numParticipants: 0 } },
+		{ $sort: { date: 1 } },
+    { $skip: cursor.skip },
+    { $limit: cursor.limit }
   ];
 
-  const [data, [count]] = await Promise.all([
-    Participant.aggregate(pipeline)
-      .skip(cursor.skip)
-      .limit(cursor.limit)
-      .sort(cursor.sort)
-      .exec(),
-    Participant.aggregate([{ $match: match }, { $count: 'count' }]).exec(),
+const [data, count] = await Promise.all([
+    Participant.aggregate(pipeline),
+    Participant.aggregate([{ $match: match }, { $count: 'count' }]),
   ]);
-
-  const totalData = count ? count.count : 0;
+  
+  const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
 
-// GET & SEARCH of USERS of those the given id follows
+// (pagination done + totaldata + sort: check:true)
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
-
   const { search, role } = query;
 	
   const matchStage = {
@@ -93,50 +90,61 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
   if (role) {
     matchStage["follower.role"] = role;
   }
-  const data = await Follow.aggregate([
-		{
-			$match: {
-				followerId: Types.ObjectId(id),
-				...(search ? {
-					$or: [
-						{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-						{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-					]
-				} : {})
-			}
-		},
-		{
-			$lookup: {
-				from: "users",
-				localField: "followedId",
-				foreignField: "_id",
-				as: "followed"
-			}
-		},
-		{
-			$unwind: "$followed"
-		},
-		{
-			$match: {
-				"followed.role": role || { $exists: true }
-			}
-		}
-	]);
-	
-  const totalData = data.length;
-  res.send({ data, totalData })
 
+  const match = {
+		followerId: Types.ObjectId(id),
+		...(search ? {
+			$or: [
+				{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+				{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+			]
+		} : {})
+	}
+	
+  const pipeline = [
+    {
+      $match: match
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "followedId",
+        foreignField: "_id",
+        as: "followed"
+      }
+    },
+    {
+      $unwind: "$followed"
+    },
+    {
+      $match: {
+        "followed.role": role || { $exists: true }
+      }
+    },
+		{ $sort: { "followed.name": 1 }},
+		{ $skip: cursor.skip },
+		{ $limit: cursor.limit },
+  ];
+	
+  const [data, count] = await Promise.all([
+    Follow.aggregate(pipeline),
+    Follow.aggregate([{ $match: match }, { $count: 'count' }]),
+  ]);
+
+  const totalData = count.length ? count[0].count : 0;
+  res.send({ data, totalData })
 };
 
-
-// GET & SEARCH of USERS of those who follow the given id
+// (pagination done + totaldata + sort: check:true)
 actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
-	const data = await Follow.aggregate([
+	const match = {
+		followedId: Types.ObjectId(id)
+	};
+
+	const pipeline = [
 		{
-			$match: {
-				followedId: Types.ObjectId(id)
-			}
+			$match: match
 		},
 	 	{
 	 	  $lookup: {
@@ -156,15 +164,21 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 					{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
 				]
 			} : { }
-		}
+		},
+		{ $sort: { "follower.name": 1 }},
+		{ $skip: cursor.skip },
+		{ $limit: cursor.limit },
+	];
+
+	const [data, count] = await Promise.all([
+		Follow.aggregate(pipeline),
+		Follow.aggregate([{ $match: match },{ $count: 'count' }]),
 	]);
 
-  const totalData = data.length; // E' sbagliato per l'ennesima volta
-  res.send({ data, totalData })
-
+	const totalData = count.length ? count[0].count : 0;
+	res.send({ data, totalData });
 };
 
-// AUTH. USER FOLLOW GIVEN ID
 actions.follow = async function ({ user, params: { id } }, res) {
 	try {
 		const follow = await Follow.create({
@@ -186,7 +200,6 @@ actions.follow = async function ({ user, params: { id } }, res) {
 	}
 };
 
-// AUTH. USER UNFOLLOW GIVEN ID
 actions.unfollow = async function ({ user, params: { id } }, res) {
 	const follow = await Follow.findOne({
 		followerId: user._id, // segue

@@ -7,7 +7,21 @@ import _ from 'lodash';
 const actions = {};
 const populationOptions = ['user', "fires"];
 
-actions.index = async function({ user, querymen: { query, select, cursor } }, res) {  
+// (pagination done + totaldata + sort: check:true)
+actions.index = async function ({ querymen: { query, cursor } }, res) {
+  const data = await Note.find(query)
+	.skip(cursor.skip)
+	.limit(cursor.limit)
+	.sort({'createdAt':1})
+  .populate(populationOptions)
+	.exec();
+
+  const totalData = await Note.countDocuments(query);
+
+  res.send({ data, totalData });
+};
+
+actions.homeNotes = async function({ user, querymen: { query, select, cursor } }, res) {  
   try {
     const authenticatedUser = user._id;
     const followDocs = await Follow.find({ followerId: authenticatedUser });
@@ -25,7 +39,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
     const noteQuery = {
       userId: { $in: followedIds },
-      createdAt: query.date,
+      createdAt: dateQuery,
     };
 
     const notes = await Note.find(noteQuery)
@@ -39,7 +53,9 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
         createdAt: dateQuery
       })
         .populate(populationOptions)
-        .sort('-createdAt');
+        .sort('-createdAt')
+        .skip(cursor.skip)
+        .limit(cursor.limit)
       
     const allNotes = authenticatedUserNotes.concat(notes);
 
@@ -56,19 +72,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
   }
 };
 
-actions.showAll = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Note.find(query)
-	.skip(cursor.skip)
-	.limit(cursor.limit)
-	.sort(cursor.sort)
-  .populate(populationOptions)
-	.exec();
-
-  const totalData = await Note.countDocuments(query);
-
-  res.send({ data, totalData });
-};
-
+// todo pagination
 actions.show = async function ({ params: { id } }, res) {
 
   const note = await Note
