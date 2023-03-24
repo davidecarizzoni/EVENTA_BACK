@@ -1,6 +1,5 @@
 import {ADMIN, User} from './model';
 import {Follow} from "../follow/model";
-import {Like} from "../likes/model";
 import {Participant} from '../participants/model';
 
 import {Types} from "mongoose";

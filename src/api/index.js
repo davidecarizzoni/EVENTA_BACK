@@ -7,6 +7,7 @@ import likes from './likes';
 import auth from './auth';
 import notes from './notes';
 import fires from './fires'
+import posts from './posts';
 
 const router = new Router();
 
@@ -16,6 +17,7 @@ router.use('/follow', follow);
 router.use('/likes', likes);
 router.use('/notes', notes);
 router.use('/fires', fires);
+router.use('/posts', posts);
 router.use('/participants', participants);
 router.use('/auth', auth);
 
