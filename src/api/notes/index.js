@@ -25,7 +25,7 @@ const queryBody = {
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
-router.get('/home', token({ required: true }), middleware(), actions.homeNotes);
+router.get('/home', token({ required: true }), middleware(queryBody), actions.homeNotes);
 
 router.get('/:id', token({ required: true }), actions.show);
 

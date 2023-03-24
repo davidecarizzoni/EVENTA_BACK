@@ -21,6 +21,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
+// (pagination done + totaldata + sort: check:true)
 actions.homeNotes = async function({ user, querymen: { query, select, cursor } }, res) {  
   try {
     const authenticatedUser = user._id;
@@ -36,43 +37,31 @@ actions.homeNotes = async function({ user, querymen: { query, select, cursor } }
         dateQuery.$lte = new Date(query.date.$lte);
       }
     }
-
     const noteQuery = {
-      userId: { $in: followedIds },
+      userId: { $in: [authenticatedUser, ...followedIds] },
       createdAt: dateQuery,
     };
-
+    
+    const totalData = await Note.countDocuments(noteQuery);
     const notes = await Note.find(noteQuery)
       .populate(populationOptions)
-      .sort('-createdAt')
+      .sort([['userId', 1], ['createdAt', 1]])
       .skip(cursor.skip)
       .limit(cursor.limit)
+    
 
-      const authenticatedUserNotes = await Note.find({
-        userId: authenticatedUser,
-        createdAt: dateQuery
-      })
-        .populate(populationOptions)
-        .sort('-createdAt')
-        .skip(cursor.skip)
-        .limit(cursor.limit)
-      
-    const allNotes = authenticatedUserNotes.concat(notes);
-
-    const notesWithFire = await Promise.all(allNotes.map(async (note) => {
+    const notesWithFire = await Promise.all(notes.map(async (note) => {
       const fire = await Fire.findOne({ userId: authenticatedUser, noteId: note._id });
       return { ...note.toObject(), hasFired: !!fire };
     }));
 
-
-    res.json({ data: notesWithFire, totalData: notesWithFire.length });
+    res.json({ data: notesWithFire, totalData });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Server error' });
   }
 };
 
-// todo pagination
 actions.show = async function ({ params: { id } }, res) {
 
   const note = await Note
