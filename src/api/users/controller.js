@@ -1,5 +1,6 @@
 import {ADMIN, User} from './model';
 import {Follow} from "../follow/model";
+import {Like} from "../likes/model";
 import {Participant} from '../participants/model';
 
 import {Types} from "mongoose";
@@ -78,6 +79,7 @@ const [data, count] = await Promise.all([
   const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
+
 
 // (pagination done + totaldata + sort: check:true)
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {

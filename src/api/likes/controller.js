@@ -1,5 +1,10 @@
 import { Like } from './model';
+import { Event } from '../events/model';
 import _ from 'lodash';
+
+
+import mongoose from "mongoose";
+import {Types} from "mongoose";
 
 const actions = {};
 
@@ -14,6 +19,37 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
   res.send({ data, totalData });
 };
+
+actions.showLikedEventsForUser = async function ({ user, querymen: { cursor } }, res) {
+  const match = { userId: mongoose.Types.ObjectId(user._id) };
+  const pipeline = [
+    { $match: match },
+    { $lookup: { from: 'events', localField: 'eventId', foreignField: '_id', as: 'event' } },
+    { $unwind: '$event' },
+    { $replaceRoot: { newRoot: '$event' } },
+    { $lookup: { from: 'users', localField: 'organiserId', foreignField: '_id', as: 'organiser' } },
+    { $unwind: '$organiser' },
+    { $addFields: { 'organiser.password': undefined } },
+    { $lookup: { from: 'likes', localField: '_id', foreignField: 'eventId', as: 'likes' } },
+    { $addFields: { likes: { $size: '$likes' } } },
+    { $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
+    { $addFields: { participants: { $size: '$participants' } } },
+    { $project: { numLikes: 0, numParticipants: 0 } },
+    { $sort: { date: 1 } },
+    { $skip: cursor.skip },
+    { $limit: cursor.limit }
+  ];
+
+  const [data, count] = await Promise.all([
+    Like.aggregate(pipeline),
+    Like.aggregate([{ $match: match }, { $count: 'count' }]),
+  ]);
+
+  const totalData = count.length ? count[0].count : 0;
+  res.send({ data, totalData });
+};
+
+
 
 actions.show = async function ({ params: { id } }, res) {
 
