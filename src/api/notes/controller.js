@@ -22,7 +22,44 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 };
 
 // (pagination done + totaldata + sort: check:true)
-actions.homeNotes = async function({ user, querymen: { query, select, cursor } }, res) {  
+actions.userNotes = async function({ user, querymen: { query, select, cursor } }, res) {  
+  try {
+    const authenticatedUser = user._id;
+    const dateQuery = {};
+    if (query.date) {
+      if (query.date.$gte) {
+        dateQuery.$gte = new Date(query.date.$gte);
+      }
+      if (query.date.$lte) {
+        dateQuery.$lte = new Date(query.date.$lte);
+      }
+    }
+    const noteQuery = {
+      userId: authenticatedUser,
+      createdAt: dateQuery
+    };
+    
+    const totalData = await Note.countDocuments(noteQuery);
+    const notes = await Note.find(noteQuery)
+      .populate(populationOptions)
+      .sort({ createdAt: -1 })
+      .skip(cursor.skip)
+      .limit(cursor.limit)
+
+    const notesWithFire = await Promise.all(notes.map(async (note) => {
+      const fire = await Fire.findOne({ userId: authenticatedUser, noteId: note._id });
+      return { ...note.toObject(), hasFired: !!fire };
+    }));
+
+    res.json({ data: notesWithFire, totalData });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Server error' });
+  }
+};
+
+// (pagination done + totaldata + sort: check:true)
+actions.followedNotes = async function({ user, querymen: { query, select, cursor } }, res) {  
   try {
     const authenticatedUser = user._id;
     const followDocs = await Follow.find({ followerId: authenticatedUser });
@@ -38,17 +75,16 @@ actions.homeNotes = async function({ user, querymen: { query, select, cursor } }
       }
     }
     const noteQuery = {
-      userId: { $in: [authenticatedUser, ...followedIds] },
-      createdAt: dateQuery,
+      userId: { $in: followedIds },
+      createdAt: dateQuery
     };
     
     const totalData = await Note.countDocuments(noteQuery);
     const notes = await Note.find(noteQuery)
       .populate(populationOptions)
-      .sort([['userId', 1], ['createdAt', 1]])
+      .sort({ createdAt: -1 })
       .skip(cursor.skip)
       .limit(cursor.limit)
-    
 
     const notesWithFire = await Promise.all(notes.map(async (note) => {
       const fire = await Fire.findOne({ userId: authenticatedUser, noteId: note._id });
@@ -61,6 +97,7 @@ actions.homeNotes = async function({ user, querymen: { query, select, cursor } }
     res.status(500).json({ error: 'Server error' });
   }
 };
+
 
 actions.show = async function ({ params: { id } }, res) {
 
