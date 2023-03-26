@@ -31,9 +31,13 @@ const EventsSchema = new Schema({
   coverImage: {
 		type: String,
   },
+  discount: {
+    type: Number,
+    default: 0,
+  },
   createdAt: {
     type: Date,
-    default: Date.now(),
+    default: Date.now,
   },
   updatedAt: {
     type: Date,

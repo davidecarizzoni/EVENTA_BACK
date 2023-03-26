@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-const PostSchema = new Schema({
+const DiscountSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     required: true
@@ -9,12 +9,8 @@ const PostSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: true
   },
-  postPic: {
-    type: String,
-    required: true
-  },
-  description: {
-    type: String,
+  discountValue:{
+    type: Number,
   },
   createdAt: {
     type: Date,
@@ -25,20 +21,20 @@ const PostSchema = new Schema({
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-PostSchema.virtual('event', {
+DiscountSchema.virtual('event', {
   ref: 'Event',
   localField: 'eventId',
   foreignField: '_id',
   justOne: true
 });
 
-PostSchema.virtual('user', {
+DiscountSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
   foreignField: '_id',
   justOne: true
 });
 
-const Post = model('Post', PostSchema);
+const Discount = model('Discount', DiscountSchema);
 
-export { Post };
+export { Discount };

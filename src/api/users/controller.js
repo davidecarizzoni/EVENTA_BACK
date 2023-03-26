@@ -65,20 +65,20 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
     { $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
     { $addFields: { participants: { $size: '$participants' } } },
     { $project: { numParticipants: 0 } },
-		{ $sort: { date: 1, name: 1 } },
+    { $sort: { date: 1, _id: 1 } },
     { $skip: cursor.skip },
     { $limit: cursor.limit }
   ];
 
-const [data, count] = await Promise.all([
+	const [data, count] = await Promise.all([
     Participant.aggregate(pipeline),
     Participant.aggregate([{ $match: match }, { $count: 'count' }]),
   ]);
   
   const totalData = count.length ? count[0].count : 0;
+	
   res.send({ data, totalData });
 };
-
 
 // (pagination done + totaldata + sort: check:true)
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
