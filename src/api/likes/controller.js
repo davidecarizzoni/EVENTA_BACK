@@ -35,7 +35,12 @@ actions.showLikedEventsForUser = async function ({ user, querymen: { cursor } },
     { $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
     { $addFields: { participants: { $size: '$participants' } } },
     { $project: { numLikes: 0, numParticipants: 0 } },
-    { $sort: { date: 1 } },
+    {
+      $sort: {
+        date: 1,
+        name: 1
+      }
+    },
     { $skip: cursor.skip },
     { $limit: cursor.limit }
   ];

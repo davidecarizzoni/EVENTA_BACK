@@ -42,7 +42,7 @@ actions.userNotes = async function({ user, querymen: { query, select, cursor } }
     const totalData = await Note.countDocuments(noteQuery);
     const notes = await Note.find(noteQuery)
       .populate(populationOptions)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1, _id: 1 })
       .skip(cursor.skip)
       .limit(cursor.limit)
 
@@ -82,7 +82,7 @@ actions.followedNotes = async function({ user, querymen: { query, select, cursor
     const totalData = await Note.countDocuments(noteQuery);
     const notes = await Note.find(noteQuery)
       .populate(populationOptions)
-      .sort({ createdAt: -1 })
+      .sort({ createdAt: -1, _id: 1 })
       .skip(cursor.skip)
       .limit(cursor.limit)
 

@@ -11,7 +11,6 @@ import {uploadToS3} from "../../services/upload";
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
-// (pagination done + totaldata + sort: check:true)
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
     if (query.date.$gte) {
@@ -85,8 +84,12 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
       }
     },
-    { $sort: cursor.sort },
-    { $sort: { date: 1 } },
+    {
+      $sort: {
+        date: 1,
+        name: 1
+      }
+    },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
@@ -99,29 +102,20 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
   res.send({ data, totalData });
 };
 
-// (pagination done + totaldata + sort: check:true)
 actions.homeEvents = async function({ user, querymen: { query, select, cursor } }, res) {
-  if (query.date) {
-    if (query.date.$gte) {
-      query.date.$gte = new Date(query.date.$gte);
-    }
-    if (query.date.$lte) {
-      query.date.$lte = new Date(query.date.$lte);
-    }
-  }
-
   const userCoordinates = user.position.coordinates;
+  const geoNearStage = {
+    $geoNear: {
+      near: { type: "Point", coordinates: userCoordinates },
+      distanceField: "distance",
+      maxDistance: 150000, // in meters
+      spherical: true,
+      query: query,
+      key: "position",
+    }
+  };
   const pipeline = [
-    {
-      $geoNear: {
-        near: { type: "Point", coordinates: userCoordinates },
-        distanceField: "distance",
-        maxDistance: 150000, // in meters
-        spherical: true,
-        query: query,
-        key: "position",
-      }
-    },
+    geoNearStage,
     {
       $lookup: {
         from: 'likes',
@@ -177,20 +171,26 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
 
       }
     },
-    { $sort: cursor.sort },
-    { $sort: { date: 1 } },
+    {
+      $sort: {
+        date: 1,
+        name: 1
+      }
+    },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
-  
+
+  const countPipeline = [geoNearStage, { $count: 'count' }];
   const [data, count] = await Promise.all([
     Event.aggregate(pipeline),
-    Event.aggregate([{ $match: query }, { $count: 'count' }]),
+    Event.aggregate(countPipeline),
   ]);
-  
+
   const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
+
 
 actions.show = async function ({ user, params: { id } }, res) {
 
@@ -242,7 +242,6 @@ actions.show = async function ({ user, params: { id } }, res) {
   });
 };
 
-// (pagination done + totaldata + sort: check:true)
 actions.participants = async function ({ params: { id }, querymen: { query, cursor } }, res) {
   const { search } = query;
   const pipeline = [

@@ -14,7 +14,7 @@ const actions = {};
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await User.find(query)
 	.skip(cursor.skip)
-	.sort({'name':1})
+	.sort({'name': 1, '_id': 1})
 	.limit(cursor.limit)
 	.sort(cursor.sort);
 	
@@ -65,7 +65,7 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
     { $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
     { $addFields: { participants: { $size: '$participants' } } },
     { $project: { numParticipants: 0 } },
-		{ $sort: { date: 1 } },
+		{ $sort: { date: 1, name: 1 } },
     { $skip: cursor.skip },
     { $limit: cursor.limit }
   ];
@@ -122,7 +122,7 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
         "followed.role": role || { $exists: true }
       }
     },
-		{ $sort: { "followed.name": 1 }},
+		{ $sort: { "followed.name": 1, "followed._id": 1 }},
 		{ $skip: cursor.skip },
 		{ $limit: cursor.limit },
   ];
@@ -166,7 +166,7 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 				]
 			} : { }
 		},
-		{ $sort: { "follower.name": 1 }},
+		{ $sort: { "follower.name": 1, "_id": 1 }},
 		{ $skip: cursor.skip },
 		{ $limit: cursor.limit },
 	];

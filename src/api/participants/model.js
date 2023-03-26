@@ -11,18 +11,12 @@ const ParticipantsSchema = new Schema({
   },
   createdAt: {
     type: Date,
+    default: Date.now(),
   },
   updatedAt: {
     type: Date,
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
-
-// ParticipantsSchema.virtual('event', {
-//   ref: 'Event',
-//   localField: 'eventId',
-//   foreignField: '_id',
-//   justOne: true
-// });
 
 ParticipantsSchema.virtual('user', {
   ref: 'User',
