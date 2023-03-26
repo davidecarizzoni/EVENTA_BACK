@@ -84,14 +84,6 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
 // (pagination done + totaldata + sort: check:true)
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
   const { search, role } = query;
-	
-  const matchStage = {
-    followerId: Types.ObjectId(id)
-  };
-
-  if (role) {
-    matchStage["follower.role"] = role;
-  }
 
   const match = {
 		followerId: Types.ObjectId(id),
@@ -128,12 +120,21 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
 		{ $limit: cursor.limit },
   ];
 	
-  const [data, count] = await Promise.all([
-    Follow.aggregate(pipeline),
-    Follow.aggregate([{ $match: match }, { $count: 'count' }]),
-  ]);
-
-  const totalData = count.length ? count[0].count : 0;
+  const countPipeline = [
+		{ $match: match },
+		{ $lookup: { from: "users", localField: "followedId", foreignField: "_id", as: "followed" } },
+		{ $unwind: "$followed" },
+		{ $match: { "followed.role": role || { $exists: true } } },
+		{ $count: 'count' }
+	];
+	
+	const [data, count] = await Promise.all([
+		Follow.aggregate(pipeline),
+		Follow.aggregate(countPipeline),
+	]);
+	
+	const totalData = count.length ? count[0].count : 0;
+	
   res.send({ data, totalData })
 };
 
