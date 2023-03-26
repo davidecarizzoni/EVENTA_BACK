@@ -50,7 +50,7 @@ actions.show = async function ({ user, params: { id }, res }) {
   });
 };
 
-// (pagination done + totaldata + sort: check:true)
+
 actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor } }, res) {
 
   const match = { userId: mongoose.Types.ObjectId(id) };
@@ -70,15 +70,16 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
     { $limit: cursor.limit }
   ];
 
-	const [data, count] = await Promise.all([
+  const [data, count] = await Promise.all([
     Participant.aggregate(pipeline),
     Participant.aggregate([{ $match: match }, { $count: 'count' }]),
   ]);
   
   const totalData = count.length ? count[0].count : 0;
-	
+  
   res.send({ data, totalData });
 };
+
 
 // (pagination done + totaldata + sort: check:true)
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
