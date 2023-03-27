@@ -1,6 +1,7 @@
 import {Event} from './model';
 import {Participant} from '../participants/model';
 import {Like} from '../likes/model';
+import {Post} from '../posts/model';
 
 import mongoose from "mongoose";
 import {Types} from "mongoose";
@@ -10,6 +11,8 @@ import {uploadToS3} from "../../services/upload";
 
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
+const populationOptions2 = ['user', 'event'];
+
 
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
@@ -242,7 +245,20 @@ actions.show = async function ({ user, params: { id } }, res) {
   });
 };
 
-actions.participants = async function ({ params: { id }, querymen: { query, cursor } }, res) {
+actions.showPostsForEvent = async function ({ params: { id }, querymen: { cursor } }, res) {
+  const data = await Post.find({ eventId: id })
+    .skip(cursor.skip)
+    .limit(cursor.limit)
+    .sort({ createdAt: -1 })
+    .populate(populationOptions2)
+    .exec();
+
+  const totalData = await Post.countDocuments({ eventId: id });
+
+  res.send({ data, totalData });
+};
+
+actions.showParticipantsForEvent = async function ({ params: { id }, querymen: { query, cursor } }, res) {
   const { search } = query;
   const pipeline = [
     {

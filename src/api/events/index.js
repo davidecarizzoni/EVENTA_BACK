@@ -46,7 +46,9 @@ router.get('/home', token({ required: true }), middleware(queryBody), actions.ho
 
 router.get('/:id', token({ required: true }), actions.show);
 
-router.get('/:id/participants', token({ required: true }), middleware(queryBody), actions.participants);
+router.get('/:id/participants', token({ required: true }), middleware(queryBody), actions.showParticipantsForEvent);
+
+router.get('/:id/posts', token({ required: true }), middleware(queryBody), actions.showPostsForEvent);
 
 
 router.post('/:id/participate', token({ required: true }), actions.participate);
