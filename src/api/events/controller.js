@@ -13,7 +13,6 @@ const actions = {};
 const populationOptions = ['organiser', 'participants'];
 const populationOptions2 = ['user', 'event'];
 
-
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
     if (query.date.$gte) {
@@ -35,10 +34,21 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     {
       $lookup: {
         from: 'likes',
-        localField: '_id',
-        foreignField: 'eventId',
-        as: 'likes',
-      },
+        let: { eventId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$type', 'event'] },
+                  { $eq: ['$objectId', '$$eventId'] }
+                ]
+              }
+            }
+          }
+        ],
+        as: 'likes'
+      }
     },
     {
       $addFields: {
@@ -122,10 +132,21 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
     {
       $lookup: {
         from: 'likes',
-        localField: '_id',
-        foreignField: 'eventId',
-        as: 'likes',
-      },
+        let: { eventId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$type', 'event'] },
+                  { $eq: ['$objectId', '$$eventId'] }
+                ]
+              }
+            }
+          }
+        ],
+        as: 'likes'
+      }
     },
     {
       $addFields: {
@@ -338,7 +359,8 @@ actions.like = async function ({ user, params: { id } }, res) {
 	try {
 		const like = await Like.create({
 			userId: user._id,
-			eventId: id,
+			objectId: id,
+			type: 'event'
 		})
 
 		res.send(like);
@@ -352,8 +374,9 @@ actions.like = async function ({ user, params: { id } }, res) {
 
 actions.unlike = async function ({ user, params: { id } }, res) {
 	const like = await Like.findOne({
-		userId: user._id,
-		eventId: id,
+    userId: user._id,
+    objectId: id,
+    type: 'event'
 	})
 
 	if (_.isNil(like)) {

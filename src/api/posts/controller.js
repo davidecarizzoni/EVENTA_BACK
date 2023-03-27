@@ -1,5 +1,6 @@
 import { Post } from './model';
 import {Follow} from "../follow/model";
+import {Like} from "../likes/model";
 
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
@@ -49,6 +50,39 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
 
 	  res.send({ data, totalData });
 
+};
+
+actions.like = async function ({ user, params: { id } }, res) {
+
+	try {
+		const like = await Like.create({
+			userId: user._id,
+			objectId: id,
+			type: 'post'
+		})
+
+		res.send(like);
+	} catch (err) {
+		if (err.code === 11000) {
+			return res.status(409)
+		}
+		res.status(500).send(err);
+	}
+};
+
+actions.unlike = async function ({ user, params: { id } }, res) {
+	const like = await Like.findOne({
+    userId: user._id,
+    objectId: id,
+    type: 'post'
+	})
+
+	if (_.isNil(like)) {
+		return res.status(404).send();
+	}
+
+	await like.delete();
+	res.status(204).send();
 };
 
 actions.show = async function ({ params: { id } }, res) {

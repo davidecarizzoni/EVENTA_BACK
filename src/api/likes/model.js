@@ -1,12 +1,17 @@
 import { Schema, model } from 'mongoose';
 
 const LikeSchema = new Schema({
-  eventId: {
+  objectId: {
     type: Schema.Types.ObjectId,
     required: true
   },
   userId: {
     type: Schema.Types.ObjectId,
+    required: true
+  },
+  type: {
+    type: String,
+    enum: ['event', 'post'],
     required: true
   },
   createdAt: {
@@ -17,21 +22,6 @@ const LikeSchema = new Schema({
     type: Date,
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
-
-LikeSchema.virtual('event', {
-  ref: 'Event',
-  localField: 'eventId',
-  foreignField: '_id',
-  justOne: true
-});
-
-LikeSchema.virtual('user', {
-  ref: 'User',
-  localField: 'userId',
-  foreignField: '_id',
-  justOne: true
-});
-
 
 
 const Like = model('Like', LikeSchema);
