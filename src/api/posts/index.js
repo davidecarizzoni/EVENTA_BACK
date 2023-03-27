@@ -27,6 +27,8 @@ const router = new Router();
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
+router.get('/home', token({ required: true }), middleware(queryBody), actions.homePosts);
+
 router.get('/:id', token({ required: true }), actions.show);
 
 router.post('/', token({ required: true }), actions.create);

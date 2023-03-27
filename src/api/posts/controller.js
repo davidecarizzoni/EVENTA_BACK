@@ -1,4 +1,5 @@
 import { Post } from './model';
+import {Follow} from "../follow/model";
 
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
@@ -19,6 +20,35 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   const totalData = await Post.countDocuments(query);
 
   res.send({ data, totalData });
+};
+
+
+actions.homePosts = async function({ user, querymen: { query, select, cursor } }, res) {  
+
+  const authenticatedUser = user._id;
+  const followDocs = await Follow.find({ followerId: authenticatedUser });
+  const followedIds = followDocs.map(doc => doc.followedId);
+
+	console.log(followedIds)
+
+
+  const postQuery = {
+		$or: [
+			{ userId: authenticatedUser },
+			{ userId: { $in: followedIds } }
+		]
+	};
+	
+    
+  const totalData = await Post.countDocuments(postQuery);
+  const data = await Post.find(postQuery)
+    .populate(populationOptions)
+    .sort({ createdAt: -1, _id: 1 })
+    .skip(cursor.skip)
+    .limit(cursor.limit)
+
+	  res.send({ data, totalData });
+
 };
 
 actions.show = async function ({ params: { id } }, res) {
