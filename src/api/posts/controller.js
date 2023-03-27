@@ -68,7 +68,7 @@ actions.update = ({ body, params }, res) => {
 };
 
 
-actions.postPic = async ( req, res) => {
+actions.postImage = async ( req, res) => {
 	let post = await Post.findById(req.params.id)
 
 	if (_.isNil(post)) {
@@ -80,7 +80,7 @@ actions.postPic = async ( req, res) => {
 	}
 
 	try {
-		post.postPic = await uploadToS3(req.file)
+		post.postImage = await uploadToS3(req.file)
 		await post.save()
 		res.send(post)
 	} catch (err) {

@@ -33,7 +33,7 @@ router.post('/', token({ required: true }), actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
 
-router.put('/:id/postPic', token({ required: false }), upload.single("file"), actions.postPic);
+router.put('/:id/postImage', token({ required: false }), upload.single("file"), actions.postImage);
 
 router.delete('/:id', token({ required: true }), actions.destroy);
 

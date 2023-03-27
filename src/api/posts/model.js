@@ -9,11 +9,11 @@ const PostSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: true
   },
-  postPic: {
+  postImage: {
     type: String,
     required: true
   },
-  description: {
+  caption: {
     type: String,
   },
   createdAt: {
