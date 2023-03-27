@@ -11,7 +11,6 @@ const PostSchema = new Schema({
   },
   postImage: {
     type: String,
-    required: true
   },
   caption: {
     type: String,
