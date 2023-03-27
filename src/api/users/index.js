@@ -40,6 +40,8 @@ router.get('/:id', admin, actions.show);
 
 router.get('/:id/events', token({ required: true }), middleware(followerBody), actions.showEventsForUser);
 
+router.get('/:id/posts', token({ required: true }), middleware(followerBody), actions.showPostsForUser);
+
 router.get('/:id/followed', token({ required: true }), middleware(followerBody), actions.followed);
 
 router.get('/:id/followers', token({ required: true }), middleware(followerBody), actions.followers);

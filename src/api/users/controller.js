@@ -1,6 +1,8 @@
 import {ADMIN, User} from './model';
 import {Follow} from "../follow/model";
 import {Participant} from '../participants/model';
+import {Post} from '../posts/model';
+
 
 import {Types} from "mongoose";
 import mongoose from "mongoose";
@@ -9,6 +11,8 @@ import {uploadToS3} from "../../services/upload";
 import _ from 'lodash';
 
 const actions = {};
+const populationOptions = ['user', 'event'];
+
 
 // (pagination done + totaldata + sort: check:true)
 actions.index = async function ({ querymen: { query, cursor } }, res) {
@@ -50,7 +54,6 @@ actions.show = async function ({ user, params: { id }, res }) {
   });
 };
 
-
 actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor } }, res) {
 
   const match = { userId: mongoose.Types.ObjectId(id) };
@@ -80,6 +83,18 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
   res.send({ data, totalData });
 };
 
+actions.showPostsForUser = async function ({ params: { id }, querymen: { cursor, query } }, res) {
+  const data = await Post.find({ userId: id })
+    .skip(cursor.skip)
+    .limit(cursor.limit)
+    .sort({ createdAt: -1 })
+    .populate(populationOptions)
+    .exec();
+
+  const totalData = await Post.countDocuments({ userId: id });
+
+  res.send({ data, totalData });
+};
 
 // (pagination done + totaldata + sort: check:true)
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
