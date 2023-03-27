@@ -5,6 +5,8 @@ import {Like} from "../likes/model";
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
+import mongoose from "mongoose";
+import {Types} from "mongoose";
 
 const actions = {};
 const populationOptions = ['user', 'event'];
@@ -23,34 +25,93 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-
 actions.homePosts = async function({ user, querymen: { query, select, cursor } }, res) {  
-
   const authenticatedUser = user._id;
   const followDocs = await Follow.find({ followerId: authenticatedUser });
   const followedIds = followDocs.map(doc => doc.followedId);
 
-	console.log(followedIds)
+  const pipeline = [
+		{
+			$match: {
+				$or: [
+					{ userId: authenticatedUser },
+					{ userId: { $in: followedIds } 
+				}                ]
+      }
+    },
+    {
+			$lookup: {
+				from: 'likes',
+				let: { eventId: '$_id' },
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [
+									{ $eq: ['$type', 'post'] },
+									{ $eq: ['$objectId', '$$eventId'] }
+								]
+							}
+						}
+					}
+				],
+				as: 'likes'
+			}
+		},
+    {
+      $addFields: {
+        hasLiked: {
+          $in: [mongoose.Types.ObjectId(user._id), '$likes.userId']
+        }
+      }
+    },
+    {
+      $addFields: {
+        likes: {
+          $cond: {
+            if: { $isArray: "$likes" },
+            then: { $size: "$likes" },
+            else: 0
+          }
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $lookup: {
+        from: "events",
+        localField: "eventId",
+        foreignField: "_id",
+        as: "event"
+      }
+    },
+    {
+      $sort: { createdAt: -1, _id: 1 }
+    },
+    {
+      $skip: cursor.skip
+    },
+    {
+      $limit: cursor.limit
+    }
+  ];
 
+  const [data, totalData] = await Promise.all([
+		Post.aggregate(pipeline).exec(),
+		Post.countDocuments(pipeline[0].$match)
+  ]);
 
-  const postQuery = {
-		$or: [
-			{ userId: authenticatedUser },
-			{ userId: { $in: followedIds } }
-		]
-	};
-	
-    
-  const totalData = await Post.countDocuments(postQuery);
-  const data = await Post.find(postQuery)
-    .populate(populationOptions)
-    .sort({ createdAt: -1, _id: 1 })
-    .skip(cursor.skip)
-    .limit(cursor.limit)
-
-	  res.send({ data, totalData });
-
+  res.send({ data, totalData });
 };
+
+
 
 actions.like = async function ({ user, params: { id } }, res) {
 
