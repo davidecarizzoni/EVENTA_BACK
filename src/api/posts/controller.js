@@ -2,7 +2,7 @@ import { Post } from './model';
 import {Follow} from "../follow/model";
 import {Like} from "../likes/model";
 
-import _ from 'lodash';
+import _, { matches } from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
 import mongoose from "mongoose";
@@ -30,14 +30,16 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
   const followDocs = await Follow.find({ followerId: authenticatedUser });
   const followedIds = followDocs.map(doc => doc.followedId);
 
+	const match = {
+		$or: [
+			{ userId: authenticatedUser },
+			{ userId: { $in: followedIds }}
+		]
+	}
+
   const pipeline = [
 		{
-			$match: {
-				$or: [
-					{ userId: authenticatedUser },
-					{ userId: { $in: followedIds }}
-				]
-      }
+			$match: match
     },
     {
 			$lookup: {
@@ -109,10 +111,11 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
     }
   ];
 
-  const [data, totalData] = await Promise.all([
-		Post.aggregate(pipeline).exec(),
-		Post.countDocuments(pipeline[0].$match)
+  const [data, count] = await Promise.all([
+    Post.aggregate(pipeline),
+    Post.aggregate([{ $match: match }, { $count: 'count' }]),
   ]);
+	const totalData = count.length ? count[0].count : 0;
 
   res.send({ data, totalData });
 };

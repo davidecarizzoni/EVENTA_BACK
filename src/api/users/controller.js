@@ -83,15 +83,87 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
   res.send({ data, totalData });
 };
 
-actions.showPostsForUser = async function ({ params: { id }, querymen: { cursor, query } }, res) {
-  const data = await Post.find({ userId: id })
-    .skip(cursor.skip)
-    .limit(cursor.limit)
-    .sort({ createdAt: -1 })
-    .populate(populationOptions)
-    .exec();
+actions.showPostsForUser = async function ({ user, params: { id }, querymen: { cursor, query } }, res) {
 
-  const totalData = await Post.countDocuments({ userId: id });
+  const match = { userId: mongoose.Types.ObjectId(id) };
+  
+  const pipeline = [
+    { $match: match },
+    {
+			$lookup: {
+				from: 'likes',
+				let: { eventId: '$_id' },
+				pipeline: [
+					{
+						$match: {
+							$expr: {
+								$and: [
+									{ $eq: ['$type', 'post'] },
+									{ $eq: ['$objectId', '$$eventId'] }
+								]
+							}
+						}
+					}
+				],
+				as: 'likes'
+			}
+		},
+    {
+      $addFields: {
+        hasLiked: {
+          $in: [mongoose.Types.ObjectId(user._id), '$likes.userId']
+        }
+      }
+    },
+    {
+      $addFields: {
+        likes: {
+          $cond: {
+            if: { $isArray: "$likes" },
+            then: { $size: "$likes" },
+            else: 0
+          }
+        },
+      },
+    },
+    {
+			$lookup: {
+				from: 'events',
+				localField: 'eventId',
+				foreignField: '_id',
+				as: 'event'
+			}
+		},
+		{
+			$lookup: {
+				from: 'users',
+				localField: 'userId',
+				foreignField: '_id',
+				as: 'user'
+			}
+		},
+		{
+			$addFields: {
+				event: { $arrayElemAt: ['$event', 0] },
+				user: { $arrayElemAt: ['$user', 0] }
+			}
+		},		
+    {
+      $sort: { createdAt: -1, _id: 1 }
+    },
+    {
+      $skip: cursor.skip
+    },
+    {
+      $limit: cursor.limit
+    }
+  ];
+
+  const [data, count] = await Promise.all([
+    Post.aggregate(pipeline),
+    Post.aggregate([{ $match: match }, { $count: 'count' }]),
+  ]);
+	const totalData = count.length ? count[0].count : 0;
 
   res.send({ data, totalData });
 };
