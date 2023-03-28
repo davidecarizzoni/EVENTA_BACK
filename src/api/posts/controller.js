@@ -35,8 +35,8 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
 			$match: {
 				$or: [
 					{ userId: authenticatedUser },
-					{ userId: { $in: followedIds } 
-				}                ]
+					{ userId: { $in: followedIds }}
+				]
       }
     },
     {
@@ -77,21 +77,27 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
       },
     },
     {
-      $lookup: {
-        from: "users",
-        localField: "userId",
-        foreignField: "_id",
-        as: "user"
-      }
-    },
-    {
-      $lookup: {
-        from: "events",
-        localField: "eventId",
-        foreignField: "_id",
-        as: "event"
-      }
-    },
+			$lookup: {
+				from: 'events',
+				localField: 'eventId',
+				foreignField: '_id',
+				as: 'event'
+			}
+		},
+		{
+			$lookup: {
+				from: 'users',
+				localField: 'userId',
+				foreignField: '_id',
+				as: 'user'
+			}
+		},
+		{
+			$addFields: {
+				event: { $arrayElemAt: ['$event', 0] },
+				user: { $arrayElemAt: ['$user', 0] }
+			}
+		},		
     {
       $sort: { createdAt: -1, _id: 1 }
     },
