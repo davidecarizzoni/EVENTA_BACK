@@ -9,9 +9,6 @@ const DiscountSchema = new Schema({
     type: Schema.Types.ObjectId,
     required: true
   },
-  discountValue:{
-    type: Number,
-  },
   createdAt: {
     type: Date,
     default: Date.now,

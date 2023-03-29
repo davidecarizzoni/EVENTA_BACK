@@ -1,9 +1,5 @@
 import { Discount } from './model';
 
-import _ from 'lodash';
-import {uploadToS3} from "../../services/upload";
-
-
 const actions = {};
 const populationOptions = ['user', 'event'];
 
