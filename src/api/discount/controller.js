@@ -38,7 +38,7 @@ actions.create = async ({ body }, res) => {
     return null; // to be changed
   }
 
-  res.send(v);
+  res.send(discount);
 };
 
 actions.update = ({ body, params }, res) => {
