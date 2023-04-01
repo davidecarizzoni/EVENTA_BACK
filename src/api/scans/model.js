@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 
-const DiscountSchema = new Schema({
+const ScanSchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
     required: true
@@ -18,20 +18,20 @@ const DiscountSchema = new Schema({
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-DiscountSchema.virtual('event', {
+ScanSchema.virtual('event', {
   ref: 'Event',
   localField: 'eventId',
   foreignField: '_id',
   justOne: true
 });
 
-DiscountSchema.virtual('user', {
+ScanSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
   foreignField: '_id',
   justOne: true
 });
 
-const Discount = model('Discount', DiscountSchema);
+const Scan = model('Scan', ScanSchema);
 
-export { Discount };
+export { Scan };

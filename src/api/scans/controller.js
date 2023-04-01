@@ -1,75 +1,75 @@
-import { Discount } from './model';
+import { Scan } from './model';
 
 const actions = {};
 const populationOptions = ['user', 'event'];
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Discount.find(query)
+  const data = await Scan.find(query)
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
 	.populate(populationOptions)
 	.exec();
 
-  const totalData = await Discount.countDocuments(query);
+  const totalData = await Scan.countDocuments(query);
 
   res.send({ data, totalData });
 };
 
 actions.show = async function ({ params: { id } }, res) {
 
-  const discount = await Discount
+  const scan = await Scan
 	.findById(id)
 	.exec();
 
-  if (!discount) {
+  if (!scan) {
     return res.status(404).send();
   }
 
-  res.send(discount);
+  res.send(scan);
 };
 
 actions.create = async ({ body }, res) => {
-  let discount;
+  let scan;
   try {
-    discount = await Discount.create(body);
+    scan = await Scan.create(body);
   } catch (err) {
     return null; // to be changed
   }
 
-  res.send(discount);
+  res.send(scan);
 };
 
 actions.update = ({ body, params }, res) => {
-	return Discount.findById(params.id)
-		.then(async (discount) => {
-			if (!discount) {
+	return Scan.findById(params.id)
+		.then(async (scan) => {
+			if (!scan) {
 				return null;
 			}
 			for (const key in body) {
 				if (
 					!_.isUndefined(body[key]) &&
-					discount[key] !== body[key]
+					scan[key] !== body[key]
 				) {
-					discount[key] = null;
-					discount[key] = body[key];
-					discount.markModified(key);
+					scan[key] = null;
+					scan[key] = body[key];
+					scan.markModified(key);
 				}
 			}
-			await discount.save();
+			await scan.save();
 
-			res.send(discount);
+			res.send(scan);
 		});
 };
 actions.destroy = async function ({ params: { id } }, res) {
-  const discount = await Discount.findById(id);
+  const scan = await Scan.findById(id);
 
-  if (_.isNil(discount)) {
+  if (_.isNil(scan)) {
     return res.status(404).send();
   }
 
-  await discount.delete();
+  await scan.delete();
 
   res.status(204).send();
 };
