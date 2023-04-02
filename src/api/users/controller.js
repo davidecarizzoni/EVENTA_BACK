@@ -21,7 +21,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.sort({'name': 1, '_id': 1})
 	.limit(cursor.limit)
 	.sort(cursor.sort);
-	
+
   const totalData = await User.countDocuments(query);
   res.send({ data, totalData });
 };
@@ -39,7 +39,7 @@ actions.show = async function ({ user, params: { id }, res }) {
   const followed = await Follow.countDocuments({ followerId: id });
 	const posts = await Post.countDocuments({ userId: user.id })
 
-	
+
   const isFollowing = !!(await Follow.findOne({
     followerId: mongoose.Types.ObjectId(user._id),
     followedId: mongoose.Types.ObjectId(id)
@@ -53,7 +53,7 @@ actions.show = async function ({ user, params: { id }, res }) {
     ...userCheck,
     followers,
     followed,
-		posts, 
+		posts,
     isFollowing,
   });
 };
@@ -81,16 +81,16 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
     Participant.aggregate(pipeline),
     Participant.aggregate([{ $match: match }, { $count: 'count' }]),
   ]);
-  
+
   const totalData = count.length ? count[0].count : 0;
-  
+
   res.send({ data, totalData });
 };
 
 actions.showPostsForUser = async function ({ user, params: { id }, querymen: { cursor, query } }, res) {
 
   const match = { userId: mongoose.Types.ObjectId(id) };
-  
+
   const pipeline = [
     { $match: match },
     {
@@ -151,7 +151,7 @@ actions.showPostsForUser = async function ({ user, params: { id }, querymen: { c
 				event: { $arrayElemAt: ['$event', 0] },
 				user: { $arrayElemAt: ['$user', 0] }
 			}
-		},		
+		},
     {
       $sort: { createdAt: -1, _id: 1 }
     },
@@ -185,7 +185,7 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
 			]
 		} : {})
 	}
-	
+
   const pipeline = [
     {
       $match: match
@@ -210,7 +210,7 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
 		{ $skip: cursor.skip },
 		{ $limit: cursor.limit },
   ];
-	
+
   const countPipeline = [
 		{ $match: match },
 		{ $lookup: { from: "users", localField: "followedId", foreignField: "_id", as: "followed" } },
@@ -218,14 +218,14 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
 		{ $match: { "followed.role": role || { $exists: true } } },
 		{ $count: 'count' }
 	];
-	
+
 	const [data, count] = await Promise.all([
 		Follow.aggregate(pipeline),
 		Follow.aggregate(countPipeline),
 	]);
-	
+
 	const totalData = count.length ? count[0].count : 0;
-	
+
   res.send({ data, totalData })
 };
 
@@ -424,6 +424,20 @@ actions.destroy = async function ({ params: { id } }, res) {
   await user.delete();
 
   res.status(204).send();
+};
+
+actions.deleteMe = async function ({ user }, res) {
+	console.debug(user)
+	if (_.isNil(user)) {
+		return res.status(404).send();
+	}
+
+	if (user.isDeleted) {
+		return res.status(400).send({ message: 'current user is already deleted' });
+	}
+
+	const obliteratedUser = await user.obscureFields();
+	res.status(200).send(obliteratedUser);
 };
 
 export { actions };

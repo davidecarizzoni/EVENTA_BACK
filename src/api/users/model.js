@@ -1,6 +1,6 @@
 import { Schema, model } from 'mongoose';
 import bcrypt from 'bcryptjs';
-
+import { split } from 'lodash';
 export const ADMIN = 'admin';
 export const USER = 'user';
 export const ORGANISER = 'organiser';
@@ -52,7 +52,11 @@ const UsersSchema = new Schema({
   },
   updatedAt: {
     type: Date,
-  }
+  },
+	isDeleted: {
+		type: Boolean,
+		default: false
+	}
 });
 
 UsersSchema.index({ position: '2dsphere' });
@@ -80,6 +84,17 @@ UsersSchema.methods.authenticate = async function (password) {
   const result = await bcrypt.compare(password, user.password);
 
   return result ? this : false;
+};
+
+UsersSchema.methods.obscureFields = async function () {
+	console.log(this)
+	const email = split(this.email, '@')
+	this.email = `${new Date().getTime()}@${email[1]}`
+	this.name = 'deleted'
+	this.username = 'deleted'
+	this.isDeleted = true;
+
+	return this.save();
 };
 
 
