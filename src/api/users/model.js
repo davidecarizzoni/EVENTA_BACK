@@ -56,6 +56,10 @@ const UsersSchema = new Schema({
 	isDeleted: {
 		type: Boolean,
 		default: false
+	},
+	expoPushToken: {
+		type: String,
+		required: null
 	}
 });
 

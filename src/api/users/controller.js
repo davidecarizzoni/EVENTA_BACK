@@ -25,6 +25,8 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.limit(cursor.limit)
 	.sort(cursor.sort);
 
+	console.log(data)
+
   const totalData = await User.countDocuments(newQuery);
   res.send({ data, totalData });
 };

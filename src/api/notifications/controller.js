@@ -1,5 +1,8 @@
 import { Notification } from './model';
 import _ from 'lodash';
+import {Follow} from "../follow/model";
+import {Post} from "../posts/model";
+import {sendPushNotification} from "../../services/notifications";
 
 
 const actions = {};
@@ -62,6 +65,19 @@ actions.update = ({ body, params }, res) => {
 
 			res.send(notification);
 		});
+};
+
+actions.test = async ({ user }, res) => {
+	if (_.isNil(user.expoPushToken)) {
+		return res.status(404).send({
+			message: 'User expoPushToken not found'
+		});
+	}
+	await sendPushNotification({
+		expoPushToken: user.expoPushToken,
+		text: 'Test',
+		title: 'Ma io che cazzo ne so'
+	})
 };
 
 
