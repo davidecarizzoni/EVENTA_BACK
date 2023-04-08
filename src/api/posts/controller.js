@@ -222,6 +222,7 @@ actions.postImage = async ( req, res) => {
 		res.status(500).send(err);
 	}
 };
+
 actions.destroy = async function ({ params: { id } }, res) {
   const post = await Post.findById(id);
 
