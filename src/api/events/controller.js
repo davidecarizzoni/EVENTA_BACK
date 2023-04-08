@@ -8,6 +8,8 @@ import {Types} from "mongoose";
 
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
+import {sendPushNotificationToAllUsers, sendPushNotificationToUsersGroup} from "../../services/notifications";
+import {User} from "../users/model";
 
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
@@ -109,7 +111,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     Event.aggregate(pipeline),
     Event.aggregate([{ $match: query }, { $count: 'count' }]),
   ]);
-  
+
   const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
@@ -266,9 +268,9 @@ actions.show = async function ({ user, params: { id } }, res) {
 };
 
 actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { cursor } }, res) {
-  
+
   const match = { eventId: mongoose.Types.ObjectId(id) };
-  
+
   const pipeline = [
     { $match: match },
     {
@@ -329,7 +331,7 @@ actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { 
 				event: { $arrayElemAt: ['$event', 0] },
 				user: { $arrayElemAt: ['$user', 0] }
 			}
-		},		
+		},
     {
       $sort: { createdAt: -1, _id: 1 }
     },
@@ -458,21 +460,20 @@ actions.unlike = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
-actions.create = async ({ body }, res) => {
-  let participant;
-  try {
-    participant = await Participant.create(body);
-  } catch (err) {
-    return null; // to be changed
-  }
-
-  res.send(participant);
-};
-
-actions.create = async ({ body }, res) => {
+actions.create = async ({user},{ body }, res) => {
 	let event;
 	try {
-		event = await Event.create(body);
+		event = await Event.create(body)
+		const organiser = await User.findById(body.organiserId).lean()
+		//get user that follow organizer
+		console.debug(organiser)
+		await sendPushNotificationToAllUsers({
+			title: `New Event from ${organiser.name}`,
+			text: body.name,
+			extraData: {
+				event
+			},
+		})
 	} catch (err) {
 		return res.status(409).send({
 			valid: false,

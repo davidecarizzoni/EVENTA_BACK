@@ -65,4 +65,6 @@ router.post('/:id/follow', token({ required: true }), actions.follow);
 
 router.get('/:id/followers', token({ required: true }), middleware(followerBody), actions.followers);
 
+
+
 export default router;

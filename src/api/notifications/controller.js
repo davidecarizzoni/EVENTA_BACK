@@ -2,7 +2,7 @@ import { Notification } from './model';
 import _ from 'lodash';
 import {Follow} from "../follow/model";
 import {Post} from "../posts/model";
-import {sendPushNotification} from "../../services/notifications";
+import {sendPushNotification, sendPushNotificationToAllUsers} from "../../services/notifications";
 
 
 const actions = {};
@@ -68,16 +68,19 @@ actions.update = ({ body, params }, res) => {
 };
 
 actions.test = async ({ user }, res) => {
-	if (_.isNil(user.expoPushToken)) {
-		return res.status(404).send({
-			message: 'User expoPushToken not found'
+	try {
+		await sendPushNotificationToAllUsers({
+			text: 'Test',
+			title: 'Ma io che cazzo ne so',
+			extraData: { bho: 'nculet'}
+		})
+		res.status(200).send()
+	} catch (e) {
+		console.error(e)
+		res.status(500).send({
+			message: 'Error sending notification'
 		});
 	}
-	await sendPushNotification({
-		expoPushToken: user.expoPushToken,
-		text: 'Test',
-		title: 'Ma io che cazzo ne so'
-	})
 };
 
 

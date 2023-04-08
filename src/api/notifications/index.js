@@ -14,7 +14,7 @@ router.post('/', token({ required: true }), actions.create);
 
 router.put('/:id', token({ required: true }), actions.update);
 
-router.put('/test', token({ required: true }), actions.test);
+router.post('/test', token({ required: true }), actions.test);
 
 
 export default router;
