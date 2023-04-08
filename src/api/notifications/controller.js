@@ -7,14 +7,14 @@ import {sendPushNotification} from "../../services/notifications";
 
 const actions = {};
 
-actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Notification.find(query)
+actions.index = async function ({user, querymen: { query, cursor } }, res) {
+  const data = await Notification.find({userId: user._id})
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
 	.exec();
 
-  const totalData = await Notification.countDocuments(query);
+  const totalData = await Notification.countDocuments({userId: user._id});
 
   res.send({ data, totalData });
 };

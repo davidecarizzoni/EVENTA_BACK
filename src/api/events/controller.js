@@ -11,7 +11,6 @@ import {uploadToS3} from "../../services/upload";
 
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
-const populationOptions2 = ['user', 'event'];
 
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {

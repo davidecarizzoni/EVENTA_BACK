@@ -5,13 +5,8 @@ import { middleware } from 'querymen';
 
 const router = new Router();
 
-const queryBody = {
-	userId: {
-		type: String
-	},
-}
 
-router.get('/me', token({ required: true }), middleware(queryBody), actions.index);
+router.get('/me', token({ required: true }), middleware(), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
 
