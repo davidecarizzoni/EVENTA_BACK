@@ -538,9 +538,7 @@ actions.destroy = async function ({ params: { id } }, res) {
     return res.status(404).send();
   }
 
-  await event.delete();
-
-  res.status(204).send();
-};
+	const obliteratedEvent = await event.obscureFields();
+	res.status(200).send(obliteratedEvent);};
 
 export { actions };

@@ -3,7 +3,6 @@ import {Follow} from "../follow/model";
 import {Participant} from '../participants/model';
 import {Post} from '../posts/model';
 
-
 import {Types} from "mongoose";
 import mongoose from "mongoose";
 
@@ -16,13 +15,17 @@ const populationOptions = ['user', 'event'];
 
 // (pagination done + totaldata + sort: check:true)
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await User.find(query)
+	const newQuery = {
+		...query,
+		isDeleted: false,
+	}
+  const data = await User.find(newQuery)
 	.skip(cursor.skip)
 	.sort({'name': 1, '_id': 1})
 	.limit(cursor.limit)
 	.sort(cursor.sort);
 
-  const totalData = await User.countDocuments(query);
+  const totalData = await User.countDocuments(newQuery);
   res.send({ data, totalData });
 };
 

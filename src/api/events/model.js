@@ -42,9 +42,23 @@ const EventsSchema = new Schema({
   updatedAt: {
     type: Date,
   },
+  isDeleted: {
+		type: Boolean,
+		default: false
+	}
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
 EventsSchema.index({ position: '2dsphere' });
+
+EventsSchema.methods.obscureFields = async function () {
+	console.log(this)
+	this.isDeleted = true;
+  this.name = "Event Deleted"
+  this.coverImage = null
+  this.description = "Event Deleted"
+
+	return this.save();
+};
 
 EventsSchema.virtual('organiser', {
   ref: 'User',

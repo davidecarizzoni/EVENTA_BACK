@@ -92,6 +92,7 @@ UsersSchema.methods.obscureFields = async function () {
 	this.email = `${new Date().getTime()}@${email[1]}`
 	this.name = 'deleted'
 	this.username = 'deleted'
+  this.profilePic = null;
 	this.isDeleted = true;
 
 	return this.save();
