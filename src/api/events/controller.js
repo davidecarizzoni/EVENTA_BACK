@@ -8,8 +8,12 @@ import {Types} from "mongoose";
 
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
-import {sendPushNotificationToAllUsers, sendPushNotificationToUsersGroup} from "../../services/notifications";
+import {
+	sendPushNotificationToAllUsers,
+	sendPushNotificationToUsersGroup
+} from "../../services/notifications";
 import {User} from "../users/model";
+import {NOTIFICATIONS_TYPES} from "../notifications/model";
 
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
@@ -460,21 +464,28 @@ actions.unlike = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
-actions.create = async ({user},{ body }, res) => {
+actions.create = async ({ body }, res) => {
 	let event;
 	try {
 		event = await Event.create(body)
 		const organiser = await User.findById(body.organiserId).lean()
 		//get user that follow organizer
+		const users = await User.find({
+			expoPushToken: {$ne: null},
+			isDeleted: false
+		}).select('expoPushToken')
 		console.debug(organiser)
-		await sendPushNotificationToAllUsers({
+		await sendPushNotificationToUsersGroup({
 			title: `New Event from ${organiser.name}`,
 			text: body.name,
+			type: NOTIFICATIONS_TYPES.NEW_EVENT,
+			users: users,
 			extraData: {
 				event
 			},
 		})
 	} catch (err) {
+
 		return res.status(409).send({
 			valid: false,
 			param: 'name',

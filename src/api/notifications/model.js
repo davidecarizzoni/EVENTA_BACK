@@ -1,7 +1,11 @@
 import { Schema, model } from 'mongoose';
 
+export const NOTIFICATIONS_TYPES = {
+	NEW_EVENT: 'newEvent'
+}
+
 const NotificationSchema = new Schema({
-  userId: {
+  targetUserId: {
     type: Schema.Types.ObjectId,
     required: true
   },
@@ -21,6 +25,14 @@ const NotificationSchema = new Schema({
     type: Date,
     default: Date.now,
   },
+	type: {
+		type: String,
+		enum: [...Object.values(NOTIFICATIONS_TYPES)],
+		required: true
+	},
+	extraData: {
+		type: Schema.Types.Mixed
+	},
   updatedAt: {
     type: Date,
   }

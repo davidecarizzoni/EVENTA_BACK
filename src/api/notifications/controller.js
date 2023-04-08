@@ -8,7 +8,7 @@ import {sendPushNotification, sendPushNotificationToAllUsers} from "../../servic
 const actions = {};
 
 actions.index = async function ({user, querymen: { query, cursor } }, res) {
-  const data = await Notification.find({userId: user._id})
+  const data = await Notification.find({targetUserId: user._id})
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
