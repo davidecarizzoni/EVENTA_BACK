@@ -3,12 +3,15 @@ import _ from 'lodash';
 
 
 const actions = {};
+const populationOptions = ['user'];
+
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await Like.find(query)
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
+  .populate(populationOptions)
 	.exec();
 
   const totalData = await Like.countDocuments(query);

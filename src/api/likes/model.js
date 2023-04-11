@@ -23,7 +23,16 @@ const LikeSchema = new Schema({
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
+LikeSchema.virtual('user', {
+  ref: 'User',
+  localField: 'userId',
+  foreignField: '_id',
+  justOne: true
+});
+
+
 
 const Like = model('Like', LikeSchema);
+
 
 export { Like };

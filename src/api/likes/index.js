@@ -2,10 +2,22 @@ import { Router } from 'express';
 import { token } from '../auth/passport';
 import { actions } from './controller';
 import { middleware } from 'querymen';
+import { Schema } from 'mongoose';
 
 const router = new Router();
 
-router.get('/', token({ required: true }), middleware(), actions.index);
+const queryBody = {
+	objectId: {
+		type: Schema.Types.ObjectId
+	},
+  userId: {
+		type: Schema.Types.ObjectId
+	},
+	
+}
+
+
+router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);
 

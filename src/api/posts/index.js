@@ -21,6 +21,7 @@ const queryBody = {
   userId: {
 		type: Schema.Types.ObjectId
 	},
+	
 }
 
 const router = new Router();

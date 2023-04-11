@@ -18,6 +18,20 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
+actions.userFires = async function ({ params: { id }, querymen: { cursor } }, res) {
+  const data = await Fire.find({noteId: id})
+	.populate('user')
+	.skip(cursor.skip)
+	.limit(cursor.limit)
+	.sort(cursor.sort)
+	.exec();
+
+  const totalData = await Fire.countDocuments({noteId: id});
+
+  res.send({ data, totalData });
+};
+
+
 actions.show = async function ({ params: { id } }, res) {
 
   const fire = await Fire

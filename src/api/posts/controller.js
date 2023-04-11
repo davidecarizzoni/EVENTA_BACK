@@ -1,6 +1,7 @@
 import { Post } from './model';
 import {Follow} from "../follow/model";
 import {Like} from "../likes/model";
+import {User} from "../users/model";
 
 import _, { matches } from 'lodash';
 import {uploadToS3} from "../../services/upload";
@@ -119,8 +120,6 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
 
   res.send({ data, totalData });
 };
-
-
 
 actions.like = async function ({ user, params: { id } }, res) {
 
