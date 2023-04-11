@@ -32,9 +32,15 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     query.organiserId = mongoose.Types.ObjectId(query.organiserId);
   }
 
+  const newQuery = {
+		...query,
+		isDeleted: false,
+	}
+
+
   const pipeline = [
     {
-      $match: query,
+      $match: newQuery,
     },
     {
       $lookup: {
@@ -113,7 +119,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
   ];
   const [data, count] = await Promise.all([
     Event.aggregate(pipeline),
-    Event.aggregate([{ $match: query }, { $count: 'count' }]),
+    Event.aggregate([{ $match: newQuery }, { $count: 'count' }]),
   ]);
 
   const totalData = count.length ? count[0].count : 0;
@@ -122,13 +128,17 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
 actions.homeEvents = async function({ user, querymen: { query, select, cursor } }, res) {
   const userCoordinates = user.position.coordinates;
+  const newQuery = {
+		...query,
+		isDeleted: false,
+	}
   const geoNearStage = {
     $geoNear: {
       near: { type: "Point", coordinates: userCoordinates },
       distanceField: "distance",
       maxDistance: 150000, // in meters
       spherical: true,
-      query: query,
+      query: newQuery,
       key: "position",
     }
   };
