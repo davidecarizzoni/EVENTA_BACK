@@ -67,27 +67,53 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
 
   const match = { userId: mongoose.Types.ObjectId(id) };
   const pipeline = [
-    { $match: match },
-    { $lookup: { from: 'events', localField: 'eventId', foreignField: '_id', as: 'event' } },
-    { $unwind: '$event' },
-    { $replaceRoot: { newRoot: '$event' } },
-    { $lookup: { from: 'users', localField: 'organiserId', foreignField: '_id', as: 'organiser' } },
-    { $unwind: '$organiser' },
-    { $addFields: { 'organiser.password': undefined } },
-    { $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
-    { $addFields: { participants: { $size: '$participants' } } },
-    { $project: { numParticipants: 0 } },
-    { $sort: { date: 1, _id: 1 } },
-    { $skip: cursor.skip },
-    { $limit: cursor.limit }
-  ];
-
-  const [data, count] = await Promise.all([
-    Participant.aggregate(pipeline),
-    Participant.aggregate([{ $match: match }, { $count: 'count' }]),
-  ]);
-
-  const totalData = count.length ? count[0].count : 0;
+		{ $match: match },
+		{ $lookup: { from: 'events', localField: 'eventId', foreignField: '_id', as: 'event' } },
+		{ $unwind: '$event' },
+		{ $replaceRoot: { newRoot: '$event' } },
+		{ $lookup: { from: 'users', localField: 'organiserId', foreignField: '_id', as: 'organiser' } },
+		{ $unwind: '$organiser' },
+		{ $addFields: { 'organiser.password': undefined } },
+		{ $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
+		{ $addFields: { participants: { $size: '$participants' } } },
+		{ $project: { numParticipants: 0 } },
+		{ $match: { isDeleted: { $ne: true } } }, // exclude deleted events
+		{ $sort: { date: 1, _id: 1 } },
+		{ $skip: cursor.skip },
+		{ $limit: cursor.limit }
+	];
+	const [data, count] = await Promise.all([
+		Participant.aggregate(pipeline),
+		Participant.aggregate([
+			{
+				$match: match
+			},
+			{
+				$lookup: {
+					from: 'events',
+					localField: 'eventId',
+					foreignField: '_id',
+					as: 'event'
+				}
+			},
+			{
+				$unwind: '$event'
+			},
+			{
+				$match: {
+					'event.isDeleted': { $ne: true }
+				}
+			},
+			{
+				$count: 'count'
+			}
+		])
+	]);
+	
+	const totalData = count.length ? count[0].count : 0;
+	
+	
+	
 
   res.send({ data, totalData });
 };
