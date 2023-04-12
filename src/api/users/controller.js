@@ -207,15 +207,22 @@ actions.showPostsForUser = async function ({ user, params: { id }, querymen: { c
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
   const { search, role } = query;
 
-  const match = {
-		followerId: Types.ObjectId(id),
-		...(search ? {
-			$or: [
-				{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-				{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-			]
-		} : {})
-	}
+	const match = {
+		followerId: Types.ObjectId(id)
+	};
+	const secondMatch = {
+		$and: [
+			match,
+			{ "followed.role": role || { $exists: true }},
+			{ "followed.isDeleted": { $ne: true } },
+			search ? {
+				$or: [
+					{ "followed.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+					{ "followed.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+				]
+			} : {}
+		]
+	};
 
   const pipeline = [
     {
@@ -233,26 +240,30 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
       $unwind: "$followed"
     },
     {
-      $match: {
-        "followed.role": role || { $exists: true }
-      }
+      $match: secondMatch 
     },
 		{ $sort: { "followed.name": 1, "followed._id": 1 }},
 		{ $skip: cursor.skip },
 		{ $limit: cursor.limit },
   ];
 
-  const countPipeline = [
-		{ $match: match },
-		{ $lookup: { from: "users", localField: "followedId", foreignField: "_id", as: "followed" } },
-		{ $unwind: "$followed" },
-		{ $match: { "followed.role": role || { $exists: true } } },
-		{ $count: 'count' }
-	];
 
 	const [data, count] = await Promise.all([
 		Follow.aggregate(pipeline),
-		Follow.aggregate(countPipeline),
+		Follow.aggregate([
+			{ $match: match },
+			{
+				$lookup: {
+					from: "users",
+					localField: "followedId",
+					foreignField: "_id",
+					as: "followed"
+				}
+			},
+			{ $unwind: "$followed" },
+			{ $match: secondMatch },
+			{ $count: 'count' }
+		]),
 	]);
 
 	const totalData = count.length ? count[0].count : 0;
@@ -266,42 +277,57 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 	const match = {
 		followedId: Types.ObjectId(id)
 	};
-
-	const pipeline = [
-		{
-			$match: match
-		},
-	 	{
-	 	  $lookup: {
-	 	    from: "users",
-	 	    localField: "followerId",
-	 	    foreignField: "_id",
-	 	    as: "follower"
-	 	  }
-	 	},
-	 	{
-	 	  $unwind: "$follower"
-	 	},
-		{
-			$match: search ? {
+	const secondMatch = {
+		$and: [
+			match,
+			{ "follower.isDeleted": { $ne: true } },
+			search ? {
 				$or: [
 					{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
 					{ "follower.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
 				]
-			} : { }
+			} : {}
+		]
+	};
+	
+	const pipeline = [
+		{ $match: match },
+		{
+			$lookup: {
+				from: "users",
+				localField: "followerId",
+				foreignField: "_id",
+				as: "follower"
+			}
 		},
+		{ $unwind: "$follower" },
+		{ $match: secondMatch },
 		{ $sort: { "follower.name": 1, "_id": 1 }},
 		{ $skip: cursor.skip },
-		{ $limit: cursor.limit },
+		{ $limit: cursor.limit }
 	];
-
+	
 	const [data, count] = await Promise.all([
 		Follow.aggregate(pipeline),
-		Follow.aggregate([{ $match: match },{ $count: 'count' }]),
+		Follow.aggregate([
+			{ $match: match },
+			{
+				$lookup: {
+					from: "users",
+					localField: "followerId",
+					foreignField: "_id",
+					as: "follower"
+				}
+			},
+			{ $unwind: "$follower" },
+			{ $match: secondMatch },
+			{ $count: 'count' }
+		]),
 	]);
-
+	
 	const totalData = count.length ? count[0].count : 0;
 	res.send({ data, totalData });
+	
 };
 
 actions.follow = async function ({ user, params: { id } }, res) {

@@ -41,7 +41,6 @@ export const sendPushNotification = async ({expoPushToken, userId, title, text, 
 	}
 }
 
-
 //write function to sent push notification to all users
 export const sendPushNotificationToAllUsers = async ({ title, text, extraData, type }) => {
 	try {

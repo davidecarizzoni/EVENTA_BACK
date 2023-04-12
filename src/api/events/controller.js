@@ -37,7 +37,6 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 		isDeleted: false,
 	}
 
-
   const pipeline = [
     {
       $match: newQuery,
@@ -368,11 +367,38 @@ actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { 
 
 actions.showParticipantsForEvent = async function ({ params: { id }, querymen: { query, cursor } }, res) {
   const { search } = query;
+  // const secondMatch = {
+	// 	$and: [
+	// 		match,
+	// 		{ "followed.role": role || { $exists: true }},
+	// 		{ "followed.isDeleted": { $ne: true } },
+	// 		search ? {
+	// 			$or: [
+	// 				{ "followed.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+	// 				{ "followed.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+	// 			]
+	// 		} : {}
+	// 	]
+	// };
+  const match = {
+    eventId: Types.ObjectId(id)
+	};
+	const secondMatch = {
+		$and: [
+			match,
+			{ "user.isDeleted": { $ne: true } },
+			search ? {
+				$or: [
+          { "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+          { "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+				]
+			} : {}
+		]
+	};
+
   const pipeline = [
     {
-      $match: {
-        eventId: Types.ObjectId(id)
-      }
+      $match: match
     },
     {
       $lookup: {
@@ -386,26 +412,42 @@ actions.showParticipantsForEvent = async function ({ params: { id }, querymen: {
       $unwind: "$user"
     },
     {
-      $match: search ? {
-        $or: [
-          { "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-          { "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-        ]
-      } : {}
+      $match: secondMatch
     },
     { $sort: { "user.name": 1 } },
     { $skip: cursor.skip },
     { $limit: cursor.limit }
   ];
 
-  const [data, count] = await Promise.all([
-    Participant.aggregate(pipeline),
-    Participant.aggregate([
-      { $match: { eventId: Types.ObjectId(id) } },
-      { $count: "count" }
-    ])
-  ]);
+  // const [data, count] = await Promise.all([
+  //   Participant.aggregate(pipeline),
+  //   Participant.aggregate([
+  //     { $match: { eventId: Types.ObjectId(id) } },
+  //     { $count: "count" }
+  //   ])
+  // ]);
 
+
+	const [data, count] = await Promise.all([
+		Participant.aggregate(pipeline),
+		Participant.aggregate([
+			{ $match: match },
+			{
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $unwind: "$user"
+      },
+			{ $match: secondMatch },
+			{ $count: 'count' }
+		]),
+	]);
+  
   const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
@@ -477,14 +519,16 @@ actions.unlike = async function ({ user, params: { id } }, res) {
 actions.create = async ({ body }, res) => {
 	let event;
 	try {
+
 		event = await Event.create(body)
+
 		const organiser = await User.findById(body.organiserId).lean()
 		//get user that follow organizer
 		const users = await User.find({
 			expoPushToken: {$ne: null},
 			isDeleted: false
 		}).select('expoPushToken')
-		console.debug(organiser)
+
 		await sendPushNotificationToUsersGroup({
 			title: `New Event from ${organiser.name}`,
 			text: body.name,
