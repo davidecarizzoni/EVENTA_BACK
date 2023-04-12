@@ -2,6 +2,7 @@ import {Event} from './model';
 import {Participant} from '../participants/model';
 import {Like} from '../likes/model';
 import {Post} from '../posts/model';
+import {User} from "../users/model";
 
 import mongoose from "mongoose";
 import {Types} from "mongoose";
@@ -12,7 +13,7 @@ import {
 	sendPushNotificationToAllUsers,
 	sendPushNotificationToUsersGroup
 } from "../../services/notifications";
-import {User} from "../users/model";
+
 import {NOTIFICATIONS_TYPES} from "../notifications/model";
 
 const actions = {};
@@ -367,19 +368,7 @@ actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { 
 
 actions.showParticipantsForEvent = async function ({ params: { id }, querymen: { query, cursor } }, res) {
   const { search } = query;
-  // const secondMatch = {
-	// 	$and: [
-	// 		match,
-	// 		{ "followed.role": role || { $exists: true }},
-	// 		{ "followed.isDeleted": { $ne: true } },
-	// 		search ? {
-	// 			$or: [
-	// 				{ "followed.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
-	// 				{ "followed.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
-	// 			]
-	// 		} : {}
-	// 	]
-	// };
+
   const match = {
     eventId: Types.ObjectId(id)
 	};
@@ -419,15 +408,6 @@ actions.showParticipantsForEvent = async function ({ params: { id }, querymen: {
     { $limit: cursor.limit }
   ];
 
-  // const [data, count] = await Promise.all([
-  //   Participant.aggregate(pipeline),
-  //   Participant.aggregate([
-  //     { $match: { eventId: Types.ObjectId(id) } },
-  //     { $count: "count" }
-  //   ])
-  // ]);
-
-
 	const [data, count] = await Promise.all([
 		Participant.aggregate(pipeline),
 		Participant.aggregate([
@@ -447,7 +427,7 @@ actions.showParticipantsForEvent = async function ({ params: { id }, querymen: {
 			{ $count: 'count' }
 		]),
 	]);
-  
+
   const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };

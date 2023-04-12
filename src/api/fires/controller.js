@@ -1,22 +1,84 @@
 import { Fire } from './model';
 import _ from 'lodash';
+import mongoose from "mongoose";
 
 const actions = {};
-const populationOptions = ['user', "note"];
+
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
-  const data = await Fire.find(query)
-	.skip(cursor.skip)
-	.limit(cursor.limit)
-	.sort(cursor.sort)
-  .populate(populationOptions)
-	.exec();
+  const { search } = query;
+  console.log("QUERYYYY", query)
 
-  const totalData = await Fire.countDocuments(query);
+  if (query.noteId) {
+    query.noteId = mongoose.Types.ObjectId(query.noteId);
+  }
+  const match = {
+    noteId: mongoose.Types.ObjectId(query.noteId)
+  }
+  
 
+
+	const secondMatch = {
+		$and: [
+      match,
+			{ "user.isDeleted": { $ne: true } },
+			search ? {
+				$or: [
+          { "user.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
+          { "user.username": { $regex: new RegExp(`.*${search}.*`, "i") } }
+				]
+			} : {}
+		]
+	};
+
+  const pipeline = [
+    {
+      $match: match
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "userId",
+        foreignField: "_id",
+        as: "user"
+      }
+    },
+    {
+      $unwind: "$user"
+    },
+    {
+      $match: secondMatch
+    },
+    { $sort: { "user.name": 1 } },
+    { $skip: cursor.skip },
+    { $limit: cursor.limit }
+  ];
+
+	const [data, count] = await Promise.all([
+		Fire.aggregate(pipeline),
+		Fire.aggregate([
+			{ $match: match },
+			{
+        $lookup: {
+          from: "users",
+          localField: "userId",
+          foreignField: "_id",
+          as: "user"
+        }
+      },
+      {
+        $unwind: "$user"
+      },
+			{ $match: secondMatch },
+			{ $count: 'count' }
+		]),
+	]);
+
+  const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });
 };
+
 
 
 actions.show = async function ({ params: { id } }, res) {
