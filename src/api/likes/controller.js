@@ -2,11 +2,8 @@ import { Like } from './model';
 import _ from 'lodash';
 import mongoose from "mongoose";
 
-
 const actions = {};
 const populationOptions = ['user'];
-
-
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const { search } = query;

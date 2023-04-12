@@ -230,7 +230,6 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
   res.send({ data, totalData });
 };
 
-
 actions.show = async function ({ user, params: { id } }, res) {
 
   const event = await Event

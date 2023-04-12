@@ -1,6 +1,7 @@
 import {ADMIN, User} from './model';
 import {Follow} from "../follow/model";
 import {Participant} from '../participants/model';
+import {Event} from '../events/model';
 import {Post} from '../posts/model';
 
 import {Types} from "mongoose";
@@ -33,15 +34,17 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
 actions.showMe = async ({ user }, res) => {
 
-	const followers_num = await Follow.countDocuments({followedId: user.id})
+	const events = await Event.countDocuments({organiserId: user.id})
+	const followers = await Follow.countDocuments({followedId: user.id})
 	const followed = await Follow.countDocuments({ followerId: user.id })
 	const posts = await Post.countDocuments({ userId: user.id })
 
-	res.send({ ...user._doc, followers, followed, posts});
+	res.send({ ...user._doc, events, followers, followed, posts});
 
 };
 
 actions.show = async function ({ user, params: { id }, res }) {
+	const events = await Event.countDocuments({organiserId: id})
   const userCheck = await User.findById(id).lean();
   const followers = await Follow.countDocuments({ followedId: id });
   const followed = await Follow.countDocuments({ followerId: id });
@@ -59,6 +62,7 @@ actions.show = async function ({ user, params: { id }, res }) {
 
   res.send({
     ...userCheck,
+		events,
     followers,
     followed,
 		posts,
