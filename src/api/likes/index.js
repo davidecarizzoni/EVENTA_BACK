@@ -13,7 +13,9 @@ const queryBody = {
   userId: {
 		type: Schema.Types.ObjectId
 	},
-	
+	search :{
+		type: String,
+	}
 }
 
 

@@ -17,8 +17,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
     noteId: mongoose.Types.ObjectId(query.noteId)
   }
   
-
-
 	const secondMatch = {
 		$and: [
       match,
