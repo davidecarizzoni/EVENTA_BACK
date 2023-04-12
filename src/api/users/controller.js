@@ -32,10 +32,13 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 };
 
 actions.showMe = async ({ user }, res) => {
-	const followers = await Follow.countDocuments({ followedId: user.id })
+
+	const followers_num = await Follow.countDocuments({followedId: user.id})
 	const followed = await Follow.countDocuments({ followerId: user.id })
 	const posts = await Post.countDocuments({ userId: user.id })
+
 	res.send({ ...user._doc, followers, followed, posts});
+
 };
 
 actions.show = async function ({ user, params: { id }, res }) {
@@ -214,7 +217,6 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
 		$and: [
 			match,
 			{ "followed.role": role || { $exists: true }},
-			{ "followed.isDeleted": { $ne: true } },
 			search ? {
 				$or: [
 					{ "followed.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
@@ -280,7 +282,6 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 	const secondMatch = {
 		$and: [
 			match,
-			{ "follower.isDeleted": { $ne: true } },
 			search ? {
 				$or: [
 					{ "follower.name": { $regex: new RegExp(`.*${search}.*`, "i") } },
