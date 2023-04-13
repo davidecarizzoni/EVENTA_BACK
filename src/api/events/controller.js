@@ -547,6 +547,7 @@ actions.create = async ({ user, body }, res) => {
       message: 'Error sending push notification',
     });
   }
+  res.send(event)
 };
 
 actions.update = ({ body, params }, res) => {

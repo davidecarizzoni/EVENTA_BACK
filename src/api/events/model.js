@@ -21,7 +21,7 @@ const EventsSchema = new Schema({
     },
     fullAddress: {
       type: String,
-      required: false,
+      required: true,
     },
   },
   date: {
