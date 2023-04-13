@@ -349,14 +349,14 @@ actions.follow = async function ({ user, params: { id } }, res) {
 			followerId: user._id, // segue
 			followedId: id, // seguito
 		})
-		
+
 		const targetUser = await User.findById(id).select('username name expoPushToken')
 		console.log(targetUser)
 
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
       text: `has started following you`,
-      type: NOTIFICATIONS_TYPES.NEW_EVENT,
+      type: NOTIFICATIONS_TYPES.NEW_FOLLOW,
       user: targetUser,
       extraData: {
 			},

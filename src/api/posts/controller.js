@@ -8,6 +8,8 @@ import {uploadToS3} from "../../services/upload";
 
 import mongoose from "mongoose";
 import {Types} from "mongoose";
+import { sendPushNotificationToUser } from '../../services/notifications';
+import { NOTIFICATIONS_TYPES } from '../notifications/model';
 
 const actions = {};
 const populationOptions = ['user', 'event'];
@@ -129,6 +131,20 @@ actions.like = async function ({ user, params: { id } }, res) {
 			objectId: id,
 			type: 'post'
 		})
+
+		const likedPost = await Post.findById(id)
+		const targetUser = await User.findById(likedPost.userId).select('username name expoPushToken')
+		console.log(targetUser)
+
+		await sendPushNotificationToUser({
+			title: `${user.username}`,
+      text: `has liked your post`,
+      type: NOTIFICATIONS_TYPES.NEW_POST_LIKE,
+      user: targetUser,
+      extraData: {
+			},
+    });
+
 
 		res.send(like);
 	} catch (err) {

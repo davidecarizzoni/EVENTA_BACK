@@ -1,7 +1,9 @@
 import { Schema, model } from 'mongoose';
 
 export const NOTIFICATIONS_TYPES = {
-	NEW_EVENT: 'newEvent'
+	NEW_EVENT: 'newEvent',
+  NEW_FOLLOW: 'newFollow',
+  NEW_POST_LIKE: 'newPostLIKE',
 }
 
 const NotificationSchema = new Schema({
