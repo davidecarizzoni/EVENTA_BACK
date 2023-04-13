@@ -495,38 +495,58 @@ actions.unlike = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
-actions.create = async ({ body }, res) => {
-	let event;
-	try {
 
+actions.create = async ({ user, body }, res) => {
+	let event;
+  try {
 		event = await Event.create(body)
 
 		const organiser = await User.findById(body.organiserId).lean()
-		//get user that follow organizer
-		const users = await User.find({
-			expoPushToken: {$ne: null},
-			isDeleted: false
-		}).select('expoPushToken')
 
-		await sendPushNotificationToUsersGroup({
-			title: `New Event from ${organiser.name}`,
-			text: body.name,
-			type: NOTIFICATIONS_TYPES.NEW_EVENT,
-			users: users,
-			extraData: {
+    // Get list of users to send notification to
+    const authenticatedUser = user._id;
+    const followerDocs = await Follow.find(
+      { followedId: authenticatedUser },
+      'followerId'
+    )
+      .populate({
+        path: 'follower',
+        select: '_id expoPushToken isDeleted username',
+        match: {
+          expoPushToken: { $ne: null },
+          isDeleted: false,
+        },
+      })
+      .lean();
+
+    const usersToSendNotification = followerDocs
+      .filter((doc) => doc.follower !== null)
+      .map((doc) => doc.follower);
+
+		console.log(usersToSendNotification)
+
+    await sendPushNotificationToUsersGroup({
+			title: `${organiser.name}`,
+      text: `posted a New Event!`,
+      type: NOTIFICATIONS_TYPES.NEW_EVENT,
+      users: usersToSendNotification,
+      extraData: {
 				event
 			},
-		})
-	} catch (err) {
+    });
+    
+    return res.status(200).send({
+      valid: true,
+      message: 'Push notification sent successfully',
+    });
+  } catch (err) {
+    console.error(err);
 
-		return res.status(409).send({
-			valid: false,
-			param: 'name',
-			message: 'name already registered'
-		})
- 	}
-
-	res.send(event);
+    return res.status(500).send({
+      valid: false,
+      message: 'Error sending push notification',
+    });
+  }
 };
 
 actions.update = ({ body, params }, res) => {
