@@ -13,6 +13,7 @@ import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 import {
 	sendPushNotificationToAllUsers,
+	sendPushNotificationToUser,
 	sendPushNotificationToUsersGroup
 } from "../../services/notifications";
 
@@ -441,7 +442,23 @@ actions.participate = async function ({ user, params: { id } }, res) {
 			eventId: id,
 		})
 
+    const event = await Event.findById(id)
+
+    const targetUser = await User.findById(event.organiserId).select('username name expoPushToken')
+		console.log(targetUser)
+
+		await sendPushNotificationToUser({
+			title: `${user.username}`,
+      text: `is now participating to your event`,
+      type: NOTIFICATIONS_TYPES.NEW_EVENT_PARTICIPATION,
+      user: targetUser,
+      extraData: {
+        participant
+			},
+    });
+
 		res.send(participant);
+
 	} catch (err) {
 		if (err.code === 11000) {
 			return res.status(409)
@@ -472,6 +489,23 @@ actions.like = async function ({ user, params: { id } }, res) {
 			objectId: id,
 			type: 'event'
 		})
+
+    const likedEvent = await Event.findById(id)
+
+    const targetUser = await User.findById(likedEvent.organiserId).select('username name expoPushToken')
+		console.log(targetUser)
+
+		await sendPushNotificationToUser({
+			title: `${user.username}`,
+      text: `has liked your event`,
+      type: NOTIFICATIONS_TYPES.NEW_EVENT_LIKE,
+      user: user,
+      extraData: {
+        like
+			},
+    });
+
+    console.log("GOT HERE")
 
 		res.send(like);
 	} catch (err) {
@@ -606,6 +640,8 @@ actions.destroy = async function ({ params: { id } }, res) {
   }
 
 	const obliteratedEvent = await event.obscureFields();
-	res.status(200).send(obliteratedEvent);};
+	res.status(200).send(obliteratedEvent);
+
+};
 
 export { actions };

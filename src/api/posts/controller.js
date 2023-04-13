@@ -10,6 +10,7 @@ import mongoose from "mongoose";
 import {Types} from "mongoose";
 import { sendPushNotificationToUser } from '../../services/notifications';
 import { NOTIFICATIONS_TYPES } from '../notifications/model';
+import { Event } from '../events/model';
 
 const actions = {};
 const populationOptions = ['user', 'event'];
@@ -184,15 +185,36 @@ actions.show = async function ({ params: { id } }, res) {
   res.send(post);
 };
 
-actions.create = async ({ body }, res) => {
+actions.create = async ({ user, body }, res) => {
   let post;
+
   try {
+
     post = await Post.create(body);
+		console.log("POST", post.eventId);
+
+		const event = await Event.findById(post.eventId)
+
+		const targetUser = await User.findById(event.organiserId).select('username name expoPushToken')
+
+		console.log(targetUser);
+
+		await sendPushNotificationToUser({
+			title: `${user.username}`,
+      text: `has posted on your event`,
+      type: NOTIFICATIONS_TYPES.NEW_POST_ON_EVENT,
+      user: targetUser,
+      extraData: {
+        post
+			},
+    });
+
+		res.send(post);
+
   } catch (err) {
     return null; // to be changed
   }
 
-  res.send(post);
 };
 
 actions.update = ({ body, params }, res) => {
