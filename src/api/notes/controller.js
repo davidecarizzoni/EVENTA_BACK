@@ -117,10 +117,10 @@ actions.show = async function ({ params: { id } }, res) {
 
 actions.fire = async function ({ user, params: { id } }, res) {
 	try {
-		// const fire = await Fire.create({
-		// 	userId: user._id,
-		// 	noteId: id,
-		// })
+		const fire = await Fire.create({
+			userId: user._id,
+			noteId: id,
+		})
 		const likedNote = await Note.findById(id)
     console.log(likedNote.userId)
 
