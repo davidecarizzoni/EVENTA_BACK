@@ -13,6 +13,14 @@ import _ from 'lodash';
 const actions = {};
 const populationOptions = ['user', 'event'];
 
+import {
+	sendPushNotificationToAllUsers,
+	sendPushNotificationToUsersGroup,
+	sendPushNotificationToUser
+} from "../../services/notifications";
+
+import {NOTIFICATIONS_TYPES} from "../notifications/model";
+
 
 // (pagination done + totaldata + sort: check:true)
 actions.index = async function ({ querymen: { query, cursor } }, res) {
@@ -341,6 +349,18 @@ actions.follow = async function ({ user, params: { id } }, res) {
 			followerId: user._id, // segue
 			followedId: id, // seguito
 		})
+		
+		const targetUser = await User.findById(id).select('username name expoPushToken')
+		console.log(targetUser)
+
+		await sendPushNotificationToUser({
+			title: `${user.username}`,
+      text: `has started following you`,
+      type: NOTIFICATIONS_TYPES.NEW_EVENT,
+      user: targetUser,
+      extraData: {
+			},
+    });
 
 		res.send(follow);
 	} catch (err) {

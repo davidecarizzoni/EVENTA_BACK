@@ -82,3 +82,20 @@ export const sendPushNotificationToUsersGroup = async ({ title, text, extraData,
 		return Promise.reject(error)
 	}
 }
+
+
+export const sendPushNotificationToUser = async ({ title, text, extraData, user , type}) => {
+	try {
+			return await sendPushNotification({
+				expoPushToken: user.expoPushToken,
+				userId: user._id,
+				title,
+				text,
+				type,
+				extraData
+			})
+	} catch (error) {
+		console.log(error)
+		return Promise.reject(error)
+	}
+}
