@@ -142,6 +142,7 @@ actions.like = async function ({ user, params: { id } }, res) {
       type: NOTIFICATIONS_TYPES.NEW_POST_LIKE,
       user: targetUser,
       extraData: {
+				like
 			},
     });
 

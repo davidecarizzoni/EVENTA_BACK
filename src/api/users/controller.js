@@ -359,6 +359,7 @@ actions.follow = async function ({ user, params: { id } }, res) {
       type: NOTIFICATIONS_TYPES.NEW_FOLLOW,
       user: targetUser,
       extraData: {
+				follow
 			},
     });
 

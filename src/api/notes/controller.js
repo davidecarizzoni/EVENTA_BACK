@@ -3,6 +3,9 @@ import {Follow} from "../follow/model";
 import {Fire} from "../fires/model";
 
 import _ from 'lodash';
+import { User } from '../users/model';
+import { sendPushNotificationToUser } from '../../services/notifications';
+import { NOTIFICATIONS_TYPES } from '../notifications/model';
 
 const actions = {};
 const populationOptions = ['user', "fires"];
@@ -118,6 +121,20 @@ actions.fire = async function ({ user, params: { id } }, res) {
 			userId: user._id,
 			noteId: id,
 		})
+		const likedNote = await Note.findById(id)
+
+    const targetUser = await User.findById(likedNote.userId).select('username name expoPushToken')
+		console.log(targetUser)
+
+		await sendPushNotificationToUser({
+			title: `${user.username}`,
+      text: `has fired your note`,
+      type: NOTIFICATIONS_TYPES.NEW_NOTE_LIKED,
+      user: targetUser,
+      extraData: {
+        fire
+			},
+    });
 
 		res.send(fire);
 	} catch (err) {
