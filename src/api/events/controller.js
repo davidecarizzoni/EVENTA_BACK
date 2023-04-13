@@ -3,6 +3,8 @@ import {Participant} from '../participants/model';
 import {Like} from '../likes/model';
 import {Post} from '../posts/model';
 import {User} from "../users/model";
+import { Follow } from '../follow/model';
+
 
 import mongoose from "mongoose";
 import {Types} from "mongoose";
@@ -501,8 +503,6 @@ actions.create = async ({ user, body }, res) => {
   try {
 		event = await Event.create(body)
 
-		const organiser = await User.findById(body.organiserId).lean()
-
     // Get list of users to send notification to
     const authenticatedUser = user._id;
     const followerDocs = await Follow.find(
@@ -526,7 +526,7 @@ actions.create = async ({ user, body }, res) => {
 		console.log(usersToSendNotification)
 
     await sendPushNotificationToUsersGroup({
-			title: `${organiser.name}`,
+			title: `${user.name}`,
       text: `posted a New Event!`,
       type: NOTIFICATIONS_TYPES.NEW_EVENT,
       users: usersToSendNotification,
@@ -537,7 +537,7 @@ actions.create = async ({ user, body }, res) => {
     
     return res.status(200).send({
       valid: true,
-      message: 'Push notification sent successfully',
+      message: 'Event created succesfully, Push notification sent successfully, ',
     });
   } catch (err) {
     console.error(err);

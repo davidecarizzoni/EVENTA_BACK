@@ -94,7 +94,7 @@ actions.test = async ({ user, body }, res) => {
 		console.log(usersToSendNotification)
 
     await sendPushNotificationToUsersGroup({
-			title: "Cocò Clubbing",
+			title: `${user.name}`,
       text: `posted a New Event!`,
       type: NOTIFICATIONS_TYPES.NEW_EVENT,
       users: usersToSendNotification,
