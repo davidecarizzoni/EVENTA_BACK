@@ -534,11 +534,13 @@ actions.create = async ({ user, body }, res) => {
 				event
 			},
     });
-    
+
+    res.send(event)
     return res.status(200).send({
       valid: true,
       message: 'Event created succesfully, Push notification sent successfully, ',
     });
+
   } catch (err) {
     console.error(err);
 
@@ -547,7 +549,7 @@ actions.create = async ({ user, body }, res) => {
       message: 'Error sending push notification',
     });
   }
-  res.send(event)
+  
 };
 
 actions.update = ({ body, params }, res) => {
