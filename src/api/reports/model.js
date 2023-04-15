@@ -7,7 +7,7 @@ const ReportSchema = new Schema({
   },
   type: {
     type: String,
-    enum: ['event', 'post', 'note', 'user'],
+    enum: ['event', 'post', 'note', 'user', 'comment'],
     required: true
   },
   userId: {
