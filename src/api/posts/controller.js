@@ -34,36 +34,23 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
   const followDocs = await Follow.find({ followerId: authenticatedUser });
   const followedIds = followDocs.map(doc => doc.followedId);
 
-	const match = {
-		$or: [
-			{ userId: authenticatedUser },
-			{ userId: { $in: followedIds }}
-		]
-	}
+  const match = {
+    $or: [
+      { userId: authenticatedUser },
+      { userId: { $in: followedIds }}
+    ]
+  }
 
-  const pipeline = [
-		{
-			$match: match
+  const pipeline = [    {      $match: match    },    {      $lookup: {        from: 'likes',        let: { eventId: '$_id' },        pipeline: [          {            $match: {              $expr: {                $and: [                  { $eq: ['$type', 'post'] },
+                  { $eq: ['$objectId', '$$eventId'] }
+                ]
+              }
+            }
+          }
+        ],
+        as: 'likes'
+      }
     },
-    {
-			$lookup: {
-				from: 'likes',
-				let: { eventId: '$_id' },
-				pipeline: [
-					{
-						$match: {
-							$expr: {
-								$and: [
-									{ $eq: ['$type', 'post'] },
-									{ $eq: ['$objectId', '$$eventId'] }
-								]
-							}
-						}
-					}
-				],
-				as: 'likes'
-			}
-		},
     {
       $addFields: {
         hasLiked: {
@@ -83,46 +70,68 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
       },
     },
     {
-			$lookup: {
-				from: 'events',
-				localField: 'eventId',
-				foreignField: '_id',
-				as: 'event'
-			}
-		},
-		{
-			$lookup: {
-				from: 'users',
-				localField: 'userId',
-				foreignField: '_id',
-				as: 'user'
-			}
-		},
-		{
-			$addFields: {
-				event: { $arrayElemAt: ['$event', 0] },
-				user: { $arrayElemAt: ['$user', 0] }
-			}
-		},		
+      $lookup: {
+        from: 'events',
+        localField: 'eventId',
+        foreignField: '_id',
+        as: 'event'
+      }
+    },
     {
-      $sort: { createdAt: -1, _id: 1 }
+      $lookup: {
+        from: 'users',
+        localField: 'userId',
+        foreignField: '_id',
+        as: 'user'
+      }
+    },
+    {
+      $addFields: {
+        event: { $arrayElemAt: ['$event', 0] },
+        user: { $arrayElemAt: ['$user', 0] }
+      }
+    },
+		{
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'comments'
+      }
+    },
+    {
+      $group: {
+        _id: '$_id',
+        data: { $first: '$$ROOT' },
+        comments: { $sum: { $size: '$comments' } }
+      }
+    },
+    {
+      $addFields: {
+        'data.comments': '$comments'
+      }
+    },
+    {
+      $replaceRoot: { newRoot: '$data' }
     },
     {
       $skip: cursor.skip
     },
     {
       $limit: cursor.limit
-    }
+    },
+		{
+      $sort: { createdAt: -1, _id: 1 }
+    },
   ];
 
-  const [data, count] = await Promise.all([
-    Post.aggregate(pipeline),
-    Post.aggregate([{ $match: match }, { $count: 'count' }]),
+  const [data, count] = await Promise.all([    Post.aggregate(pipeline),    Post.aggregate([{ $match: match }, { $count: 'count' }]),
   ]);
-	const totalData = count.length ? count[0].count : 0;
+  const totalData = count.length ? count[0].count : 0;
 
   res.send({ data, totalData });
 };
+
 
 actions.like = async function ({ user, params: { id } }, res) {
 
