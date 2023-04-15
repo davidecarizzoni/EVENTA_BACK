@@ -198,6 +198,29 @@ actions.showPostsForUser = async function ({ user, params: { id }, querymen: { c
 				user: { $arrayElemAt: ['$user', 0] }
 			}
 		},
+		{
+      $lookup: {
+        from: 'comments',
+        localField: '_id',
+        foreignField: 'postId',
+        as: 'comments'
+      }
+    },
+    {
+      $group: {
+        _id: '$_id',
+        data: { $first: '$$ROOT' },
+        comments: { $sum: { $size: '$comments' } }
+      }
+    },
+    {
+      $addFields: {
+        'data.comments': '$comments'
+      }
+    },
+		{
+      $replaceRoot: { newRoot: '$data' }
+    },
     {
       $sort: { createdAt: -1, _id: 1 }
     },

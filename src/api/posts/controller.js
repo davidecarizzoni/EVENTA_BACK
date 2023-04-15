@@ -2,15 +2,18 @@ import { Post } from './model';
 import {Follow} from "../follow/model";
 import {Like} from "../likes/model";
 import {User} from "../users/model";
+import { Event } from '../events/model';
+import { Comment } from '../comments/model';
 
-import _, { matches } from 'lodash';
+
+import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
 import mongoose from "mongoose";
-import {Types} from "mongoose";
+
 import { sendPushNotificationToUser } from '../../services/notifications';
 import { NOTIFICATIONS_TYPES } from '../notifications/model';
-import { Event } from '../events/model';
+
 
 const actions = {};
 const populationOptions = ['user', 'event'];
@@ -41,7 +44,20 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
     ]
   }
 
-  const pipeline = [    {      $match: match    },    {      $lookup: {        from: 'likes',        let: { eventId: '$_id' },        pipeline: [          {            $match: {              $expr: {                $and: [                  { $eq: ['$type', 'post'] },
+  const pipeline = [
+    {
+      $match: match
+    },
+    {
+      $lookup: {
+        from: 'likes',
+        let: { eventId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$type', 'post'] },
                   { $eq: ['$objectId', '$$eventId'] }
                 ]
               }
@@ -149,7 +165,7 @@ actions.like = async function ({ user, params: { id } }, res) {
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
       text: `has liked your post`,
-      type: NOTIFICATIONS_TYPES.NEW_POST_LIKE,
+      type: NOTIFICATIONS_TYPES.POST_LIKE,
       user: targetUser,
       extraData: {
 				like
@@ -211,7 +227,7 @@ actions.create = async ({ user, body }, res) => {
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
       text: `has posted on your event`,
-      type: NOTIFICATIONS_TYPES.NEW_POST_ON_EVENT,
+      type: NOTIFICATIONS_TYPES.POST_ON_EVENT,
       user: targetUser,
       extraData: {
         post

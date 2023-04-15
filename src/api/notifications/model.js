@@ -3,13 +3,12 @@ import { Schema, model } from 'mongoose';
 export const NOTIFICATIONS_TYPES = {
 	NEW_EVENT: 'newEvent',
   NEW_FOLLOW: 'newFollow',
-  NEW_POST_LIKE: 'newPostLike',
-  NEW_NOTE_LIKED: 'newNoteLike',
-  NEW_EVENT_LIKE: 'newEventLike',
-  NEW_EVENT_PARTICIPATION: 'newEventParticipation',
-  NEW_POST_ON_EVENT: 'newPostOnEvent',
-
-
+  NEW_COMMENT: 'newComment',
+  POST_LIKE: 'postLike',
+  NOTE_LIKE: 'noteLike',
+  EVENT_LIKE: 'eventLike',
+  EVENT_PARTICIPATION: 'eventParticipation',
+  POST_ON_EVENT: 'postOnEvent',
 }
 
 const NotificationSchema = new Schema({

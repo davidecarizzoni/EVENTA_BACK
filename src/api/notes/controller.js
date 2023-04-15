@@ -130,7 +130,7 @@ actions.fire = async function ({ user, params: { id } }, res) {
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
       text: `has fired your note`,
-      type: NOTIFICATIONS_TYPES.NEW_NOTE_LIKED,
+      type: NOTIFICATIONS_TYPES.NOTE_LIKE,
       user: targetUser,
       extraData: {
         fire

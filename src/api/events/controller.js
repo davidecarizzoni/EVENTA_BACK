@@ -450,7 +450,7 @@ actions.participate = async function ({ user, params: { id } }, res) {
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
       text: `is now participating to your event`,
-      type: NOTIFICATIONS_TYPES.NEW_EVENT_PARTICIPATION,
+      type: NOTIFICATIONS_TYPES.EVENT_PARTICIPATION,
       user: targetUser,
       extraData: {
         participant
@@ -498,7 +498,7 @@ actions.like = async function ({ user, params: { id } }, res) {
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
       text: `has liked your event`,
-      type: NOTIFICATIONS_TYPES.NEW_EVENT_LIKE,
+      type: NOTIFICATIONS_TYPES.EVENT_LIKE,
       user: user,
       extraData: {
         like
