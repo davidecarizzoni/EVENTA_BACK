@@ -1,3 +1,7 @@
+import { sendPushNotificationToUser } from '../../services/notifications';
+import { NOTIFICATIONS_TYPES } from '../notifications/model';
+import { Post } from '../posts/model';
+import { User } from '../users/model';
 import { Comment } from './model';
 import _ from 'lodash';
 
@@ -33,6 +37,22 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
     let comment;
     try {
       comment = await Comment.create(body);
+
+      const post = await Post.findById(body.postId);
+      const user = await User.findById(body.userId);
+
+      const targetUser = await User.findById(post.userId).select('username name expoPushToken')
+      console.log(targetUser)
+
+      await sendPushNotificationToUser({
+        title: `${user.username}`,
+        text: `has commented on your post`,
+        type: NOTIFICATIONS_TYPES.NEW_COMMENT,
+        user: targetUser,
+        extraData: {
+          post
+        },
+      })
       
     } catch (err) {
       return null; // to be changed
