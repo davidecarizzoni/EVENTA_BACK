@@ -1,9 +1,9 @@
 import { Note } from './model';
 import {Follow} from "../follow/model";
 import {Fire} from "../fires/model";
+import { User } from '../users/model';
 
 import _ from 'lodash';
-import { User } from '../users/model';
 import { sendPushNotificationToUser } from '../../services/notifications';
 import { NOTIFICATIONS_TYPES } from '../notifications/model';
 

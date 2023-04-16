@@ -3,6 +3,8 @@ import {Follow} from "../follow/model";
 import {Participant} from '../participants/model';
 import {Event} from '../events/model';
 import {Post} from '../posts/model';
+import {Comment} from '../comments/model';
+
 
 import {Types} from "mongoose";
 import mongoose from "mongoose";
@@ -11,11 +13,8 @@ import {uploadToS3} from "../../services/upload";
 import _ from 'lodash';
 
 const actions = {};
-const populationOptions = ['user', 'event'];
 
 import {
-	sendPushNotificationToAllUsers,
-	sendPushNotificationToUsersGroup,
 	sendPushNotificationToUser
 } from "../../services/notifications";
 
@@ -415,6 +414,31 @@ actions.unfollow = async function ({ user, params: { id } }, res) {
 	await follow.delete();
 	res.status(204).send();
 };
+
+actions.comment = async function ({ user, params: { id } }, res) {
+	const comment = await Comment.create({
+		userId: user._id, 
+		postId: id, 
+	})
+
+	const post = await Post.findById(id);
+
+	const targetUser = await User.findById(post.userId).select('username name expoPushToken')
+	console.log(targetUser)
+
+	await sendPushNotificationToUser({
+		title: `${user.username}`,
+		text: `has commented on your post`,
+		type: NOTIFICATIONS_TYPES.NEW_COMMENT,
+		user: targetUser,
+		extraData: {
+			post
+		},
+	})
+
+	res.send(comment);
+};
+
 
 actions.create = async ({ body }, res) => {
   let user;

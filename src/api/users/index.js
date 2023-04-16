@@ -63,6 +63,9 @@ router.get('/:id/followed', token({ required: true }), middleware(followerBody),
 
 router.post('/:id/follow', token({ required: true }), actions.follow);
 
+router.post('/:id/comment', token({ required: true }), actions.comment);
+
+
 router.get('/:id/followers', token({ required: true }), middleware(followerBody), actions.followers);
 
 

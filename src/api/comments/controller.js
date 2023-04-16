@@ -1,11 +1,6 @@
 import { Comment } from './model';
 import _ from 'lodash';
 
-import mongoose from "mongoose";
-
-import { sendPushNotificationToUser } from '../../services/notifications';
-import { NOTIFICATIONS_TYPES } from '../notifications/model';
-
 const actions = {};
 const populationOptions = ['post', 'user'];
 
@@ -38,9 +33,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
     let comment;
     try {
       comment = await Comment.create(body);
-
-      commentedPost =  await Post.find
-
       
     } catch (err) {
       return null; // to be changed

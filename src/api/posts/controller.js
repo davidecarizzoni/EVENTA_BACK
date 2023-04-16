@@ -3,7 +3,6 @@ import {Follow} from "../follow/model";
 import {Like} from "../likes/model";
 import {User} from "../users/model";
 import { Event } from '../events/model';
-import { Comment } from '../comments/model';
 
 
 import _ from 'lodash';

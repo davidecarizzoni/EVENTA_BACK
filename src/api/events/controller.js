@@ -12,7 +12,6 @@ import {Types} from "mongoose";
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 import {
-	sendPushNotificationToAllUsers,
 	sendPushNotificationToUser,
 	sendPushNotificationToUsersGroup
 } from "../../services/notifications";
