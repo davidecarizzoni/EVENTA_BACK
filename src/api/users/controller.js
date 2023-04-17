@@ -3,7 +3,6 @@ import {Follow} from "../follow/model";
 import {Participant} from '../participants/model';
 import {Event} from '../events/model';
 import {Post} from '../posts/model';
-import {Comment} from '../comments/model';
 
 
 import {Types} from "mongoose";
