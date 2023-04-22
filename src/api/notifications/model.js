@@ -12,6 +12,10 @@ export const NOTIFICATIONS_TYPES = {
 }
 
 const NotificationSchema = new Schema({
+  senderUserId: {
+    type: Schema.Types.ObjectId,
+    required: true,
+  },
   targetUserId: {
     type: Schema.Types.ObjectId,
     required: true
@@ -48,6 +52,13 @@ const NotificationSchema = new Schema({
 NotificationSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
+  foreignField: '_id',
+  justOne: true
+});
+
+NotificationSchema.virtual('targetUser', {
+  ref: 'User',
+  localField: 'targetUserId',
   foreignField: '_id',
   justOne: true
 });

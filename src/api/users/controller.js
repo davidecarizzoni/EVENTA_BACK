@@ -380,6 +380,7 @@ actions.follow = async function ({ user, params: { id } }, res) {
       text: `has started following you`,
       type: NOTIFICATIONS_TYPES.NEW_FOLLOW,
       user: targetUser,
+			userId: user._id,
       extraData: {
 				follow
 			},

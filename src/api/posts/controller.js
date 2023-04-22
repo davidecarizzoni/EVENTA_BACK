@@ -166,6 +166,7 @@ actions.like = async function ({ user, params: { id } }, res) {
       text: `has liked your post`,
       type: NOTIFICATIONS_TYPES.POST_LIKE,
       user: targetUser,
+      userId: user._id,
       extraData: {
 				like
 			},
@@ -228,6 +229,7 @@ actions.create = async ({ user, body }, res) => {
       text: `has posted on your event`,
       type: NOTIFICATIONS_TYPES.POST_ON_EVENT,
       user: targetUser,
+      userId: user._id,
       extraData: {
         post
 			},

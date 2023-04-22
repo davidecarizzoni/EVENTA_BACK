@@ -591,6 +591,8 @@ actions.participate = async function ({ user, params: { id } }, res) {
       text: `is now participating to your event`,
       type: NOTIFICATIONS_TYPES.EVENT_PARTICIPATION,
       user: targetUser,
+      userId: user._id,
+
       extraData: {
         participant
 			},
@@ -703,6 +705,7 @@ actions.create = async ({ user, body }, res) => {
       text: `posted a New Event!`,
       type: NOTIFICATIONS_TYPES.NEW_EVENT,
       users: usersToSendNotification,
+      userId: user._id,
       extraData: {
 				event
 			},

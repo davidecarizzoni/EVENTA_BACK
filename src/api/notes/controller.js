@@ -132,6 +132,7 @@ actions.fire = async function ({ user, params: { id } }, res) {
       text: `has fired your note`,
       type: NOTIFICATIONS_TYPES.NOTE_LIKE,
       user: targetUser,
+      userId: user._id,
       extraData: {
         fire
 			},

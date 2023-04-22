@@ -1,13 +1,13 @@
 import { Expo } from 'expo-server-sdk';
 import _ from "lodash";
 import {User} from "../api/users/model";
-import {Notification, NOTIFICATIONS_TYPES} from "../api/notifications/model";
+import {Notification} from "../api/notifications/model";
 import Promise from 'bluebird'
 import { Types } from 'mongoose';
 
 let expo = new Expo({});
 
-export const sendPushNotification = async ({expoPushToken, userId, title, text, type, extraData = {}}) => {
+export const sendPushNotification = async ({expoPushToken, targetUserId, userId, title, text, type, extraData = {}}) => {
 	if (_.isNil(expoPushToken) || _.isNil(userId)) {
 		console.debug('no token')
 		return Promise.reject({
@@ -28,7 +28,8 @@ export const sendPushNotification = async ({expoPushToken, userId, title, text, 
 		return await Promise.all([
 			expo.sendPushNotificationsAsync([message]),
 			Notification.create({
-				targetUserId: Types.ObjectId(userId),
+				targetUserId: Types.ObjectId(targetUserId),
+				senderUserId: Types.ObjectId(userId),
 				title: title,
 				message: text,
 				type: type,
@@ -42,7 +43,7 @@ export const sendPushNotification = async ({expoPushToken, userId, title, text, 
 }
 
 //write function to sent push notification to all users
-export const sendPushNotificationToAllUsers = async ({ title, text, extraData, type }) => {
+export const sendPushNotificationToAllUsers = async ({ userId, title, text, extraData, type }) => {
 	try {
 		const users = await User.find({
 			expoPushToken: {$ne: null},
@@ -52,7 +53,8 @@ export const sendPushNotificationToAllUsers = async ({ title, text, extraData, t
 		return await Promise.map(users, async (user) => {
 			return await sendPushNotification({
 				expoPushToken: user.expoPushToken,
-				userId: user._id,
+				targetUserId: user._id,
+				userId, 
 				title,
 				text,
 				type,
@@ -65,13 +67,14 @@ export const sendPushNotificationToAllUsers = async ({ title, text, extraData, t
 	}
 }
 
-export const sendPushNotificationToUsersGroup = async ({ title, text, extraData, users = [], type}) => {
+export const sendPushNotificationToUsersGroup = async ({ userId, title, text, extraData, users = [], type}) => {
 	try {
 		return await Promise.map(users, async (user) => {
 			return await sendPushNotification({
 				expoPushToken: user.expoPushToken,
-				userId: user._id,
+				targetUserId: user._id,
 				title,
+				userId, 
 				text,
 				type,
 				extraData
@@ -84,12 +87,12 @@ export const sendPushNotificationToUsersGroup = async ({ title, text, extraData,
 }
 
 
-export const sendPushNotificationToUser = async ({ title, text, extraData, user , type}) => {
+export const sendPushNotificationToUser = async ({ userId, title, text, extraData, user , type}) => {
 	try {
 			return await sendPushNotification({
 				expoPushToken: user.expoPushToken,
-				userId: user._id,
-				title,
+				targetUserId: user._id,
+				userId, title,
 				text,
 				type,
 				extraData

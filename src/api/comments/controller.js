@@ -33,7 +33,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
     res.send(comment);
   };
 
-  actions.create = async ({ body }, res) => {
+  actions.create = async ({ user, body }, res) => {
     let comment;
     try {
       comment = await Comment.create(body);
@@ -49,6 +49,7 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
         text: `has commented on your post`,
         type: NOTIFICATIONS_TYPES.NEW_COMMENT,
         user: targetUser,
+        userId: user._id,
         extraData: {
           post
         },

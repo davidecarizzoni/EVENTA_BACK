@@ -3,12 +3,27 @@ import _ from 'lodash';
 import {Follow} from "../follow/model";
 import { sendPushNotificationToUsersGroup} from "../../services/notifications";
 import { NOTIFICATIONS_TYPES} from "./model";
-
+import { User } from '../users/model';
 
 const actions = {};
+const populationOptions = ['targetUser', 'user'];
+
 
 actions.index = async function ({user, querymen: { query, cursor } }, res) {
   const data = await Notification.find({targetUserId: user._id})
+	.skip(cursor.skip)
+	.limit(cursor.limit)
+  .populate(populationOptions)
+	.sort({'createdAt':-1})
+	.exec();
+
+  const totalData = await Notification.countDocuments({targetUserId: user._id});
+
+  res.send({ data, totalData });
+};
+
+actions.showMe = async function ({user, querymen: { query, cursor } }, res) {
+  const data = await Notification.find({userId: user._id})
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
@@ -18,7 +33,6 @@ actions.index = async function ({user, querymen: { query, cursor } }, res) {
 
   res.send({ data, totalData });
 };
-
 
 actions.show = async function ({ params: { id } }, res) {
 
@@ -72,32 +86,15 @@ actions.test = async ({ user, body }, res) => {
   try {
 
     // Get list of users to send notification to
-    const authenticatedUser = user._id;
-    const followerDocs = await Follow.find(
-      { followedId: authenticatedUser },
-      'followerId'
-    )
-      .populate({
-        path: 'follower',
-        select: '_id expoPushToken isDeleted username',
-        match: {
-          expoPushToken: { $ne: null },
-          isDeleted: false,
-        },
-      })
-      .lean();
-
-    const usersToSendNotification = followerDocs
-      .filter((doc) => doc.follower !== null)
-      .map((doc) => doc.follower);
-
-		console.log(usersToSendNotification)
+    const usersToSendNotification = await User.findById(user._id)
+    console.log(user.name)
 
     await sendPushNotificationToUsersGroup({
 			title: `${user.name}`,
       text: `posted a New Event!`,
       type: NOTIFICATIONS_TYPES.NEW_EVENT,
-      users: usersToSendNotification,
+      userId: user._id,
+      users: [usersToSendNotification],
       extraData: {},
     });
     
@@ -114,6 +111,7 @@ actions.test = async ({ user, body }, res) => {
     });
   }
 };
+
 
 
 export { actions };
