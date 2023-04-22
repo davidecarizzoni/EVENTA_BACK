@@ -98,6 +98,20 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     },
     {
       $lookup: {
+        from: 'scans',
+        localField: '_id',
+        foreignField: 'eventId',
+        as: 'scans'
+      }
+    },
+    {
+      $addFields: {
+        scans: { $size: "$scans" }
+
+      }
+    },
+    {
+      $lookup: {
         from: 'participants',
         localField: '_id',
         foreignField: 'eventId',

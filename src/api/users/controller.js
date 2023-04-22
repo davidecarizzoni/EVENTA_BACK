@@ -3,6 +3,7 @@ import {Follow} from "../follow/model";
 import {Participant} from '../participants/model';
 import {Event} from '../events/model';
 import {Post} from '../posts/model';
+import {Like} from '../likes/model';
 
 
 import {Types} from "mongoose";
@@ -544,5 +545,38 @@ actions.deleteMe = async function ({ user }, res) {
 	const obliteratedUser = await user.obscureFields();
 	res.status(200).send(obliteratedUser);
 };
+
+// ANALYTICS
+
+
+actions.totAnalytics = async function ({ user, querymen: { cursor, query } }, res) {
+	const organiserId = user.id
+
+	const events = await Event.findById({organiserId: organiserId})
+
+
+	
+
+
+
+
+	if (_.isNil(user)) {
+		return res.status(404).send();
+	}
+
+	if(!req.file){
+		res.status(400).send();
+	}
+
+	try {
+		user.profilePic = await uploadToS3(req.file)
+		await user.save()
+		res.send(user)
+	} catch (err) {
+		console.error(err);
+		res.status(500).send(err);
+	}
+};
+
 
 export { actions };
