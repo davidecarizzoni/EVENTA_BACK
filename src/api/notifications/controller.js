@@ -6,7 +6,7 @@ import { NOTIFICATIONS_TYPES} from "./model";
 import { User } from '../users/model';
 
 const actions = {};
-const populationOptions = ['targetUser', 'user'];
+const populationOptions = ['targetUser', 'senderUser'];
 
 
 actions.index = async function ({user, querymen: { query, cursor } }, res) {

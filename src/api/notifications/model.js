@@ -49,9 +49,9 @@ const NotificationSchema = new Schema({
   }
 }, { toJSON: { virtuals: true }, toObject: { virtuals: true } });
 
-NotificationSchema.virtual('user', {
+NotificationSchema.virtual('senderUser', {
   ref: 'User',
-  localField: 'userId',
+  localField: 'senderUserId',
   foreignField: '_id',
   justOne: true
 });
