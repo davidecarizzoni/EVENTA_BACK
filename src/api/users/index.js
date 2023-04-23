@@ -34,6 +34,8 @@ const followerBody = {
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
+router.get('/analytics', token({ required: true }), middleware(queryBody), actions.analytics);
+
 router.get('/me', token({ required: true }), actions.showMe);
 
 router.get('/:id', admin, actions.show);
@@ -60,6 +62,8 @@ router.get('/:id/events', token({ required: true }), middleware(followerBody), a
 router.delete('/:id/unfollow', token({ required: true }), actions.unfollow);
 
 router.get('/:id/followed', token({ required: true }), middleware(followerBody), actions.followed);
+
+
 
 router.post('/:id/follow', token({ required: true }), actions.follow);
 

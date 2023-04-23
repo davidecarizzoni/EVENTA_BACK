@@ -4,6 +4,8 @@ import {Participant} from '../participants/model';
 import {Event} from '../events/model';
 import {Post} from '../posts/model';
 import {Like} from '../likes/model';
+import {Scan} from '../scans/model';
+
 
 
 import {Types} from "mongoose";
@@ -547,37 +549,56 @@ actions.deleteMe = async function ({ user }, res) {
 	res.status(200).send(obliteratedUser);
 };
 
-// ANALYTICS
+actions.analytics = async function ({ user, res }) {
+	const organiserId = user.id;
+  const events = await Event.find({organiserId: organiserId});
+	const number_events = await Event.countDocuments({organiserId: organiserId})
 
+  const number_participants = await Promise.all(
+    events.map(async (event) => {
+      const participants = await Participant.find({eventId: event._id});
+      return participants.length;
+    })
+  ).then((participants) => participants.reduce((a, b) => a + b, 0));
 
-actions.totAnalytics = async function ({ user, querymen: { cursor, query } }, res) {
-	const organiserId = user.id
+  const number_likes = await Promise.all(
+    events.map(async (event) => {
+      const likes = await Like.find({objectId: event._id});
+      return likes.length;
+    })
+  ).then((likes) => likes.reduce((a, b) => a + b, 0));
 
-	const events = await Event.findById({organiserId: organiserId})
+	const number_scans = await Promise.all(
+    events.map(async (event) => {
+      const scans = await Scan.find({eventId: event._id});
+      return scans.length;
+    })
+  ).then((scans) => scans.reduce((a, b) => a + b, 0));
 
+	const number_posts = await Promise.all(
+    events.map(async (event) => {
+      const posts = await Post.find({eventId: event._id});
+      return posts.length;
+    })
+  ).then((posts) => posts.reduce((a, b) => a + b, 0));
 
-	
+	const average_participants = Math.round(number_participants / number_events);
+	const average_scans = Math.round(number_scans / number_events);
+	const average_likes = Math.round(number_likes / number_events);
+	const average_posts = Math.round(number_posts / number_events);
 
+  res.json({
+		number_events, 
+		number_participants, 
+		number_likes, 
+		number_scans, 
+		number_posts,
+		average_participants,
+		average_scans,
+		average_likes,
+		average_posts
+	});
 
-
-
-	if (_.isNil(user)) {
-		return res.status(404).send();
-	}
-
-	if(!req.file){
-		res.status(400).send();
-	}
-
-	try {
-		user.profilePic = await uploadToS3(req.file)
-		await user.save()
-		res.send(user)
-	} catch (err) {
-		console.error(err);
-		res.status(500).send(err);
-	}
-};
-
+}
 
 export { actions };
