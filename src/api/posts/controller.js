@@ -4,7 +4,6 @@ import {Like} from "../likes/model";
 import {User} from "../users/model";
 import { Event } from '../events/model';
 
-
 import _ from 'lodash';
 import {uploadToS3} from "../../services/upload";
 
@@ -12,7 +11,6 @@ import mongoose from "mongoose";
 
 import { sendPushNotificationToUser } from '../../services/notifications';
 import { NOTIFICATIONS_TYPES } from '../notifications/model';
-
 
 const actions = {};
 const populationOptions = ['user', 'event'];
@@ -238,7 +236,7 @@ actions.create = async ({ user, body }, res) => {
 		res.send(post);
 
   } catch (err) {
-    return null; // to be changed
+    return null;
   }
 
 };

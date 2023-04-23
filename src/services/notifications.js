@@ -1,9 +1,10 @@
-import { Expo } from 'expo-server-sdk';
-import _ from "lodash";
 import {User} from "../api/users/model";
 import {Notification} from "../api/notifications/model";
-import Promise from 'bluebird'
+
+import { Expo } from 'expo-server-sdk';
 import { Types } from 'mongoose';
+import Promise from 'bluebird'
+import _ from "lodash";
 
 let expo = new Expo({});
 
@@ -42,7 +43,6 @@ export const sendPushNotification = async ({expoPushToken, targetUserId, userId,
 	}
 }
 
-//write function to sent push notification to all users
 export const sendPushNotificationToAllUsers = async ({ userId, title, text, extraData, type }) => {
 	try {
 		const users = await User.find({
@@ -85,7 +85,6 @@ export const sendPushNotificationToUsersGroup = async ({ userId, title, text, ex
 		return Promise.reject(error)
 	}
 }
-
 
 export const sendPushNotificationToUser = async ({ userId, title, text, extraData, user , type}) => {
 	try {

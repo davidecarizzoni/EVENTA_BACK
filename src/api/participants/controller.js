@@ -1,5 +1,4 @@
 import { Participant } from './model';
-
 import _ from 'lodash';
 
 const actions = {};
@@ -37,7 +36,7 @@ actions.create = async ({ body }, res) => {
   try {
     participant = await Participant.create(body);
   } catch (err) {
-    return null; // to be changed
+    return null; 
   }
 
   res.send(participant);

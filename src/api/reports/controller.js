@@ -1,7 +1,6 @@
 import { Report } from './model';
 import _ from 'lodash';
 
-
 const actions = {};
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
@@ -35,7 +34,7 @@ actions.create = async ({ body }, res) => {
   try {
     report = await Report.create(body);
   } catch (err) {
-    return null; // to be changed
+    return null; 
   }
 
   res.send(report);

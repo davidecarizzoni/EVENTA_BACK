@@ -7,7 +7,6 @@ const populationOptions = ['user'];
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const { search } = query;
-  console.log("QUERYYYY", query)
 
   if (query.objectId) {
     query.objectId = mongoose.Types.ObjectId(query.objectId);
@@ -96,7 +95,7 @@ actions.create = async ({ body }, res) => {
   try {
     like = await Like.create(body);
   } catch (err) {
-    return null; // to be changed
+    return null; 
   }
 
   res.send(like);

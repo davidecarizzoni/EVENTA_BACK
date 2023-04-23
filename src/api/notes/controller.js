@@ -10,7 +10,6 @@ import { NOTIFICATIONS_TYPES } from '../notifications/model';
 const actions = {};
 const populationOptions = ['user', "fires"];
 
-// (pagination done + totaldata + sort: check:true)
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await Note.find(query)
 	.skip(cursor.skip)
@@ -24,7 +23,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-// (pagination done + totaldata + sort: check:true)
 actions.userNotes = async function({ user, querymen: { query, select, cursor } }, res) {  
   try {
     const authenticatedUser = user._id;
@@ -61,7 +59,6 @@ actions.userNotes = async function({ user, querymen: { query, select, cursor } }
   }
 };
 
-// (pagination done + totaldata + sort: check:true)
 actions.followedNotes = async function({ user, querymen: { query, select, cursor } }, res) {  
   try {
     const authenticatedUser = user._id;
@@ -100,7 +97,6 @@ actions.followedNotes = async function({ user, querymen: { query, select, cursor
     res.status(500).json({ error: 'Server error' });
   }
 };
-
 
 actions.show = async function ({ params: { id } }, res) {
 

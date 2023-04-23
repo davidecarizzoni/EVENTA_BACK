@@ -5,7 +5,6 @@ import {Post} from '../posts/model';
 import {User} from "../users/model";
 import { Follow } from '../follow/model';
 
-
 import mongoose from "mongoose";
 import {Types} from "mongoose";
 

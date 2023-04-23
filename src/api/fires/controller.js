@@ -4,11 +4,8 @@ import mongoose from "mongoose";
 
 const actions = {};
 
-
-
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const { search } = query;
-  console.log("QUERYYYY", query)
 
   if (query.noteId) {
     query.noteId = mongoose.Types.ObjectId(query.noteId);
@@ -97,7 +94,7 @@ actions.create = async ({ body }, res) => {
   try {
     fire = await Fire.create(body);
   } catch (err) {
-    return null; // to be changed
+    return null; 
   }
 
   res.send(fire);

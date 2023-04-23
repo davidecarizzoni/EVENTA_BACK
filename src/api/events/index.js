@@ -41,19 +41,23 @@ const queryBody = {
 
 const router = new Router();
 
+// GET EVENTS
+
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/home', token({ required: true }), middleware(queryBody), actions.homeEvents);
 
 router.get('/mostpopular', token({ required: true }), middleware(queryBody), actions.popular);
 
-
 router.get('/:id', token({ required: true }), actions.show);
+
+// GET ENTITIES
 
 router.get('/:id/participants', token({ required: true }), middleware(queryBody), actions.showParticipantsForEvent);
 
 router.get('/:id/posts', token({ required: true }), middleware(queryBody), actions.showPostsForEvent);
 
+// ACTIONS
 
 router.post('/:id/participate', token({ required: true }), actions.participate);
 
@@ -64,9 +68,9 @@ router.post('/:id/like', token({ required: true }), actions.like);
 
 router.delete('/:id/unlike', token({ required: true }), actions.unlike);
 
+// EVENT API
 
 router.post('/', token({ required: false }), actions.create);
-
 
 router.put('/:id', token({ required: true }), actions.update);
 

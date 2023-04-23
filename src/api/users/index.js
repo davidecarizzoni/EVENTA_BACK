@@ -32,13 +32,31 @@ const followerBody = {
 	},
 }
 
-router.get('/', token({ required: true }), middleware(queryBody), actions.index);
+// GET USERS
 
-router.get('/analytics', token({ required: true }), middleware(queryBody), actions.analytics);
+router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/me', token({ required: true }), actions.showMe);
 
 router.get('/:id', admin, actions.show);
+
+router.get('/:id/followed', token({ required: true }), middleware(followerBody), actions.followed);
+
+router.get('/:id/followers', token({ required: true }), middleware(followerBody), actions.followers);
+
+// GET ENTITIES
+
+router.get('/:id/posts', token({ required: true }), middleware(followerBody), actions.showPostsForUser);
+
+router.get('/:id/events', token({ required: true }), middleware(followerBody), actions.showEventsForUser);
+
+// ACTIONS
+
+router.post('/:id/follow', token({ required: true }), actions.follow);
+
+router.delete('/:id/unfollow', token({ required: true }), actions.unfollow);
+
+// USER API
 
 router.post('/', admin, actions.create);
 
@@ -52,23 +70,6 @@ router.delete('/me', token({ required: true }), actions.deleteMe);
 
 router.delete('/:id', admin, actions.destroy);
 
-// POSTS
-router.get('/:id/posts', token({ required: true }), middleware(followerBody), actions.showPostsForUser);
-
-// EVENTS
-router.get('/:id/events', token({ required: true }), middleware(followerBody), actions.showEventsForUser);
-
-// FOLLOW
-router.delete('/:id/unfollow', token({ required: true }), actions.unfollow);
-
-router.get('/:id/followed', token({ required: true }), middleware(followerBody), actions.followed);
-
-
-
-router.post('/:id/follow', token({ required: true }), actions.follow);
-
-router.get('/:id/followers', token({ required: true }), middleware(followerBody), actions.followers);
-
-
+router.get('/analytics', token({ required: true }), middleware(queryBody), actions.analytics);
 
 export default router;

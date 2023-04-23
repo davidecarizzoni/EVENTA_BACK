@@ -6,12 +6,12 @@ import {Schema} from 'mongoose';
 
 const router = new Router();
 
-
 const queryBody = {
   postId: {
 		type: Schema.Types.ObjectId
 	},
 }
+
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/:id', token({ required: true }), actions.show);

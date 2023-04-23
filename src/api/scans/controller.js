@@ -35,7 +35,7 @@ actions.create = async ({ body }, res) => {
   try {
     scan = await Scan.create(body);
   } catch (err) {
-    return null; // to be changed
+    return null; 
   }
 
   res.send(scan);
@@ -62,6 +62,7 @@ actions.update = ({ body, params }, res) => {
 			res.send(scan);
 		});
 };
+
 actions.destroy = async function ({ params: { id } }, res) {
   const scan = await Scan.findById(id);
 

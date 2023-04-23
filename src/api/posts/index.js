@@ -26,17 +26,22 @@ const queryBody = {
 
 const router = new Router();
 
+// GET POSTS
+
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
 router.get('/home', token({ required: true }), middleware(queryBody), actions.homePosts);
 
+router.get('/:id', token({ required: true }), actions.show);
+
+// ACTIONS
 
 router.post('/:id/like', token({ required: true }), actions.like);
 
 router.delete('/:id/unlike', token({ required: true }), actions.unlike);
 
 
-router.get('/:id', token({ required: true }), actions.show);
+// POST API
 
 router.post('/', token({ required: true }), actions.create);
 
@@ -45,5 +50,6 @@ router.put('/:id', token({ required: true }), actions.update);
 router.put('/:id/postImage', token({ required: false }), upload.single("file"), actions.postImage);
 
 router.delete('/:id', token({ required: true }), actions.destroy);
+
 
 export default router;

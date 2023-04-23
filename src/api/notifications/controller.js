@@ -1,9 +1,9 @@
-import { Notification } from './model';
 import _ from 'lodash';
-import {Follow} from "../follow/model";
+import { User } from '../users/model';
+import { Notification } from './model';
+
 import { sendPushNotificationToUsersGroup} from "../../services/notifications";
 import { NOTIFICATIONS_TYPES} from "./model";
-import { User } from '../users/model';
 
 const actions = {};
 const populationOptions = ['targetUser', 'senderUser'];
@@ -22,17 +22,6 @@ actions.index = async function ({user, querymen: { query, cursor } }, res) {
   res.send({ data, totalData });
 };
 
-actions.showMe = async function ({user, querymen: { query, cursor } }, res) {
-  const data = await Notification.find({userId: user._id})
-	.skip(cursor.skip)
-	.limit(cursor.limit)
-	.sort(cursor.sort)
-	.exec();
-
-  const totalData = await Notification.countDocuments({userId: user._id});
-
-  res.send({ data, totalData });
-};
 
 actions.show = async function ({ params: { id } }, res) {
 
@@ -52,7 +41,7 @@ actions.create = async ({ body }, res) => {
   try {
     notification = await Notification.create(body);
   } catch (err) {
-    return null; // to be changed
+    return null; 
   }
 
   res.send(notification);
@@ -84,10 +73,7 @@ actions.update = ({ body, params }, res) => {
 
 actions.test = async ({ user, body }, res) => {
   try {
-
-    // Get list of users to send notification to
     const usersToSendNotification = await User.findById(user._id)
-    console.log(user.name)
 
     await sendPushNotificationToUsersGroup({
 			title: `${user.name}`,

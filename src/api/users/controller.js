@@ -7,7 +7,6 @@ import {Like} from '../likes/model';
 import {Scan} from '../scans/model';
 
 
-
 import {Types} from "mongoose";
 import mongoose from "mongoose";
 
@@ -16,14 +15,10 @@ import _ from 'lodash';
 
 const actions = {};
 
-import {
-	sendPushNotificationToUser
-} from "../../services/notifications";
-
+import { sendPushNotificationToUser } from "../../services/notifications";
 import {NOTIFICATIONS_TYPES} from "../notifications/model";
 
 
-// (pagination done + totaldata + sort: check:true)
 actions.index = async function ({ querymen: { query, cursor } }, res) {
 	const newQuery = {
 		...query,
@@ -93,7 +88,7 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
 		{ $lookup: { from: 'participants', localField: '_id', foreignField: 'eventId', as: 'participants' } },
 		{ $addFields: { participants: { $size: '$participants' } } },
 		{ $project: { numParticipants: 0 } },
-		{ $match: { isDeleted: { $ne: true } } }, // exclude deleted events
+		{ $match: { isDeleted: { $ne: true } } }, 
 		{ $sort: { date: 1, _id: 1 } },
 		{ $skip: cursor.skip },
 		{ $limit: cursor.limit }
@@ -242,7 +237,7 @@ actions.showPostsForUser = async function ({ user, params: { id }, querymen: { c
   res.send({ data, totalData });
 };
 
-// (pagination done + totaldata + sort: check:true)
+
 actions.followed = async function ({ params: { id }, querymen: { query, cursor } }, res) {
   const { search, role } = query;
 
@@ -309,7 +304,6 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
   res.send({ data, totalData })
 };
 
-// (pagination done + totaldata + sort: check:true)
 actions.followers = async function ({ params: { id }, querymen: { query, cursor } }, res) {
 	const { search } = query;
 	const match = {
