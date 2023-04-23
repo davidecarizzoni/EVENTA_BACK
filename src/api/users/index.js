@@ -36,7 +36,7 @@ const followerBody = {
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);	
 
-router.get('/analytics', token({ required: true }),middleware(queryBody), actions.analytics)
+router.get('/analytics', token({ required: true }), middleware(queryBody), actions.analytics)
 
 router.get('/me', token({ required: true }), actions.showMe);
 
