@@ -34,7 +34,9 @@ const followerBody = {
 
 // GET USERS
 
-router.get('/', token({ required: true }), middleware(queryBody), actions.index);
+router.get('/', token({ required: true }), middleware(queryBody), actions.index);	
+
+router.get('/analytics', token({ required: true }),middleware(queryBody), actions.analytics)
 
 router.get('/me', token({ required: true }), actions.showMe);
 
@@ -70,6 +72,5 @@ router.delete('/me', token({ required: true }), actions.deleteMe);
 
 router.delete('/:id', admin, actions.destroy);
 
-router.get('/analytics', token({ required: true }), middleware(queryBody), actions.analytics);
 
 export default router;
