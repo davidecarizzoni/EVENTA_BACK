@@ -35,10 +35,15 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     query.organiserId = mongoose.Types.ObjectId(query.organiserId);
   }
 
+
+  const most_popular = query.popular;
+
   const newQuery = {
-		...query,
-		isDeleted: false,
-	}
+    ...query,
+    isDeleted: false,
+  };
+
+  delete newQuery.popular;
 
   const pipeline = [
     {
@@ -124,15 +129,32 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
       }
     },
-    {
-      $sort: {
-        date: 1,
-        name: 1
-      }
-    },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
+
+
+  if (most_popular) {
+    pipeline.push(
+      {
+        $sort: {
+          participants: -1
+        }
+      },
+    );
+    console.log("bella")
+  } else {
+    pipeline.push(
+
+      {
+        $sort: {
+          date: 1,
+          name: 1
+        }
+      },
+    );
+  }
+
   const [data, count] = await Promise.all([
     Event.aggregate(pipeline),
     Event.aggregate([{ $match: newQuery }, { $count: 'count' }]),
@@ -142,7 +164,9 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
   res.send({ data, totalData });
 };
 
-actions.popular = async function({ user, querymen: { query, select, cursor } }, res) {
+
+actions.homeEvents = async function({ user, querymen: { query, select, cursor } }, res) {
+
   if (query.date) {
     if (query.date.$gte) {
       query.date.$gte = new Date(query.date.$gte);
@@ -151,123 +175,6 @@ actions.popular = async function({ user, querymen: { query, select, cursor } }, 
       query.date.$lte = new Date(query.date.$lte);
     }
   }
-
-  if (query.organiserId) {
-    query.organiserId = mongoose.Types.ObjectId(query.organiserId);
-  }
-
-  const newQuery = {
-		...query,
-		isDeleted: false,
-	}
-
-  const pipeline = [
-    {
-      $match: newQuery,
-    },
-    {
-      $lookup: {
-        from: 'likes',
-        let: { eventId: '$_id' },
-        pipeline: [
-          {
-            $match: {
-              $expr: {
-                $and: [
-                  { $eq: ['$type', 'event'] },
-                  { $eq: ['$objectId', '$$eventId'] }
-                ]
-              }
-            }
-          }
-        ],
-        as: 'likes'
-      }
-    },
-    {
-      $addFields: {
-        hasLiked: {
-          $in: [mongoose.Types.ObjectId(user._id), '$likes.userId']
-        }
-      }
-    },
-    {
-      $addFields: {
-        likes: {
-          $cond: {
-            if: { $isArray: "$likes" },
-            then: { $size: "$likes" },
-            else: 0
-          }
-        },
-      },
-    },
-    {
-      $lookup: {
-        from: 'users',
-        localField: 'organiserId',
-        foreignField: '_id',
-        as: 'organiser'
-      }
-    },
-    {
-      $addFields: {
-        organiser: {
-          $arrayElemAt: ['$organiser', 0]
-        }
-      }
-    },
-    {
-      $lookup: {
-        from: 'scans',
-        localField: '_id',
-        foreignField: 'eventId',
-        as: 'scans'
-      }
-    },
-    {
-      $addFields: {
-        scans: { $size: "$scans" }
-
-      }
-    },
-    {
-      $lookup: {
-        from: 'participants',
-        localField: '_id',
-        foreignField: 'eventId',
-        as: 'participants'
-      }
-    },
-    {
-      $addFields: {
-        participants: { $size: "$participants" }
-
-      }
-    },
-    {
-      $addFields: {
-        totalParticipants: { $sum: "$participants" }
-      }
-    },
-    {
-      $sort: {
-        participants: -1
-      }
-    },
-    { $skip: cursor.skip },
-    { $limit: cursor.limit },
-  ];
-  const [data, count] = await Promise.all([
-    Event.aggregate(pipeline),
-    Event.aggregate([{ $match: newQuery }, { $count: 'count' }]),
-  ]);
-
-  const totalData = count.length ? count[0].count : 0;
-  res.send({ data, totalData });
-};
-
-actions.homeEvents = async function({ user, querymen: { query, select, cursor } }, res) {
   const userCoordinates = user.position.coordinates;
   const most_popular = query.popular;
 
@@ -350,6 +257,12 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
         as: 'participants'
       }
     },
+    {
+      $addFields: {
+        participants: { $size: "$participants" }
+
+      }
+    },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
@@ -358,12 +271,6 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
   if (most_popular) {
     pipeline.push(
       {
-        $addFields: {
-          participants: { $size: "$participants" }
-  
-        }
-      },
-      {
         $sort: {
           participants: -1
         }
@@ -371,12 +278,7 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
     );
   } else {
     pipeline.push(
-      {
-        $addFields: {
-          participants: { $size: "$participants" }
-  
-        }
-      },
+
       {
         $sort: {
           date: 1,
