@@ -8,7 +8,10 @@ const router = new Router();
 
 router.get('/me', token({ required: true }), middleware(), actions.index);
 
-router.get('/read', token({ required: true }), middleware(), actions.read);
+router.get('/check', token({ required: true }), middleware(), actions.checkRead);
+
+router.get('/setRead', token({ required: true }), middleware(), actions.setRead);
+
 
 router.get('/:id', token({ required: true }), actions.show);
 
