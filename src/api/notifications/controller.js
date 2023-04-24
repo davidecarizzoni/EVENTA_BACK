@@ -23,6 +23,19 @@ actions.index = async function ({user, querymen: { query, cursor } }, res) {
 };
 
 
+actions.read = async function ({user, querymen: { query, cursor } }, res) {
+  const data = await Notification.find({isRead: false})
+	.skip(cursor.skip)
+	.limit(cursor.limit)
+	.sort({'createdAt':-1})
+	.exec();
+
+  const totalData = await Notification.countDocuments({isRead: false});
+
+  res.send({ data, totalData });
+};
+
+
 actions.show = async function ({ params: { id } }, res) {
 
   const notification = await Notification
