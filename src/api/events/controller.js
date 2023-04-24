@@ -269,10 +269,15 @@ actions.popular = async function({ user, querymen: { query, select, cursor } }, 
 
 actions.homeEvents = async function({ user, querymen: { query, select, cursor } }, res) {
   const userCoordinates = user.position.coordinates;
+  const most_popular = query.popular;
+
   const newQuery = {
-		...query,
-		isDeleted: false,
-	}
+    ...query,
+    isDeleted: false,
+  };
+
+  delete newQuery.popular;
+
   const geoNearStage = {
     $geoNear: {
       near: { type: "Point", coordinates: userCoordinates },
@@ -345,27 +350,48 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
         as: 'participants'
       }
     },
-    {
-      $addFields: {
-        participants: { $size: "$participants" }
-
-      }
-    },
-    {
-      $sort: {
-        date: 1,
-        name: 1
-      }
-    },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
+
+
+  if (most_popular) {
+    pipeline.push(
+      {
+        $addFields: {
+          participants: { $size: "$participants" }
+  
+        }
+      },
+      {
+        $sort: {
+          participants: -1
+        }
+      },
+    );
+  } else {
+    pipeline.push(
+      {
+        $addFields: {
+          participants: { $size: "$participants" }
+  
+        }
+      },
+      {
+        $sort: {
+          date: 1,
+          name: 1
+        }
+      },
+    );
+  }
 
   const countPipeline = [geoNearStage, { $count: 'count' }];
   const [data, count] = await Promise.all([
     Event.aggregate(pipeline),
     Event.aggregate(countPipeline),
   ]);
+
 
   const totalData = count.length ? count[0].count : 0;
   res.send({ data, totalData });

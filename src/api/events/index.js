@@ -25,6 +25,9 @@ const queryBody = {
   search:{
     type: String,
   },
+  popular: {
+    type: Boolean,
+  },
   'date.$gte': {
     type: Date,
     paths: ['date'],
