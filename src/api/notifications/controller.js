@@ -24,7 +24,7 @@ actions.index = async function ({user, querymen: { query, cursor } }, res) {
 
 
 actions.read = async function ({user, querymen: { query, cursor } }, res) {
-  const totalData = await Notification.countDocuments({isRead: false});
+  const totalData = await Notification.countDocuments({targetUserId: user._id, isRead: false});
 
   res.send({ totalData });
 };
