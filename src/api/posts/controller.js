@@ -128,17 +128,20 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
       $replaceRoot: { newRoot: '$data' }
     },
     {
+      $sort: { createdAt: -1 }
+    },
+    {
       $skip: cursor.skip
     },
     {
       $limit: cursor.limit
     },
-		{
-      $sort: { createdAt: -1, _id: 1 }
-    },
+
   ];
 
-  const [data, count] = await Promise.all([    Post.aggregate(pipeline),    Post.aggregate([{ $match: match }, { $count: 'count' }]),
+  const [data, count] = await Promise.all([
+    Post.aggregate(pipeline),
+    Post.aggregate([{ $match: match }, { $count: 'count' }]),
   ]);
   const totalData = count.length ? count[0].count : 0;
 

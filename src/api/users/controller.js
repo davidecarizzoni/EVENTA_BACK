@@ -123,9 +123,6 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
 	
 	const totalData = count.length ? count[0].count : 0;
 	
-	
-	
-
   res.send({ data, totalData });
 };
 
@@ -359,6 +356,24 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 	const totalData = count.length ? count[0].count : 0;
 	res.send({ data, totalData });
 	
+};
+
+
+actions.recommended = async function ({ user, querymen: { query, cursor } }, res) {
+	const newQuery = {
+		...query,
+		isDeleted: false,
+	}
+  const data = await User.find(newQuery)
+	.skip(cursor.skip)
+	.sort({'name': 1, '_id': 1})
+	.limit(cursor.limit)
+	.sort(cursor.sort);
+
+	console.log(data)
+
+  const totalData = await User.countDocuments(newQuery);
+  res.send({ data, totalData });
 };
 
 actions.follow = async function ({ user, params: { id } }, res) {
