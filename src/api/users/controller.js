@@ -17,6 +17,7 @@ const actions = {};
 
 import { sendPushNotificationToUser } from "../../services/notifications";
 import {NOTIFICATIONS_TYPES} from "../notifications/model";
+import { authenticate } from 'passport';
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
@@ -358,23 +359,59 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 	
 };
 
-
 actions.recommended = async function ({ user, querymen: { query, cursor } }, res) {
-	const newQuery = {
-		...query,
-		isDeleted: false,
-	}
-  const data = await User.find(newQuery)
-	.skip(cursor.skip)
-	.sort({'name': 1, '_id': 1})
-	.limit(cursor.limit)
-	.sort(cursor.sort);
+  const authenticatedUser = user._id;
 
-	console.log(data)
+	console.log("USER ID: ", authenticatedUser)
 
-  const totalData = await User.countDocuments(newQuery);
+  // find the ids of the users that the authenticated user does not follow
+  const followDocs = await Follow.find({ followerId: authenticatedUser });
+  const followedIds = followDocs.map(doc => doc.followedId);
+
+	console.log("FOLLOWD DOCS: ", followDocs)
+
+  const notFollowedIds = await User.find({
+    _id: { $nin: followedIds.concat(authenticatedUser) },
+    isDeleted: false
+  }).distinct('_id');
+
+  // create a new query that combines the original query with the new query to filter by the not followed ids
+  const newQuery = {
+    ...query,
+    _id: { $in: notFollowedIds }
+  };
+
+  // add the geoNear stage to the pipeline
+  const userCoordinates = user.position.coordinates;
+  const geoNearStage = {
+    $geoNear: {
+      near: { type: "Point", coordinates: userCoordinates },
+      distanceField: "distance",
+      maxDistance: 75000, // in meters
+      spherical: true,
+      query: newQuery,
+      key: "position",
+    }
+  };
+
+	const pipeline = [
+		geoNearStage,
+		{ $sort: cursor.sort || { name: 1, _id: 1 } },
+    { $skip: cursor.skip },
+    { $limit: cursor.limit }
+	]
+
+  const countPipeline = [geoNearStage, { $count: 'count' }];
+  const [data, count] = await Promise.all([
+    User.aggregate(pipeline),
+    User.aggregate(countPipeline),
+  ]);
+
+  const totalData = count.length ? count[0].count : 0;
+
   res.send({ data, totalData });
 };
+
 
 actions.follow = async function ({ user, params: { id } }, res) {
 	try {

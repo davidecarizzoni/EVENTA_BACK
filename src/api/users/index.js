@@ -34,13 +34,16 @@ const followerBody = {
 
 // GET USERS
 
-router.get('/', token({ required: true }), middleware(queryBody), actions.index);	
+router.get('/', token({ required: true }), middleware(queryBody), actions.index);
+
+router.get('/recommended', token({ required: true }), middleware(followerBody), actions.recommended);
 
 router.get('/analytics', token({ required: true }), middleware(queryBody), actions.analytics)
 
 router.get('/me', token({ required: true }), actions.showMe);
 
 router.get('/:id', admin, actions.show);
+
 
 router.get('/:id/followed', token({ required: true }), middleware(followerBody), actions.followed);
 
