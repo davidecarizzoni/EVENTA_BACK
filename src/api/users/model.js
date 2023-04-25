@@ -60,6 +60,9 @@ const UsersSchema = new Schema({
 	expoPushToken: {
 		type: String,
 		required: null
+	},
+	appleId: {
+		type: String,
 	}
 });
 

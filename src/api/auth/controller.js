@@ -75,4 +75,51 @@ export const googleLogin = async ({ body }, res, next)=> {
 	}
 }
 
+export const appleLogin = async ({ body }, res, next) => {
+	try {
+		const email = _.get(body, 'email', '')
+		const familyName = _.get(body, 'fullName.familyName')
+		const givenName = _.get(body, 'fullName.givenName')
+		const appleId = _.get(body, 'user')
+
+		if(!email) {
+			res.status(400).json({
+				param: 'no social user exist',
+				message: 'no social user exist'
+			});
+			res.send()
+		}
+
+		let user = await User.findOne({ email: email });
+		if (_.isNil(user)) {
+			user = await User.create({
+				email: email,
+				name: familyName,
+				username: `${givenName} ${familyName}`,
+				password: 'ahahahhaha',
+				role: USER,
+				appleId: appleId,
+				toComplete: true
+			})
+				.catch(err => {
+					console.debug('err', err)
+					if (err.name === 'MongoError' && err.code === 11000) {
+						res.status(409).json({
+							valid: false,
+							param: 'email - username',
+							message: 'email or username already registered'
+						});
+						res.send()
+					} else {
+						next(err);
+					}
+				});
+		}
+
+		const token =  await sign(user._id)
+		res.send({ token, user });
+	} catch (e) {
+		res.status(400).send(e.message);
+	}
+}
 
