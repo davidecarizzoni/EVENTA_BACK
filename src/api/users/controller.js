@@ -17,7 +17,6 @@ const actions = {};
 
 import { sendPushNotificationToUser } from "../../services/notifications";
 import {NOTIFICATIONS_TYPES} from "../notifications/model";
-import { authenticate } from 'passport';
 
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {

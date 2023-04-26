@@ -10,14 +10,31 @@ const populationOptions = ['targetUser', 'senderUser'];
 
 
 actions.index = async function ({user, querymen: { query, cursor } }, res) {
-  const data = await Notification.find({targetUserId: user._id})
+
+  const dateQuery = {};
+  if (query.date) {
+    if (query.date.$gte) {
+      dateQuery.$gte = new Date(query.date.$gte);
+    }
+    if (query.date.$lte) {
+      dateQuery.$lte = new Date(query.date.$lte);
+    }
+  }
+  console.log(dateQuery);
+
+  const noteQuery = {
+    targetUserId: user._id,
+    createdAt: dateQuery
+  };
+
+  const data = await Notification.find(noteQuery)
 	.skip(cursor.skip)
 	.limit(cursor.limit)
   .populate(populationOptions)
 	.sort({'createdAt':-1})
 	.exec();
 
-  const totalData = await Notification.countDocuments({targetUserId: user._id});
+  const totalData = await Notification.countDocuments(noteQuery);
 
   res.send({ data, totalData });
 };
