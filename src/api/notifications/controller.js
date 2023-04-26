@@ -20,7 +20,6 @@ actions.index = async function ({user, querymen: { query, cursor } }, res) {
       dateQuery.$lte = new Date(query.date.$lte);
     }
   }
-  console.log(dateQuery);
 
   const noteQuery = {
     targetUserId: user._id,
