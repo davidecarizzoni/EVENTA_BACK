@@ -158,6 +158,8 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
         comment: {
           _id: 1,
           userId: 1,
+          postId: 1,
+          content: 1,
         },
 
       }
