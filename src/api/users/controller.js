@@ -101,13 +101,16 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
       $project: {
         _id: 1,
         organiserId: 1,
-				name: 1,
-				date: 1,
-				coverImage: 1,
-				participants: 1,
+        name: 1,
+        description: 1,
+        position: 1,
+        address: 1,
+        coverImage: 1,
+        participants: 1,
         organiser: {
           _id: 1,
           name: 1,
+          role: 1,
           username: 1,
           profilePic: 1,
         }

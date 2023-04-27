@@ -142,6 +142,7 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
         caption: 1,
         postImage: 1,
         likes: 1,
+        createdAt: 1,
         hasLiked: 1,
         event: {
           _id: 1,
@@ -161,7 +162,6 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
           postId: 1,
           content: 1,
         },
-
       }
     },
     {
