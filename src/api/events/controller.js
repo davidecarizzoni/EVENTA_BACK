@@ -473,6 +473,13 @@ actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { 
           organiserId: 1, 
           role: 1,
           username: 1,
+        },
+        user: {
+          _id: 1,
+          role: 1,
+          name: 1,
+          username: 1,
+          profilePic: 1,
         }
       }
     },
