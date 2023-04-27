@@ -143,6 +143,7 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
         hasLiked: 1,
         scans:1,
         organiser: {
+          _id: 1,
           name: 1,
           role: 1,
           username: 1,
@@ -297,6 +298,7 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
         likes: 1,
         hasLiked: 1,
         organiser: {
+          _id: 1,
           name: 1,
           role: 1,
           username: 1,
@@ -469,6 +471,7 @@ actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { 
         likes: 1,
         hasLiked: 1,
         event: {
+          _id: 1,
           name: 1,
           organiserId: 1, 
           role: 1,
@@ -544,6 +547,7 @@ actions.showParticipantsForEvent = async function ({ params: { id }, querymen: {
         eventId: 1,
         userId: 1,
         user: {
+          _id: 1,
           name: 1,
           role: 1,
           username: 1,
