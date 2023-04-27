@@ -30,11 +30,16 @@ const followerBody = {
 	role: {
 		type: String
 	},
+	field: {
+		type: String
+	}
 }
 
 // GET USERS
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
+
+router.get('/:id/getField', token({ required: true }), middleware(followerBody), actions.getUserField);
 
 router.get('/recommended', token({ required: true }), middleware(followerBody), actions.recommended);
 

@@ -74,7 +74,15 @@ actions.show = async function ({ user, params: { id }, res }) {
   });
 };
 
-actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor } }, res) {
+actions.getUserField = async function ({ params: { id }, querymen: { cursor, query }}, res) {
+	console.log("Query", query.field)
+  const user = await User.findById(id).select(query.field)
+
+  res.send({user});
+};
+
+
+actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor} }, res) {
 
   const match = { userId: mongoose.Types.ObjectId(id) };
   const pipeline = [
