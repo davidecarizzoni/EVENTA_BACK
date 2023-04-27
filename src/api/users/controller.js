@@ -75,7 +75,6 @@ actions.show = async function ({ user, params: { id }, res }) {
 };
 
 actions.getUserField = async function ({ params: { id }, querymen: { cursor, query }}, res) {
-	console.log("Query", query.field)
   const user = await User.findById(id).select(query.field)
 
   res.send({user});
