@@ -22,17 +22,35 @@ FollowSchema.virtual('followed', {
   ref: 'User',
   localField: 'followedId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+  options: {
+		projection: {
+      _id: 1,
+			username: 1,
+			name: 1,
+      profilePic: 1,
+      role: 1, 
+		},
+	}
 });
 
 FollowSchema.virtual('follower', {
   ref: 'User',
   localField: 'followerId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+  options: {
+		projection: {
+      _id: 1,
+			username: 1,
+			name: 1,
+      profilePic: 1,
+      role: 1, 
+		},
+	}
 });
-FollowSchema.index({ followedId: 1, followerId: 1}, { unique: true });
 
+FollowSchema.index({ followedId: 1, followerId: 1}, { unique: true });
 
 const Follow = model('Follow', FollowSchema);
 

@@ -28,14 +28,30 @@ PostSchema.virtual('event', {
   ref: 'Event',
   localField: 'eventId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+  options: {
+		projection: {
+      _id:1,
+      name: 1, 
+			coverImage: 1,
+		},
+	}
 });
 
 PostSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+  options: {
+		projection: {
+      _id:1,
+      name: 1,
+      username: 1,
+      role: 1,
+			profilePic: 1,
+		},
+	}
 });
 
 const Post = model('Post', PostSchema);

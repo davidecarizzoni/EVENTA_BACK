@@ -18,10 +18,11 @@ const populationOptions = ['user', 'event'];
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await Post.find(query)
+  .sort({'createdAt':-1})
+  .populate(populationOptions)
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
-	.populate(populationOptions)
 	.exec();
 
   const totalData = await Post.countDocuments(query);
@@ -98,12 +99,6 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
         as: 'user'
       }
     },
-    {
-      $addFields: {
-        event: { $arrayElemAt: ['$event', 0] },
-        user: { $arrayElemAt: ['$user', 0] }
-      }
-    },
 		{
       $lookup: {
         from: 'comments',
@@ -116,19 +111,55 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
       $group: {
         _id: '$_id',
         data: { $first: '$$ROOT' },
-        comments: { $sum: { $size: '$comments' } }
+        comments: { $sum: { $size: '$comments' } },
+        comment: { $first: '$comments' }
       }
     },
     {
       $addFields: {
-        'data.comments': '$comments'
+        'data.comments': '$comments',
+        'data.comment': { $arrayElemAt: ['$comment', 0] }
       }
     },
     {
       $replaceRoot: { newRoot: '$data' }
     },
+    
+    {
+      $addFields: {
+        event: { $arrayElemAt: ['$event', 0] },
+        user: { $arrayElemAt: ['$user', 0] },
+      }
+    },
     {
       $sort: { createdAt: -1 }
+    },
+    {
+      $project: {
+        _id: 1,
+        userId: 1,
+        eventId: 1,
+        caption: 1,
+        postImage: 1,
+        likes: 1,
+        hasLiked: 1,
+        event: {
+          _id: 1,
+          name: 1,
+        },
+        user: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          role: 1,
+        },
+        comments: 1,
+        comment: {
+          _id: 1,
+          userId: 1,
+        },
+
+      }
     },
     {
       $skip: cursor.skip

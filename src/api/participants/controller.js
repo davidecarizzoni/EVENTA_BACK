@@ -10,7 +10,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.skip(cursor.skip)
 	.limit(cursor.limit)
 	.sort(cursor.sort)
-	.populate(populationOptions)
 	.exec();
 
   const totalData = await Participant.countDocuments(query);

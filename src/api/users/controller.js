@@ -90,6 +90,22 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
 		{ $project: { numParticipants: 0 } },
 		{ $match: { isDeleted: { $ne: true } } }, 
 		{ $sort: { date: 1, _id: 1 } },
+		{
+      $project: {
+        _id: 1,
+        organiserId: 1,
+				name: 1,
+				date: 1,
+				coverImage: 1,
+				participants: 1,
+        organiser: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          profilePic: 1,
+        }
+      }
+    },
 		{ $skip: cursor.skip },
 		{ $limit: cursor.limit }
 	];
@@ -217,6 +233,28 @@ actions.showPostsForUser = async function ({ user, params: { id }, querymen: { c
     {
       $sort: { createdAt: -1, _id: 1 }
     },
+		{
+      $project: {
+        _id: 1,
+        userId: 1,
+				eventId: 1,
+				caption: 1,
+				postImage: 1,
+				likes: 1,
+				hasLiked: 1,
+				comments: 1,
+        event: {
+          _id: 1,
+          name: 1,
+        },
+				user:{
+					_id: 1,
+					name: 1,
+					username: 1,
+					profilePic: 1,
+				}
+      }
+    },
     {
       $skip: cursor.skip
     },
@@ -273,6 +311,19 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
       $match: secondMatch 
     },
 		{ $sort: { "followed.name": 1, "followed._id": 1 }},
+		{
+      $project: {
+        _id: 1,
+        followedId: 1,
+				followerId: 1,
+        followed: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          profilePic: 1,
+        }
+      }
+    },
 		{ $skip: cursor.skip },
 		{ $limit: cursor.limit },
   ];
@@ -331,6 +382,19 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 		{ $unwind: "$follower" },
 		{ $match: secondMatch },
 		{ $sort: { "follower.name": 1, "_id": 1 }},
+		{
+      $project: {
+        _id: 1,
+        followedId: 1,
+				followerId: 1,
+        follower: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          profilePic: 1,
+        }
+      }
+    },
 		{ $skip: cursor.skip },
 		{ $limit: cursor.limit }
 	];
@@ -361,12 +425,9 @@ actions.followers = async function ({ params: { id }, querymen: { query, cursor 
 actions.recommended = async function ({ user, querymen: { query, cursor } }, res) {
   const authenticatedUser = user._id;
 
-	console.log("USER ID: ", authenticatedUser)
-
   const followDocs = await Follow.find({ followerId: authenticatedUser });
   const followedIds = followDocs.map(doc => doc.followedId);
 
-	console.log("FOLLOWD DOCS: ", followDocs)
 
   const notFollowedIds = await User.find({
     _id: { $nin: followedIds.concat(authenticatedUser) },

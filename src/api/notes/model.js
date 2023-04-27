@@ -27,6 +27,7 @@ NoteSchema.virtual('user', {
 		projection: {
       _id: 1,
 			username: 1,
+      name: 1,
 			profilePic: 1
 		},
 	}

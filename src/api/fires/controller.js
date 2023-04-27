@@ -46,6 +46,20 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
       $match: secondMatch
     },
     { $sort: { "user.name": 1 } },
+    {
+      $project: {
+        _id: 1,
+        userId: 1,
+        noteId: 1,
+        user: {
+          _id: 1,
+          name: 1,
+          role: 1,
+          username: 1,
+          profilePic: 1,
+        }
+      }
+    },
     { $skip: cursor.skip },
     { $limit: cursor.limit }
   ];

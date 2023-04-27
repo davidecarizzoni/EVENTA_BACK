@@ -289,6 +289,7 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
       $project: {
         _id: 1,
         organiserId: 1,
+        date: 1,
         name: 1,
         description: 1,
         position: 1,

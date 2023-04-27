@@ -29,8 +29,8 @@ actions.index = async function ({user, querymen: { query, cursor } }, res) {
   const data = await Notification.find(noteQuery)
 	.skip(cursor.skip)
 	.limit(cursor.limit)
+  .sort({'createdAt':-1})
   .populate(populationOptions)
-	.sort({'createdAt':-1})
 	.exec();
 
   const totalData = await Notification.countDocuments(noteQuery);
