@@ -151,6 +151,7 @@ actions.homePosts = async function({ user, querymen: { query, select, cursor } }
           _id: 1,
           name: 1,
           username: 1,
+          profilePic: 1,
           role: 1,
         },
         comments: 1,
