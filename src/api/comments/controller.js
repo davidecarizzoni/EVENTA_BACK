@@ -7,7 +7,7 @@ import { sendPushNotificationToUser } from '../../services/notifications';
 import { NOTIFICATIONS_TYPES } from '../notifications/model';
 
 const actions = {};
-const populationOptions = ['post', 'user'];
+const populationOptions = ['user'];
 
 actions.index = async function ({ querymen: { query, cursor } }, res) {
   const data = await Comment.find(query)

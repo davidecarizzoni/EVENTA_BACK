@@ -25,15 +25,17 @@ CommentSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+  options: {
+		projection: {
+      _id: 1,
+			username: 1,
+      name: 1,
+			profilePic: 1
+		},
+	}
 });
 
-CommentSchema.virtual('post', {
-  ref: 'Post',
-  localField: 'postId',
-  foreignField: '_id',
-  justOne: true
-});
 
 const Comment = model('Comment', CommentSchema);
 

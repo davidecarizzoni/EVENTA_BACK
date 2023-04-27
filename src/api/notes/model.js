@@ -22,7 +22,14 @@ NoteSchema.virtual('user', {
   ref: 'User',
   localField: 'userId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+  options: {
+		projection: {
+      _id: 1,
+			username: 1,
+			profilePic: 1
+		},
+	}
 });
 
 NoteSchema.virtual('fires', {

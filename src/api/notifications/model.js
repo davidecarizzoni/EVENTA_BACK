@@ -53,14 +53,29 @@ NotificationSchema.virtual('senderUser', {
   ref: 'User',
   localField: 'senderUserId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+  options: {
+		projection: {
+      _id:1,
+      name: 1, 
+			username: 1,
+			profilePic: 1
+		},
+	}
 });
 
 NotificationSchema.virtual('targetUser', {
   ref: 'User',
   localField: 'targetUserId',
   foreignField: '_id',
-  justOne: true
+  justOne: true,
+  options: {
+		projection: {
+      _id: 1,
+			username: 1,
+			name: 1
+		},
+	}
 });
 
 

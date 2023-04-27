@@ -129,6 +129,27 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
       }
     },
+    {
+      $project: {
+        _id: 1,
+        organiserId: 1,
+        name: 1,
+        description: 1,
+        position: 1,
+        address: 1,
+        coverImage: 1,
+        participants: 1,
+        likes: 1,
+        hasLiked: 1,
+        scans:1,
+        organiser: {
+          name: 1,
+          role: 1,
+          username: 1,
+          profilePic: 1,
+        }
+      }
+    },
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
@@ -263,6 +284,27 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
 
       }
     },
+    {
+      $project: {
+        _id: 1,
+        organiserId: 1,
+        name: 1,
+        description: 1,
+        position: 1,
+        address: 1,
+        coverImage: 1,
+        participants: 1,
+        likes: 1,
+        hasLiked: 1,
+        organiser: {
+          name: 1,
+          role: 1,
+          username: 1,
+          profilePic: 1,
+        }
+      }
+    },
+    
     { $skip: cursor.skip },
     { $limit: cursor.limit },
   ];
@@ -418,6 +460,23 @@ actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { 
       $sort: { createdAt: -1, _id: 1 }
     },
     {
+      $project: {
+        _id: 1,
+        eventId: 1,
+        userId: 1,
+        caption: 1,
+        postImage: 1,
+        likes: 1,
+        hasLiked: 1,
+        event: {
+          name: 1,
+          organiserId: 1, 
+          role: 1,
+          username: 1,
+        }
+      }
+    },
+    {
       $skip: cursor.skip
     },
     {
@@ -472,6 +531,19 @@ actions.showParticipantsForEvent = async function ({ params: { id }, querymen: {
       $match: secondMatch
     },
     { $sort: { "user.name": 1 } },
+    {
+      $project: {
+        _id: 1,
+        eventId: 1,
+        userId: 1,
+        user: {
+          name: 1,
+          role: 1,
+          username: 1,
+          profilePic: 1,
+        }
+      }
+    },
     { $skip: cursor.skip },
     { $limit: cursor.limit }
   ];

@@ -363,7 +363,6 @@ actions.recommended = async function ({ user, querymen: { query, cursor } }, res
 
 	console.log("USER ID: ", authenticatedUser)
 
-  // find the ids of the users that the authenticated user does not follow
   const followDocs = await Follow.find({ followerId: authenticatedUser });
   const followedIds = followDocs.map(doc => doc.followedId);
 
@@ -374,13 +373,11 @@ actions.recommended = async function ({ user, querymen: { query, cursor } }, res
     isDeleted: false
   }).distinct('_id');
 
-  // create a new query that combines the original query with the new query to filter by the not followed ids
   const newQuery = {
     ...query,
     _id: { $in: notFollowedIds }
   };
 
-  // add the geoNear stage to the pipeline
   const userCoordinates = user.position.coordinates;
   const geoNearStage = {
     $geoNear: {
@@ -596,10 +593,90 @@ actions.deleteMe = async function ({ user }, res) {
 
 
 actions.analytics = async function({ user, querymen: { query, select, cursor } }, res) {
-	console.log(user)
 	const organiserId = user._id;
   const events = await Event.find({organiserId: organiserId});
-    const number_events = await Event.countDocuments({organiserId: organiserId})
+  const number_events = await Event.countDocuments({organiserId: organiserId})
+	const number_followers = await Follow.countDocuments({followedId: user._id})
+
+
+  const number_participants = await Promise.all(
+    events.map(async (event) => {
+      const participants = await Participant.find({eventId: event._id});
+      return participants.length;
+    })
+  ).then((participants) => participants.reduce((a, b) => a + b, 0));
+
+
+  const number_likes = await Promise.all(
+    events.map(async (event) => {
+      const likes = await Like.find({objectId: event._id});
+      return likes.length;
+    })
+  ).then((likes) => likes.reduce((a, b) => a + b, 0));
+
+    const number_scans = await Promise.all(
+    events.map(async (event) => {
+      const scans = await Scan.find({eventId: event._id});
+      return scans.length;
+    })
+  ).then((scans) => scans.reduce((a, b) => a + b, 0));
+
+    const number_posts = await Promise.all(
+    events.map(async (event) => {
+      const posts = await Post.find({eventId: event._id});
+      return posts.length;
+    })
+  ).then((posts) => posts.reduce((a, b) => a + b, 0));
+
+    const average_participants = Math.round(number_participants / number_events);
+    const average_scans = Math.round(number_scans / number_events);
+    const average_likes = Math.round(number_likes / number_events);
+    const average_posts = Math.round(number_posts / number_events);
+
+	// your data in the last months: +10 followers, +10 posts made on your events, +10 people who participated in your  events
+	const dateQuery = {};
+	if (query.date) {
+		if (query.date.$gte) {
+			dateQuery.$gte = new Date(query.date.$gte);
+		}
+		if (query.date.$lte) {
+			dateQuery.$lte = new Date(query.date.$lte);
+		}
+	}
+
+  res.json({
+        number_events, 
+				number_followers,
+        number_participants, 
+        number_likes, 
+        number_scans, 
+        number_posts,
+        average_participants,
+        average_scans,
+        average_likes,
+        average_posts
+    });
+
+}
+
+actions.percentages = async function({ user, querymen: { query, select, cursor } }, res) {
+
+	// your data in the last months: +10 followers, +10 posts made on your events, +10 people who participated in your  events
+	const dateQuery = {};
+	if (query.date) {
+		if (query.date.$gte) {
+			dateQuery.$gte = new Date(query.date.$gte);
+		}
+		if (query.date.$lte) {
+			dateQuery.$lte = new Date(query.date.$lte);
+		}
+	}
+
+	const organiserId = user._id;
+  const events = await Event.find({organiserId: organiserId});
+  const number_events = await Event.countDocuments({organiserId: organiserId})
+	const number_followers = await Follow.countDocuments({followedId: user._id})
+
 
   const number_participants = await Promise.all(
     events.map(async (event) => {
@@ -633,9 +710,11 @@ actions.analytics = async function({ user, querymen: { query, select, cursor } }
     const average_scans = Math.round(number_scans / number_events);
     const average_likes = Math.round(number_likes / number_events);
     const average_posts = Math.round(number_posts / number_events);
+	
 
   res.json({
-        number_events, 
+        number_events,
+				number_followers,
         number_participants, 
         number_likes, 
         number_scans, 
@@ -644,6 +723,8 @@ actions.analytics = async function({ user, querymen: { query, select, cursor } }
         average_scans,
         average_likes,
         average_posts
-    });}
+    });
+	
+}
 
 export { actions };

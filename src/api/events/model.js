@@ -67,6 +67,7 @@ EventsSchema.virtual('organiser', {
   justOne: true,
 	options: {
 		projection: {
+      _id: 1,
 			name: 1,
 			username: 1,
 			profilePic: 1
