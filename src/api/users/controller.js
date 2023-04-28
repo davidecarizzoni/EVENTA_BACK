@@ -229,15 +229,17 @@ actions.showPostsForUser = async function ({ user, params: { id }, querymen: { c
       $group: {
         _id: '$_id',
         data: { $first: '$$ROOT' },
-        comments: { $sum: { $size: '$comments' } }
+        comments: { $sum: { $size: '$comments' } },
+        comment: { $first: '$comments' }
       }
     },
     {
       $addFields: {
-        'data.comments': '$comments'
+        'data.comments': '$comments',
+        'data.comment': { $arrayElemAt: ['$comment', 0] }
       }
     },
-		{
+    {
       $replaceRoot: { newRoot: '$data' }
     },
     {
@@ -247,22 +249,30 @@ actions.showPostsForUser = async function ({ user, params: { id }, querymen: { c
       $project: {
         _id: 1,
         userId: 1,
-				eventId: 1,
-				caption: 1,
-				postImage: 1,
-				likes: 1,
-				hasLiked: 1,
-				comments: 1,
+        eventId: 1,
+        caption: 1,
+        postImage: 1,
+        likes: 1,
+        createdAt: 1,
+        hasLiked: 1,
         event: {
           _id: 1,
           name: 1,
         },
-				user:{
-					_id: 1,
-					name: 1,
-					username: 1,
-					profilePic: 1,
-				}
+        user: {
+          _id: 1,
+          name: 1,
+          username: 1,
+          profilePic: 1,
+          role: 1,
+        },
+        comments: 1,
+        comment: {
+          _id: 1,
+          userId: 1,
+          postId: 1,
+          content: 1,
+        },
       }
     },
     {
