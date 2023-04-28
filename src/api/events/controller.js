@@ -604,7 +604,6 @@ actions.participate = async function ({ user, params: { id } }, res) {
       type: NOTIFICATIONS_TYPES.EVENT_PARTICIPATION,
       user: targetUser,
       userId: user._id,
-
       extraData: {
         participant
 			},
@@ -637,6 +636,7 @@ actions.unparticipate = async function ({ user, params: { id } }, res) {
 actions.like = async function ({ user, params: { id } }, res) {
 
 	try {
+
 		const like = await Like.create({
 			userId: user._id,
 			objectId: id,
@@ -644,7 +644,6 @@ actions.like = async function ({ user, params: { id } }, res) {
 		})
 
     const likedEvent = await Event.findById(id)
-
     const targetUser = await User.findById(likedEvent.organiserId).select('username name expoPushToken')
 		console.log(targetUser)
 
@@ -652,13 +651,14 @@ actions.like = async function ({ user, params: { id } }, res) {
 			title: `${user.username}`,
       text: `has liked your event`,
       type: NOTIFICATIONS_TYPES.EVENT_LIKE,
-      user: user,
+      user: targetUser,
+      userId: user._id,
       extraData: {
         like
 			},
     });
-
     console.log("GOT HERE")
+
 
 		res.send(like);
 	} catch (err) {

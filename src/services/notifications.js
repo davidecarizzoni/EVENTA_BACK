@@ -10,12 +10,14 @@ let expo = new Expo({});
 
 export const sendPushNotification = async ({expoPushToken, targetUserId, userId, title, text, type, extraData = {}}) => {
 	if (_.isNil(expoPushToken) || _.isNil(userId)) {
+		console.log("USERRRRR", userId)
 		console.debug('no token')
 		return Promise.reject({
 			message: 'User expoPushToken not found or userId not provided'
 		})
 	}
 	try {
+		console.log("HEREEEEEEEE", expoPushToken)
 		const message = {
 			to: expoPushToken,
 			sound: 'default',
@@ -88,10 +90,12 @@ export const sendPushNotificationToUsersGroup = async ({ userId, title, text, ex
 
 export const sendPushNotificationToUser = async ({ userId, title, text, extraData, user , type}) => {
 	try {
+		console.log("user 1 11 1 1", userId)
 			return await sendPushNotification({
 				expoPushToken: user.expoPushToken,
 				targetUserId: user._id,
-				userId, title,
+				userId, 
+				title,
 				text,
 				type,
 				extraData

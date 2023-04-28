@@ -59,7 +59,8 @@ NotificationSchema.virtual('senderUser', {
       _id:1,
       name: 1, 
 			username: 1,
-			profilePic: 1
+			profilePic: 1,
+      expoPushToken: 1
 		},
 	}
 });
@@ -74,7 +75,9 @@ NotificationSchema.virtual('targetUser', {
       _id: 1,
 			username: 1,
 			name: 1,
-      profilePic: 1
+      profilePic: 1,
+      expoPushToken: 1
+
 
 		},
 	}
