@@ -96,6 +96,43 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
 		{ $match: { isDeleted: { $ne: true } } }, 
 		{ $sort: { date: 1, _id: 1 } },
 		{
+      $lookup: {
+        from: 'likes',
+        let: { eventId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$type', 'event'] },
+                  { $eq: ['$objectId', '$$eventId'] }
+                ]
+              }
+            }
+          }
+        ],
+        as: 'likes'
+      }
+    },
+    {
+      $addFields: {
+        hasLiked: {
+          $in: [mongoose.Types.ObjectId(id), '$likes.userId']
+        }
+      }
+    },
+    {
+      $addFields: {
+        likes: {
+          $cond: {
+            if: { $isArray: "$likes" },
+            then: { $size: "$likes" },
+            else: 0
+          }
+        },
+      },
+    },
+		{
       $project: {
         _id: 1,
         organiserId: 1,
@@ -106,6 +143,8 @@ actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor
         address: 1,
         coverImage: 1,
         participants: 1,
+				likes: 1, 
+				hasLiked: 1,
         organiser: {
           _id: 1,
           name: 1,
