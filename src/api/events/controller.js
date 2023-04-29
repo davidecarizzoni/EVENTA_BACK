@@ -165,7 +165,6 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
         }
       },
     );
-    console.log("bella")
   } else {
     pipeline.push(
 
@@ -596,7 +595,6 @@ actions.participate = async function ({ user, params: { id } }, res) {
     const event = await Event.findById(id)
 
     const targetUser = await User.findById(event.organiserId).select('username name expoPushToken')
-		console.log(targetUser)
 
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
@@ -645,7 +643,6 @@ actions.like = async function ({ user, params: { id } }, res) {
 
     const likedEvent = await Event.findById(id)
     const targetUser = await User.findById(likedEvent.organiserId).select('username name expoPushToken')
-		console.log(targetUser)
 
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
@@ -657,8 +654,6 @@ actions.like = async function ({ user, params: { id } }, res) {
         like
 			},
     });
-    console.log("GOT HERE")
-
 
 		res.send(like);
 	} catch (err) {
@@ -709,8 +704,6 @@ actions.create = async ({ user, body }, res) => {
     const usersToSendNotification = followerDocs
       .filter((doc) => doc.follower !== null)
       .map((doc) => doc.follower);
-
-		console.log(usersToSendNotification)
 
     await sendPushNotificationToUsersGroup({
 			title: `${user.name}`,

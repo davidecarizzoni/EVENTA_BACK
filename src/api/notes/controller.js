@@ -118,10 +118,7 @@ actions.fire = async function ({ user, params: { id } }, res) {
 			noteId: id,
 		})
 		const likedNote = await Note.findById(id)
-    console.log(likedNote.userId)
-
     const targetUser = await User.findById(likedNote.userId).select('username name expoPushToken')
-		console.log(targetUser)
 
 		await sendPushNotificationToUser({
 			title: `${user.username}`,

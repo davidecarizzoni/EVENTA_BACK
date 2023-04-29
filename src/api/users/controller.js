@@ -30,8 +30,6 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 	.limit(cursor.limit)
 	.sort(cursor.sort);
 
-	console.log(data)
-
   const totalData = await User.countDocuments(newQuery);
   res.send({ data, totalData });
 };
@@ -448,11 +446,13 @@ actions.recommended = async function ({ user, querymen: { query, cursor } }, res
   const followDocs = await Follow.find({ followerId: authenticatedUser });
   const followedIds = followDocs.map(doc => doc.followedId);
 
-
-  const notFollowedIds = await User.find({
+	console.log("FOLLOWED", followedIds);
+	const notFollowedIds = await User.find({
     _id: { $nin: followedIds.concat(authenticatedUser) },
     isDeleted: false
   }).distinct('_id');
+
+	console.log("", followedIds);
 
   const newQuery = {
     ...query,
@@ -470,13 +470,22 @@ actions.recommended = async function ({ user, querymen: { query, cursor } }, res
       key: "position",
     }
   };
-
 	const pipeline = [
 		geoNearStage,
 		{ $sort: cursor.sort || { name: 1, _id: 1 } },
-    { $skip: cursor.skip },
-    { $limit: cursor.limit }
-	]
+		{
+      $project: {
+        _id: 1,
+        name: 1,
+        username: 1,
+        profilePic: 1,
+				expoPushToken: 1,
+      }
+    },
+		{ $skip: cursor.skip },
+		{ $limit: cursor.limit }
+	];
+	
 
   const countPipeline = [geoNearStage, { $count: 'count' }];
   const [data, count] = await Promise.all([
@@ -498,7 +507,6 @@ actions.follow = async function ({ user, params: { id } }, res) {
 		})
 
 		const targetUser = await User.findById(id).select('username name expoPushToken')
-		console.log(targetUser)
 
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
@@ -530,8 +538,6 @@ actions.unfollow = async function ({ user, params: { id } }, res) {
 		followerId: user._id, // segue
 		followedId: id, // seguito
 	})
-
-	console.log('follow', follow)
 
 	if (_.isNil(follow)) {
 		return res.status(404).send();

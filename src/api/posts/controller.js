@@ -194,7 +194,6 @@ actions.like = async function ({ user, params: { id } }, res) {
 
 		const likedPost = await Post.findById(id)
 		const targetUser = await User.findById(likedPost.userId).select('username name expoPushToken')
-		console.log(targetUser)
 
 		await sendPushNotificationToUser({
 			title: `${user.username}`,
@@ -251,13 +250,10 @@ actions.create = async ({ user, body }, res) => {
   try {
 
     post = await Post.create(body);
-		console.log("POST", post.eventId);
 
 		const event = await Event.findById(post.eventId)
-
 		const targetUser = await User.findById(event.organiserId).select('username name expoPushToken')
 
-		console.log(targetUser);
 
 		await sendPushNotificationToUser({
 			title: `${user.username}`,

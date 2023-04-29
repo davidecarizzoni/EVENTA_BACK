@@ -43,7 +43,6 @@ actions.create = async ({ user, body }, res) => {
     const user = await User.findById(body.userId);
 
     const targetUser = await User.findById(post.userId).select('username name expoPushToken')
-    console.log(targetUser)
 
     await sendPushNotificationToUser({
       title: `${user.username}`,

@@ -47,7 +47,6 @@ actions.checkRead = async function ({user, querymen: { query, cursor } }, res) {
 
 
 actions.setRead = async function ({user, querymen: { query, cursor } }, res) {
-  console.log(user)
       await Notification.updateMany({targetUserId: user._id, isRead: false}, {isRead: true});
   
     res.send({ success: true });
