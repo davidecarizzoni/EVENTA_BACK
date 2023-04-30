@@ -42,7 +42,14 @@ export const googleLogin = async ({ body }, res, next)=> {
 		}
 
 		let user = await User.findOne({ email: userInfo.email });
-		console.debug('user', user)
+
+		if(user.role === 'organiser'){
+			res.status(400).json({
+				param: 'Ops, you used a different authentification method.',
+				message: 'Ops, you used a different authentification method.'
+			});
+			res.send()		
+		}
 
 		if (_.isNil(user)) {
 			user = await User.create({
@@ -91,6 +98,15 @@ export const appleLogin = async ({ body }, res, next) => {
 		}
 
 		let user = await User.findOne({ email: email });
+
+		if(user.role === 'organiser'){
+			res.status(400).json({
+				param: 'Ops, you used a different authentification method.',
+				message: 'Ops, you used a different authentification method.'
+			});
+			res.send()		
+		}
+
 		if (_.isNil(user)) {
 			user = await User.create({
 				email: email,

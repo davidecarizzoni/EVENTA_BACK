@@ -47,7 +47,7 @@ actions.showMe = async ({ user }, res) => {
 
 actions.show = async function ({ user, params: { userId }, res }) {
 	const events = await Event.countDocuments({organiserId: userId})
-  const userCheck = await User.findById(id).lean();
+  const userCheck = await User.findById(userId).lean();
   const followers = await Follow.countDocuments({ followedId: userId });
   const followed = await Follow.countDocuments({ followerId: userId });
 	const posts = await Post.countDocuments({ userId: user.userId })
@@ -55,7 +55,7 @@ actions.show = async function ({ user, params: { userId }, res }) {
 
   const isFollowing = !!(await Follow.findOne({
     followerId: mongoose.Types.ObjectId(user._id),
-    followedId: mongoose.Types.ObjectId(id)
+    followedId: mongoose.Types.ObjectId(userId)
   }).limit(1));
 
   if (!userCheck) {
