@@ -48,7 +48,7 @@ export const googleLogin = async ({ body }, res, next)=> {
 			user = await User.create({
 				email: userInfo.email,
 				name: userInfo.given_name || userInfo.name.split(' ')[0] || '',
-				username: userInfo.name || '',
+				username: '',
 				password: 'ahahahhaha',
 				role: USER,
 				toComplete: true
