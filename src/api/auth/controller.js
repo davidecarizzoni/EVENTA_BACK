@@ -49,7 +49,7 @@ export const googleLogin = async ({ body }, res, next)=> {
 				email: userInfo.email,
 				name: userInfo.given_name || userInfo.name.split(' ')[0] || '',
 				username: '',
-				password: 'ahahahhaha',
+				password: uuid.v4(),
 				role: USER,
 				toComplete: true
 			})
@@ -95,8 +95,8 @@ export const appleLogin = async ({ body }, res, next) => {
 			user = await User.create({
 				email: email,
 				name: familyName,
-				username: `${givenName} ${familyName}`,
-				password: 'ahahahhaha',
+				username: '',
+				password: uuid.v4(),
 				role: USER,
 				appleId: appleId,
 				toComplete: true

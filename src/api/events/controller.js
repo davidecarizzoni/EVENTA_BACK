@@ -344,16 +344,111 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
   res.send({ data, totalData });
 };
 
-actions.show = async function ({ user, params: { id } }, res) {
 
-  const event = await Event
-    .findById(id)
-    .populate(populationOptions)
-    .exec();
+actions.show = async function ({ user, params: { id }, querymen: { cursor } }, res) {
 
-  if (!event) {
-    return res.status(404).send();
-  }
+  const pipeline = [
+    {
+      $match: { _id: mongoose.Types.ObjectId(id) }    },
+    {
+      $lookup: {
+        from: 'likes',
+        let: { eventId: '$_id' },
+        pipeline: [
+          {
+            $match: {
+              $expr: {
+                $and: [
+                  { $eq: ['$type', 'event'] },
+                  { $eq: ['$objectId', '$$eventId'] }
+                ]
+              }
+            }
+          }
+        ],
+        as: 'likes'
+      }
+    },
+    {
+      $addFields: {
+        likes: {
+          $cond: {
+            if: { $isArray: "$likes" },
+            then: { $size: "$likes" },
+            else: 0
+          }
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: 'users',
+        localField: 'organiserId',
+        foreignField: '_id',
+        as: 'organiser'
+      }
+    },
+    {
+      $addFields: {
+        organiser: {
+          $arrayElemAt: ['$organiser', 0]
+        }
+      }
+    },
+    {
+      $lookup: {
+        from: 'scans',
+        localField: '_id',
+        foreignField: 'eventId',
+        as: 'scans'
+      }
+    },
+    {
+      $addFields: {
+        scans: { $size: "$scans" }
+
+      }
+    },
+    {
+      $lookup: {
+        from: 'participants',
+        localField: '_id',
+        foreignField: 'eventId',
+        as: 'participants'
+      }
+    },
+    {
+      $addFields: {
+        participants: { $size: "$participants" }
+
+      }
+    },
+    {
+      $project: {
+        _id: 1,
+        organiserId: 1,
+        name: 1,
+        description: 1,
+        position: 1,
+        address: 1,
+        date: 1,
+        discount: 1,
+        coverImage: 1,
+        likes: 1,
+        scans:1,
+        participants: 1,
+        organiser: {
+          _id: 1,
+          name: 1,
+          role: 1,
+          username: 1,
+          profilePic: 1,
+        }
+      }
+    },
+  ];
+  const data = await Event.aggregate(pipeline);
+
 
   const isParticipating = await Participant
     .aggregate([
@@ -376,7 +471,7 @@ actions.show = async function ({ user, params: { id } }, res) {
           _id: 0,
           isParticipating: { $ne: ['$user', []] }
         }
-      }
+      },
     ])
     .then((result) => {
       return result.length > 0 && result[0].isParticipating;
@@ -387,12 +482,13 @@ actions.show = async function ({ user, params: { id } }, res) {
     });
 
   res.send({
-    event: {
-      ...event.toObject(),
-      isParticipating
-    }
-  });
+        event: {
+          ...data[0],
+          isParticipating
+        }
+      });
 };
+
 
 actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { cursor } }, res) {
 
