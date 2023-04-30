@@ -30,8 +30,15 @@ const followerBody = {
 	role: {
 		type: String
 	},
+
+}
+
+const fieldBody = {
 	field: {
 		type: String
+	},
+	value: {
+		type: String,
 	}
 }
 
@@ -39,15 +46,18 @@ const followerBody = {
 
 router.get('/', token({ required: true }), middleware(queryBody), actions.index);
 
-router.get('/:id/getField', token({ required: true }), middleware(followerBody), actions.getUserField);
-
 router.get('/recommended', token({ required: true }), middleware(followerBody), actions.recommended);
 
 router.get('/analytics', token({ required: true }), middleware(queryBody), actions.analytics)
 
 router.get('/me', token({ required: true }), actions.showMe);
 
-router.get('/:id', admin, actions.show);
+router.get('/checkField', token({ required: true }), middleware(fieldBody), actions.checkField)
+
+
+router.get('/:userFieldId/getField', token({ required: true }), middleware(fieldBody), actions.getUserField);
+
+router.get('/:userId', admin, actions.show);
 
 
 router.get('/:id/followed', token({ required: true }), middleware(followerBody), actions.followed);
@@ -79,6 +89,7 @@ router.put('/:id/password', password(), actions.updatePassword);
 router.delete('/me', token({ required: true }), actions.deleteMe);
 
 router.delete('/:id', admin, actions.destroy);
+
 
 
 export default router;

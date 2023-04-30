@@ -36,21 +36,21 @@ actions.index = async function ({ querymen: { query, cursor } }, res) {
 
 actions.showMe = async ({ user }, res) => {
 
-	const events = await Event.countDocuments({organiserId: user.id})
-	const followers = await Follow.countDocuments({followedId: user.id})
-	const followed = await Follow.countDocuments({ followerId: user.id })
+	const events = await Event.countDocuments({organiserId: user._id})
+	const followers = await Follow.countDocuments({followedId: user._id})
+	const followed = await Follow.countDocuments({ followerId: user._id })
 	const posts = await Post.countDocuments({ userId: user.id })
 
 	res.send({ ...user._doc, events, followers, followed, posts});
 
 };
 
-actions.show = async function ({ user, params: { id }, res }) {
-	const events = await Event.countDocuments({organiserId: id})
+actions.show = async function ({ user, params: { userId }, res }) {
+	const events = await Event.countDocuments({organiserId: userId})
   const userCheck = await User.findById(id).lean();
-  const followers = await Follow.countDocuments({ followedId: id });
-  const followed = await Follow.countDocuments({ followerId: id });
-	const posts = await Post.countDocuments({ userId: user.id })
+  const followers = await Follow.countDocuments({ followedId: userId });
+  const followed = await Follow.countDocuments({ followerId: userId });
+	const posts = await Post.countDocuments({ userId: user.userId })
 
 
   const isFollowing = !!(await Follow.findOne({
@@ -72,11 +72,23 @@ actions.show = async function ({ user, params: { id }, res }) {
   });
 };
 
-actions.getUserField = async function ({ params: { id }, querymen: { cursor, query }}, res) {
-  const user = await User.findById(id).select(query.field)
+actions.getUserField = async function ({ params: { userFieldId }, querymen: { cursor, query }}, res) {
+  const user = await User.findById(userFieldId).select(query.field)
 
   res.send({user});
 };
+
+actions.checkField = async function ({ querymen: { cursor, query }}, res) {
+
+  const user = await User.find({username : query.value}).select('_id')
+  if(user){
+    res.send({message : true});
+
+  } else{
+    res.send({message : false});
+  }
+}
+
 
 
 actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor} }, res) {
