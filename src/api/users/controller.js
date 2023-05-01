@@ -78,14 +78,18 @@ actions.getUserField = async function ({ params: { userFieldId }, querymen: { cu
   res.send({user});
 };
 
-actions.checkField = async function ({ querymen: { cursor, query }}, res) {
+actions.checkField = async function ({user, querymen: { cursor, query }}, res) {
 
-  const user = await User.find({username : query.value}).select('_id')
-  if(user){
-    res.send({success : true});
+  const userCheck = await User.find({username : query.value}).select('_id username')
+
+  console.log(userCheck[0])
+  console.log(user)
+
+  if(userCheck[0] && userCheck[0].username != user.username){
+    res.send({isFree : false});
 
   } else{
-    res.send({success : false});
+    res.send({isFree : true});
   }
 }
 
