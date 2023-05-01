@@ -82,10 +82,10 @@ actions.checkField = async function ({ querymen: { cursor, query }}, res) {
 
   const user = await User.find({username : query.value}).select('_id')
   if(user){
-    res.send({message : true});
+    res.send({success : true});
 
   } else{
-    res.send({message : false});
+    res.send({success : false});
   }
 }
 
