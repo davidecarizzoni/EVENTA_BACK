@@ -285,6 +285,7 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
 
       }
     },
+    
     {
       $project: {
         _id: 1,
@@ -556,9 +557,6 @@ actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { 
 			}
 		},
     {
-      $sort: { createdAt: -1, _id: 1 }
-    },
-    {
       $lookup: {
         from: 'comments',
         localField: '_id',
@@ -582,6 +580,9 @@ actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { 
     },
     {
       $replaceRoot: { newRoot: '$data' }
+    },
+    {
+      $sort: { createdAt: -1, _id: 1 }
     },
     {
       $project: {
