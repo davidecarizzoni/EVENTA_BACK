@@ -395,6 +395,7 @@ actions.followed = async function ({ params: { id }, querymen: { query, cursor }
           name: 1,
           username: 1,
           profilePic: 1,
+          address: 1,
         }
       }
     },
