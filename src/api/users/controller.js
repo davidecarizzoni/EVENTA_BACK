@@ -73,7 +73,7 @@ actions.show = async function ({ user, params: { userId }, res }) {
 };
 
 actions.getUserField = async function ({ params: { userFieldId }, querymen: { cursor, query }}, res) {
-  const user = await User.findById(userFieldId).select(query.field)
+  const user = await User.findById(userFieldId).select('_id profilePic username name bio role isDeleted')
 
   res.send({user});
 };
