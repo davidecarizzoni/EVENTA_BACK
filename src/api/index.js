@@ -12,6 +12,7 @@ import scans from './scans';
 import reports from './reports';
 import comments from './comments';
 import notifications from './notifications';
+import stories from './stories';
 
 const router = new Router();
 
@@ -25,6 +26,7 @@ router.use('/posts', posts);
 router.use('/scans', scans);
 router.use('/reports', reports);
 router.use('/comments', comments);
+router.use('/stories', stories);
 router.use('/notifications', notifications);
 router.use('/participants', participants);
 router.use('/auth', auth);
