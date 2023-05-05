@@ -1,6 +1,9 @@
 import { Block } from './model';
 import _ from 'lodash';
 
+import {Types} from "mongoose";
+import mongoose from "mongoose";
+
 const actions = {};
 const populationOptions = ['blocker', 'blocked'];
 
