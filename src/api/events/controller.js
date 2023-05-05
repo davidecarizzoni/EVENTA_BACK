@@ -20,7 +20,6 @@ import {NOTIFICATIONS_TYPES} from "../notifications/model";
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
 
-
 actions.index = async function({ user, querymen: { query, select, cursor } }, res) {
   if (query.date) {
     if (query.date.$gte) {

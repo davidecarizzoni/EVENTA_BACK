@@ -63,11 +63,11 @@ actions.update = ({ body, params }, res) => {
         });
   };
 
-actions.destroy = async function ({ user, params: { userId }, res }) {
+actions.destroy = async function ({ user, params: { id }, res }) {
 
   const block = await Block.findOne({
     blockerId: mongoose.Types.ObjectId(user._id),
-    blockedId: mongoose.Types.ObjectId(userId)
+    blockedId: mongoose.Types.ObjectId(id)
   });
 
   if (_.isNil(block)) {
