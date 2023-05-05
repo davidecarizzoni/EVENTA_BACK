@@ -5,6 +5,8 @@ import {Event} from '../events/model';
 import {Post} from '../posts/model';
 import {Like} from '../likes/model';
 import {Scan} from '../scans/model';
+import {Block} from '../blocks/model';
+
 
 
 import {Types} from "mongoose";
@@ -50,13 +52,18 @@ actions.show = async function ({ user, params: { userId }, res }) {
   const userCheck = await User.findById(userId).lean();
   const followers = await Follow.countDocuments({ followedId: userId });
   const followed = await Follow.countDocuments({ followerId: userId });
-	const posts = await Post.countDocuments({ userId: user.userId })
+	const posts = await Post.countDocuments({ userId: user._id })
 
 
   const isFollowing = !!(await Follow.findOne({
     followerId: mongoose.Types.ObjectId(user._id),
     followedId: mongoose.Types.ObjectId(userId)
   }).limit(1));
+
+  const isBlocked = !!(await Block.findOne({
+    blockerId: mongoose.Types.ObjectId(user._id),
+    blockedId: mongoose.Types.ObjectId(userId)
+  }));
 
   if (!userCheck) {
     return res.status(404).send();
@@ -69,6 +76,7 @@ actions.show = async function ({ user, params: { userId }, res }) {
     followed,
 		posts,
     isFollowing,
+    isBlocked,
   });
 };
 
