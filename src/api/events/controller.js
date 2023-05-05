@@ -35,7 +35,6 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
     query.organiserId = mongoose.Types.ObjectId(query.organiserId);
   }
 
-
   const most_popular = query.popular;
 
   const newQuery = {

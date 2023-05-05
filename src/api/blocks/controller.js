@@ -63,15 +63,18 @@ actions.update = ({ body, params }, res) => {
         });
   };
 
-actions.destroy = async function ({ params: { id } }, res) {
-  const block = await Block.findById(id);
+actions.destroy = async function ({ user, params: { userId }, res }) {
+
+  const block = await Block.findOne({
+    blockerId: mongoose.Types.ObjectId(user._id),
+    blockedId: mongoose.Types.ObjectId(userId)
+  });
 
   if (_.isNil(block)) {
     return res.status(404).send();
   }
 
   await block.delete();
-
   res.status(204).send();
 };
 
