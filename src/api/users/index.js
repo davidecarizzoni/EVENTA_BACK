@@ -76,6 +76,8 @@ router.post('/:id/follow', token({ required: true }), actions.follow);
 
 router.delete('/:id/unfollow', token({ required: true }), actions.unfollow);
 
+router.delete('/:id/unfollowBlocked', token({ required: true }), actions.unfollowBlocked);
+
 // USER API
 
 router.post('/', admin, actions.create);

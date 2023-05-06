@@ -21,20 +21,30 @@ import { sendPushNotificationToUser } from "../../services/notifications";
 import {NOTIFICATIONS_TYPES} from "../notifications/model";
 
 
-actions.index = async function ({ querymen: { query, cursor } }, res) {
-	const newQuery = {
-		...query,
-		isDeleted: false,
-	}
+actions.index = async function ({ user, querymen: { query, cursor } }, res) {
+  const newQuery = {
+    ...query,
+    isDeleted: false,
+  };
+
+  // Get the IDs of all the users who have blocked the authenticated user
+  const blockingUsers = await Block.find({ blockedId: user._id }, { blockerId: 1 }).lean();
+  const blockingUserIds = blockingUsers.map((block) => block.blockerId);
+
+  // Exclude the blocking users from the query
+  newQuery._id = { $nin: blockingUserIds };
+
   const data = await User.find(newQuery)
-	.skip(cursor.skip)
-	.sort({'name': 1, '_id': 1})
-	.limit(cursor.limit)
-	.sort(cursor.sort);
+    .skip(cursor.skip)
+    .sort({ name: 1, _id: 1 })
+    .limit(cursor.limit)
+    .sort(cursor.sort);
 
   const totalData = await User.countDocuments(newQuery);
   res.send({ data, totalData });
 };
+
+
 
 actions.showMe = async ({ user }, res) => {
 
@@ -100,8 +110,6 @@ actions.checkField = async function ({user, querymen: { cursor, query }}, res) {
     res.send({isFree : true});
   }
 }
-
-
 
 actions.showEventsForUser = async function ({ params: { id }, querymen: { cursor} }, res) {
 
@@ -612,6 +620,19 @@ actions.unfollow = async function ({ user, params: { id } }, res) {
 	res.status(204).send();
 };
 
+actions.unfollowBlocked = async function ({ user, params: { id } }, res) {
+	const follow = await Follow.findOne({
+		followerId: id, // segue
+		followedId: user._id, // seguito
+	})
+
+	if (_.isNil(follow)) {
+		return res.status(404).send();
+	}
+
+	await follow.delete();
+	res.status(204).send();
+};
 
 actions.create = async ({ body }, res) => {
   let user;
