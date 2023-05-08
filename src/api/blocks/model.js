@@ -20,7 +20,7 @@ const BlockSchema = new Schema({
 
 BlockSchema.virtual('blocker', {
   ref: 'User',
-  localField: 'blockerID',
+  localField: 'blockerId',
   foreignField: '_id',
   justOne: true
 });

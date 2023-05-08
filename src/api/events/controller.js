@@ -16,6 +16,7 @@ import {
 } from "../../services/notifications";
 
 import {NOTIFICATIONS_TYPES} from "../notifications/model";
+import { Block } from '../blocks/model';
 
 const actions = {};
 const populationOptions = ['organiser', 'participants'];
@@ -36,8 +37,12 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
 
   const most_popular = query.popular;
 
+  const blockingUsers = await Block.find({ blockedId: user._id }, { blockerId: 1 }).lean();
+  const blockingUserIds = blockingUsers.map((block) => block.blockerId);
+
   const newQuery = {
     ...query,
+    organiserId: { $nin: blockingUserIds },
     isDeleted: false,
   };
 
@@ -198,8 +203,13 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
   const userCoordinates = user.position.coordinates;
   const most_popular = query.popular;
 
+
+  const blockingUsers = await Block.find({ blockedId: user._id }, { blockerId: 1 }).lean();
+  const blockingUserIds = blockingUsers.map((block) => block.blockerId);
+
   const newQuery = {
     ...query,
+    organiserId: { $nin: blockingUserIds },
     isDeleted: false,
   };
 
@@ -491,7 +501,13 @@ actions.show = async function ({ user, params: { id }, querymen: { cursor } }, r
 
 actions.showPostsForEvent = async function ({ user, params: { id }, querymen: { cursor } }, res) {
 
-  const match = { eventId: mongoose.Types.ObjectId(id) };
+  const blockingUsers = await Block.find({ blockedId: user._id }, { blockerId: 1 }).lean();
+  const blockingUserIds = blockingUsers.map((block) => block.blockerId);
+  
+  const match = {
+    userId: { $nin: blockingUserIds },
+    eventId: mongoose.Types.ObjectId(id)
+  };
 
   const pipeline = [
     { $match: match },
