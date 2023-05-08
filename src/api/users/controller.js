@@ -61,7 +61,6 @@ actions.show = async function ({ user, params: { userId }, res }) {
   const followed = await Follow.countDocuments({ followerId: userId });
 	const posts = await Post.countDocuments({ userId: user._id })
 
-
   const isFollowing = !!(await Follow.findOne({
     followerId: mongoose.Types.ObjectId(user._id),
     followedId: mongoose.Types.ObjectId(userId)

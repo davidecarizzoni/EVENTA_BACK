@@ -1,10 +1,8 @@
 import { Story } from './model';
-import { User } from '../users/model';
 
 import _ from 'lodash';
-import { sendPushNotificationToUser } from '../../services/notifications';
-import { NOTIFICATIONS_TYPES } from '../notifications/model';
 import { Follow } from '../follow/model';
+import { uploadToS3 } from '../../services/upload';
 
 const actions = {};
 const populationOptions = ['user'];

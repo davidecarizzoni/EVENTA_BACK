@@ -41,9 +41,10 @@ actions.index = async function({ user, querymen: { query, select, cursor } }, re
   const blockingUserIds = blockingUsers.map((block) => block.blockerId);
 
   const newQuery = {
-    ...query,
     organiserId: { $nin: blockingUserIds },
     isDeleted: false,
+    ...query,
+
   };
 
   delete newQuery.popular;
@@ -208,9 +209,9 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
   const blockingUserIds = blockingUsers.map((block) => block.blockerId);
 
   const newQuery = {
-    ...query,
     organiserId: { $nin: blockingUserIds },
     isDeleted: false,
+    ...query,
   };
 
   delete newQuery.popular;
@@ -316,9 +317,6 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
         }
       }
     },
-    
-    { $skip: cursor.skip },
-    { $limit: cursor.limit },
   ];
 
 
@@ -329,6 +327,8 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
           participants: -1
         }
       },
+      { $skip: cursor.skip },
+      { $limit: cursor.limit },
     );
   } else {
     pipeline.push(
@@ -339,6 +339,8 @@ actions.homeEvents = async function({ user, querymen: { query, select, cursor } 
           name: 1
         }
       },
+      { $skip: cursor.skip },
+      { $limit: cursor.limit },
     );
   }
 
