@@ -7,8 +7,6 @@ import {Like} from '../likes/model';
 import {Scan} from '../scans/model';
 import {Block} from '../blocks/model';
 
-
-
 import {Types} from "mongoose";
 import mongoose from "mongoose";
 
@@ -45,7 +43,6 @@ actions.index = async function ({ user, querymen: { query, cursor } }, res) {
 };
 
 
-
 actions.showMe = async ({ user }, res) => {
 
 	const events = await Event.countDocuments({organiserId: user._id})
@@ -75,6 +72,11 @@ actions.show = async function ({ user, params: { userId }, res }) {
     blockedId: mongoose.Types.ObjectId(userId)
   }));
 
+  const hasBlockedYou = !!(await Block.findOne({
+    blockerId: mongoose.Types.ObjectId(userId),
+    blockedId: mongoose.Types.ObjectId(user._id)
+  }));
+
   if (!userCheck) {
     return res.status(404).send();
   }
@@ -87,6 +89,7 @@ actions.show = async function ({ user, params: { userId }, res }) {
 		posts,
     isFollowing,
     isBlocked,
+    hasBlockedYou
   });
 };
 
