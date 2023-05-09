@@ -576,7 +576,22 @@ actions.recommended = async function ({ user, querymen: { query, cursor } }, res
 
 actions.follow = async function ({ user, params: { id } }, res) {
 	try {
-		const follow = await Follow.create({
+
+		const followcheck = await Follow.findOne({
+			followerId: user._id, // segue
+			followedId: id, // seguito
+		})
+
+    if (followcheck) {
+      return res.status(409).send({
+
+				valid: false,
+				param: 'followerId - followedId',
+				message: 'You already follow the user'
+			});
+    }
+
+    const follow = await Follow.create({
 			followerId: user._id, // segue
 			followedId: id, // seguito
 		})
