@@ -61,9 +61,11 @@ actions.show = async function ({ params: { id } }, res) {
 
 actions.create = async ({ body }, res) => {
   let story;
+	console.log(body)
   try {
     story = await Story.create(body);
   } catch (err) {
+		console.log("error")
     return null; 
   }
 

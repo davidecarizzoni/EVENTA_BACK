@@ -3,11 +3,10 @@ import { Schema, model } from 'mongoose';
 const StorySchema = new Schema({
   userId: {
     type: Schema.Types.ObjectId,
-    required: true
+    required: true,
   },
   contentImage: {
     type: String,
-    required: true
   },
   caption: {
     type: String, 
